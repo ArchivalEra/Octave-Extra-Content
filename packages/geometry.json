@@ -1,0 +1,61 @@
+{
+ "schema": 1,
+ "name": "geometry",
+ "depends": [
+  "matgeom"
+ ],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Library for extending MatGeom functionality.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later and BSL-1.0",
+    "url": "https://sourceforge.net/p/octave/geometry/ci/default/tree/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://sourceforge.net/p/octave/geometry/ci/default/tree/NEWS"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://sourceforge.net/p/octave/geometry/ci/default/tree/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/geometry/overview.html"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://savannah.octave.org/?Action=get&Format=HTMLCSS&Title=[octave%20forge]%20(geometry)"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "dbc1658845c97d2d"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "4.1.0",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/geometry-4.1.0.tar.gz",
+   "sha256": "dbc1658845c97d2d6687c1490a61b43d359913d33420e475b659f335f7a34360",
+   "size": 113949,
+   "requires": [
+    "octave (>= 4.2.0)"
+   ],
+   "date": "2024-03-19",
+   "kinds": [
+    "m",
+    "src"
+   ],
+   "in_index": true
+  }
+ ]
+}

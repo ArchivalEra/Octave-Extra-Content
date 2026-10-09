@@ -1,0 +1,59 @@
+{
+ "schema": 1,
+ "name": "struct",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Additional structure manipulation functions.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later",
+    "url": "https://sourceforge.net/p/octave/struct/ci/default/tree/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://sourceforge.net/p/octave/struct/ci/default/tree/NEWS"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://sourceforge.net/p/octave/struct/ci/default/tree/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/struct/overview.html"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://savannah.octave.org/?Action=get&Format=HTMLCSS&Title=[octave%20forge]%20(struct)"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "fccea7dd84c1104e"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "1.0.18",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/struct-1.0.18.tar.gz",
+   "sha256": "fccea7dd84c1104ed3babb47a28f05e0012a89c284f39ab094090450915294ce",
+   "size": 64113,
+   "requires": [
+    "octave (>= 4.0.0)"
+   ],
+   "date": "2022-04-10",
+   "kinds": [
+    "m",
+    "src"
+   ],
+   "in_index": true
+  }
+ ]
+}

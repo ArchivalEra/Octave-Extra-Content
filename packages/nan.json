@@ -1,0 +1,64 @@
+{
+ "schema": 1,
+ "name": "nan",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "A statistics and machine learning toolbox for data with and w/o missing values.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later",
+    "url": "https://sourceforge.net/p/octave/NaN/ci/default/tree/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://sourceforge.net/p/octave/NaN/ci/default/tree/NEWS"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://sourceforge.net/p/octave/NaN/ci/default/tree/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/nan/overview.html"
+   },
+   {
+    "icon": "fas fa-book",
+    "label": "package documentation",
+    "url": "https://pub.ist.ac.at/~schloegl/matlab/NaN/"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://savannah.octave.org/?Action=get&Format=HTMLCSS&Title=[octave%20forge]%20(nan)"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "d2d2bac3f1d79042"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "3.7.2",
+   "url": "https://pub.ista.ac.at/~schloegl/matlab/NaN/nan-3.7.2.tar.gz",
+   "sha256": "d2d2bac3f1d790428df2f7a396c6a1ffed93e91e29ab13678f641deaf021a216",
+   "size": 257606,
+   "requires": [
+    "octave (>= 4.4.1)"
+   ],
+   "date": "2026-04-28",
+   "kinds": [
+    "m",
+    "src"
+   ],
+   "in_index": true
+  }
+ ]
+}

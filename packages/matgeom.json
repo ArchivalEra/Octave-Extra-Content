@@ -1,0 +1,63 @@
+{
+ "schema": 1,
+ "name": "matgeom",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Geometry toolbox for 2D/3D geometric computing.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "BSD-2-Clause-FreeBSD",
+    "url": "https://sourceforge.net/p/octave/matgeom/ci/master/tree/LICENSE.txt"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://sourceforge.net/p/octave/matgeom/ci/master/tree/CHANGELOG.md"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://sourceforge.net/p/octave/matgeom/ci/master/tree/"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository (upstream)",
+    "url": "https://github.com/mattools/matGeom/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/matgeom/overview.html"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://github.com/mattools/matGeom/issues"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "6b344f870315bf27"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "1.2.4",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/matgeom-1.2.4.tar.gz",
+   "sha256": "6b344f870315bf2742ca88c0feb5c3da8835b4f4cbd2f8a2d793af798405f920",
+   "size": 572364,
+   "requires": [
+    "octave (>= 4.2.0)"
+   ],
+   "date": "2024-03-19",
+   "kinds": [
+    "m"
+   ],
+   "in_index": true
+  }
+ ]
+}

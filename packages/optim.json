@@ -1,0 +1,67 @@
+{
+ "schema": 1,
+ "name": "optim",
+ "depends": [
+  "statistics",
+  "struct"
+ ],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Non-linear optimization toolkit.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later and BSD-3-Clause and public domain",
+    "url": "https://octave.sourceforge.io/optim/COPYING.html"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://octave.sourceforge.io/optim/NEWS.html"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://octave.sourceforge.io/pkg-repository/optim/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/optim/overview.html"
+   },
+   {
+    "icon": "fas fa-book",
+    "label": "package documentation",
+    "url": "https://octave.sourceforge.io/optim/package_doc/"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://savannah.octave.org/?Action=get&Format=HTMLCSS&Title=[octave%20forge]%20(optim)"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "59fb3771a2d2a231"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "1.6.3",
+   "url": "https://octave.sourceforge.io/download.php?package=optim-1.6.3.tar.gz",
+   "sha256": "59fb3771a2d2a2313447532c59a2e000a6a7bb7a677f3ef8183fbaaab5493a14",
+   "size": 422679,
+   "requires": [
+    "octave (>= 4.0.0)"
+   ],
+   "date": "2026-03-08",
+   "kinds": [
+    "m",
+    "src"
+   ],
+   "in_index": true
+  }
+ ]
+}

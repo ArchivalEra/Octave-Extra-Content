@@ -1,0 +1,58 @@
+{
+ "schema": 1,
+ "name": "quaternion",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Quaternion package for GNU Octave, includes a quaternion class with overloaded operators.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later",
+    "url": "https://sourceforge.net/p/octave/quaternion/ci/default/tree/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://sourceforge.net/p/octave/quaternion/ci/default/tree/NEWS"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://sourceforge.net/p/octave/quaternion/ci/default/tree/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/quaternion/overview.html"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://savannah.octave.org/?Action=get&Format=HTMLCSS&Title=[octave%20forge]%20(quaternion)"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "4bcb64743972693f"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "2.4.2",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/quaternion-2.4.2.tar.gz",
+   "sha256": "4bcb64743972693f04ed6d2fea4906b38a9353f1b80c6e6f2d0bc0f6f8cf3a07",
+   "size": 47838,
+   "requires": [
+    "octave (>= 4.4.0)"
+   ],
+   "date": "2025-12-10",
+   "kinds": [
+    "m"
+   ],
+   "in_index": true
+  }
+ ]
+}

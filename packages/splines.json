@@ -1,0 +1,58 @@
+{
+ "schema": 1,
+ "name": "splines",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Additional spline functions",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later and public domain",
+    "url": "https://sourceforge.net/p/octave/splines/ci/default/tree/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://sourceforge.net/p/octave/splines/ci/default/tree/NEWS"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://sourceforge.net/p/octave/splines/ci/default/tree/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/splines/overview.html"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://savannah.octave.org/?Action=get&Format=HTMLCSS&Title=[octave%20forge]%20(splines)"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "af886877797c3a9c"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "1.3.5",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/splines-1.3.5.tar.gz",
+   "sha256": "af886877797c3a9c8a36ce7d94613c1059f79fab4883429e7b32a3b01e03d7a6",
+   "size": 34053,
+   "requires": [
+    "octave (>= 3.6.0)"
+   ],
+   "date": "2023-05-05",
+   "kinds": [
+    "m"
+   ],
+   "in_index": true
+  }
+ ]
+}

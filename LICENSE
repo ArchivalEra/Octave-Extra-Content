@@ -1,0 +1,10 @@
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
+
+This repository contains only metadata (public facts from the upstream
+Octave-Forge package index plus sha256 checksums). Package bytes are fetched
+from their upstream URLs and are governed by each package's own license
+(see the package's COPYING file inside its tarball).
+
+The tooling in tools/ is licensed AGPL-3.0-or-later.
+See <https://www.gnu.org/licenses/agpl-3.0.txt>.
