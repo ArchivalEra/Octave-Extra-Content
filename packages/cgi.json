@@ -1,0 +1,58 @@
+{
+ "schema": 1,
+ "name": "cgi",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Common Gateway Interface for Octave.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-2.0-or-later",
+    "url": "https://sourceforge.net/p/octave/cgi/ci/master/tree/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://sourceforge.net/p/octave/cgi/ci/master/tree/NEWS"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://sourceforge.net/p/octave/cgi/ci/master/tree/"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/cgi/overview.html"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://savannah.octave.org/?Action=get&Format=HTMLCSS&Title=[octave%20forge]%20(cgi)"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "4187eb2abec69c57"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "0.1.2",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/cgi-0.1.2.tar.gz",
+   "sha256": "4187eb2abec69c5735527fe3d6a25b2010fccede199fe556e242677ed991cf43",
+   "size": 0,
+   "requires": [
+    "octave (>= 3.8.0)"
+   ],
+   "date": "2016-09-07",
+   "kinds": [
+    "m"
+   ],
+   "in_index": true
+  }
+ ]
+}

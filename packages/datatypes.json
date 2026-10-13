@@ -1,0 +1,467 @@
+{
+ "schema": 1,
+ "name": "datatypes",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Extra data types for GNU Octave.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later",
+    "url": "https://github.com/pr0m1th3as/datatypes/blob/master/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://github.com/pr0m1th3as/datatypes/releases"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://github.com/pr0m1th3as/datatypes/"
+   },
+   {
+    "icon": "fas fa-book",
+    "label": "package documentation",
+    "url": "https://pr0m1th3as.github.io/datatypes/"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://github.com/pr0m1th3as/datatypes/issues"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "86aef8eddb8f3902"
+ },
+ "note": "",
+ "versions": [
+  {
+   "version": "1.4.2",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.4.2/datatypes-1.4.2.tar.gz",
+   "sha256": "86aef8eddb8f39025cc32a6a385157dc8adbc83417ca25b1e95681c7dae08b47",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-09-15",
+   "kinds": [
+    "m",
+    "src"
+   ],
+   "in_index": true
+  },
+  {
+   "version": "1.4.1",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.4.1/datatypes-1.4.1.tar.gz",
+   "sha256": "946b97a9c96183338a3aab500a3899a00f51a782638ad188d706cfae033b21f1",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-09-14",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.4.0",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.4.0/datatypes-1.4.0.tar.gz",
+   "sha256": "a317404b914193c6e8568dba7aad279ab1d2b2de37e3d70e004e318226d3bb12",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-09-10",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.3.4",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.3.4/datatypes-1.3.4.tar.gz",
+   "sha256": "c77bdcfad9db6562225655f442f95a6c8899381216cb42bc58c84b7e9c08d53d",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-08-26",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.3.3",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.3.3/datatypes-1.3.3.tar.gz",
+   "sha256": "6c9aa5cacc2e39ceedc7a5f731a9fcb9e01e4066a97670c203e1b09b88d289eb",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-08-12",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.3.2",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.3.2/datatypes-1.3.2.tar.gz",
+   "sha256": "9f89348b5ad75a2df4cac2d4ab47be35479f03ad256c9cc62aadbb534106057f",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-08-07",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.3.1",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.3.1/datatypes-1.3.1.tar.gz",
+   "sha256": "c43fb535b56877bce775db0bf086d144a42aaa4c86c46e1f2604241a1d9f238b",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-08-07",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.3.0",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.3.0/datatypes-1.3.0.tar.gz",
+   "sha256": "3670eedd6af6c5cefe699d6796749d7eefb73fe08cda8504f53f126fc828d6fd",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-08-03",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.7",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.7/datatypes-1.2.7.tar.gz",
+   "sha256": "159340dc37590b4bd993978c037730bdf09161dd11dd28a3b6b76ba4ed7ad644",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-07-21",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.6",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.6/datatypes-1.2.6.tar.gz",
+   "sha256": "08b02c9dd072c62f9c6a4061e715403b212cc327104702be78b9824c137a1f09",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-07-08",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.5",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.5/datatypes-1.2.5.tar.gz",
+   "sha256": "632d3acd525ad4f6a971dc2daa32db4d30d4408bcff23f0bc4298f94658b51d7",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-06-21",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.4",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.4/datatypes-1.2.4.tar.gz",
+   "sha256": "f077ab2b4d521a0631e1e9d086f9699faca4c01af93f8e2e416a278198699003",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-06-09",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.3",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.3/datatypes-1.2.3.tar.gz",
+   "sha256": "2dbd6e0140354c069227412c495cbde975d088ca71d964117371735be4646c72",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-05-18",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.2",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.2/datatypes-1.2.2.tar.gz",
+   "sha256": "73bd1cf57984bb0a9851f1aa1f72c7f82d05adbb9134ec5a02e415bbc7516241",
+   "size": 0,
+   "requires": [
+    "octave (>= 11.1.0)"
+   ],
+   "date": "2026-04-03",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.1",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.1/datatypes-1.2.1.tar.gz",
+   "sha256": "269ece90dd4115e99f4764b77313110054ad52a7145b1b905c2d7eee713ac26d",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2026-03-28",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.2.0",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.2.0/datatypes-1.2.0.tar.gz",
+   "sha256": "f054213bfe79b604c97eab3d738624b7fdd5548b3c9631acf6222d97016e9861",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2026-03-05",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.9",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.9/datatypes-1.1.9.tar.gz",
+   "sha256": "0f343bfe03267b69f696c8e964c2bea0480751c40e5c6999d419f98fbd075ef4",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2026-02-28",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.8",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.8/datatypes-1.1.8.tar.gz",
+   "sha256": "83258f0a587f014f2fb7ddb477cdb4fcc25cb92bf6ebdf8c046f64178a0ed4d4",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2026-02-10",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.7",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.7/datatypes-1.1.7.tar.gz",
+   "sha256": "2320c964c6f640bc07f553ba12acab602fd20c3ab805b746c419be80eeb53e0b",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2026-02-05",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.6",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.6/datatypes-1.1.6.tar.gz",
+   "sha256": "cdd5679b7246d08d3d1e1ff4305c2e87d93b9dfa1ab3a6aebef726b5153620ff",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2026-01-17",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.5",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.5/datatypes-1.1.5.tar.gz",
+   "sha256": "d684b9cab257b6bdaa511525bad2044e7addb0902863183ca9609a74a51cb736",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-12-27",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.4",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.4/datatypes-1.1.4.tar.gz",
+   "sha256": "96ee22096045e8e3269d73c095b8a06172ddbfb14907bbd6dae77b278cfeab35",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-12-19",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.3",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.3/datatypes-1.1.3.tar.gz",
+   "sha256": "9eb707cc8a3847cc62eb4ea73a93bf4d5bdd8e07045fb760c8ee614ae1c6c4eb",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-12-12",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.2",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.2/datatypes-1.1.2.tar.gz",
+   "sha256": "73f39a59fa04ddcd664b80f0f6fb20ee3669c6311ee3d3b827d0b640903b17f1",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-12-09",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.1",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.1/datatypes-1.1.1.tar.gz",
+   "sha256": "b9105d73abc2af3eca191c65aaaa1a8ecd27cf857c4de00c7ef2f71528a8613d",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-12-08",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.1.0",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.1.0/datatypes-1.1.0.tar.gz",
+   "sha256": "5c9670352a5b3fa5f93b9b4b2bcb7ec72a09d6cdfa8fd2d1acb87f98c9652938",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-10-05",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.9",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.9/datatypes-1.0.9.tar.gz",
+   "sha256": "56a26dc0071f596799b512c535922b6de4bd034606a787f02b64bcc8db2a3592",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-10-03",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.8",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.8/datatypes-1.0.8.tar.gz",
+   "sha256": "9713acb33fcdb3f5c7870dbf2c3b1ecb361507a4e6cd4668af3078fff7807263",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-09-25",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.7",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.7/datatypes-1.0.7.tar.gz",
+   "sha256": "b9c60ef0c51b4aff2f032d385d7d6797ee948e5ff29e934b178952f97b83d113",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-07-25",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.6",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.6/datatypes-1.0.6.tar.gz",
+   "sha256": "321e6baa405538b71f0364f3376ca182f44a3ec46b2a68418d05885c1c4c62aa",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-07-20",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.5",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.5/datatypes-1.0.5.tar.gz",
+   "sha256": "8224849361e2d758dd97a028c5dd2de3f84e70915b47741a9f27993d90ada3a3",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-07-16",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.4",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.4/datatypes-1.0.4.tar.gz",
+   "sha256": "c8c3d2ce0a54b5a7b122628676c665444973fdc088d3a94af74204fd9162ec74",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-07-02",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.3",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.3/datatypes-1.0.3.tar.gz",
+   "sha256": "52f204c0ec0c975c11e0f0607bf18fee3b634cca4498b927a4d5ca3827be5f01",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-05-29",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.2",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.2/datatypes-1.0.2.tar.gz",
+   "sha256": "0cbf9171e366d2cfd067ed8089a97c3320b3475a88f63680c3ceeaaca55976f3",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-04-17",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "1.0.1",
+   "url": "https://github.com/pr0m1th3as/datatypes/releases/download/release-1.0.1/datatypes-1.0.1.tar.gz",
+   "sha256": "098ba1e254202d6ac349bf4b095bec3162ae9241979ff04809361115a4e2eec0",
+   "size": 0,
+   "requires": [
+    "octave (>= 9.1.0)"
+   ],
+   "date": "2025-04-16",
+   "kinds": [],
+   "in_index": true
+  }
+ ]
+}
