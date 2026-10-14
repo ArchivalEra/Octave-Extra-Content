@@ -95,6 +95,9 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   004-host-ruling.md         host 裁决端口产地 = 宿主 + 归属≠投送（回应 003 的分歧）
   005-host-port-landed.md    host 端口产地已落地 + 两件本仓侧小事（--emit 缺 producer 等）
   006-re-port-landed.md      本仓回信（A① --emit 加 producer 已做 / A② URL 两段式确认）
+  007-port-gaps-to-host.md   本仓上报三个端口缺口请裁决 + 收口方定义请确认
+  008-host-port-rulings.md   host 三裁决（content 留空 / consumer 轴 / pin 前缀）+ 确认收口方窄定义
+  006-re-port-landed.md      本仓回信（A① --emit 加 producer 已做 / A② URL 两段式确认）
   007-port-gaps-to-host.md   本仓上报三个端口缺口请裁决（能力层 content 枚举 / consumer 轴 / pin 形态）
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
