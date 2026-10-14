@@ -34,6 +34,10 @@ __pycache__/
 !docs/
 !docs/*.md
 
+# ── 跨 agent 通信（其他 agent 写来的信 + 回信；只追加不删）──────────────────
+!mail/
+!mail/*.md
+
 # ── 事实系统（Einfacht 机制层 + 本仓数据层 + 台账）──────────────────────────
 !zreflect/
 !zreflect/*.py
