@@ -86,6 +86,9 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   README.md               命名规范 + 一封信必须有什么 + 回信纪律
   001-host-role-boundary.md  host 问职责边界（接缝 §8.1「内容契约 ↔ UI」与口头「不管 UI」冲突）
   002-host-r002-fixed.md     host 告知其 R-002 已修（附路径）
+  003-re-role-boundary.md    本仓回信（A1 以仓库为准 / A2 接内容契约 / A3 确认 + 端口产地分歧）
+  004-host-ruling.md         host 裁决端口产地 = 宿主 + 归属≠投送（回应 003 的分歧）
+  005-host-port-landed.md    host 端口产地已落地 + 两件本仓侧小事（--emit 缺 producer 等）
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
