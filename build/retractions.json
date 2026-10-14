@@ -1,0 +1,17 @@
+{
+  "_why": [
+    "翻案台账：每条 = 一条**已被推翻**的断言。`text` 是它的特征片段（会被当搜索串在活状态文档里找）。",
+    "`why` 说它为什么错，`evidence` 给复跑方式或出处，`fixed_in` 说现在哪里说对了。",
+    "`check_retractions.py` 的判据：活状态文档（REFLECT_DOCS）里只要出现 `text`，**该行必须带更正标记**。",
+    "扫描面有界：只有 REFLECT_DOCS 声明的文档在面内（源码注释 / docs/ 里的历史讨论不在面内，这是写明的缺口）。"
+  ],
+  "retractions": [
+    {
+      "id": "R-001",
+      "text": "content_pin",
+      "why": "本仓 tip（`git rev-parse HEAD`）**每提交都变**，把它当台账键 ⇒ 同一个提交里 `--check` 永不收敛、复跑闸门永远红。它违反采集器契约（zreflect/collect.py）原则 2『不引入会自己在变的输入』。docs/FACT-SYSTEM.md §4 的建议表里列过这条键，是错的。",
+      "evidence": "python3 zreflect/facts.py --render-doc STATE.md --check（若 tip 进了台账，此命令在本仓会因每提交变化而不收敛）",
+      "fixed_in": "zreflect/measure_extra_content.py 的模块头（写明 tip 故意不进台账；要引用 tip 就在正文写命令，不写台账键）"
+    }
+  ]
+}

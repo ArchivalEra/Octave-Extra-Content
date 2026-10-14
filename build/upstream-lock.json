@@ -1,0 +1,27 @@
+{
+  "_why": [
+    "锁定源清单（check_locks.py 读它，经 REFLECT_LOCKS 旋钮内联指向本文件）。",
+    "不是每个上游都有可 git 化的官方仓 —— 工具链 bundle / Pyodide 运行时正是这个形状：",
+    "供给只能靠 URL + sha256。本文件把 recipes/*.md 里记的身份落成**可核对**的清单。",
+    "file 是**本机持久盘**上的 provision 产物路径（绝对路径允许）；换机器缺件 ⇒ 报，",
+    "那是「部署了 ≠ 在跑」家族该红的形状，不是噪音。",
+    "边界：sha256 只证明『还是那份字节』，不证明『那份字节是对的』—— URL 与版本的",
+    "对应关系是配方作者的主张；闸门不做网络验证（重取是宿主 provision 的事）。"
+  ],
+  "locked": [
+    {
+      "name": "llvm-wasm-bundle",
+      "version": "v0.1.1",
+      "url": "https://github.com/ArchivalEra/LLVM-wasm/releases/download/v0.1.1/llvm-wasm-bundle-v0.1.1.tar.gz",
+      "file": "/mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz",
+      "sha256": "a9ba3b41e5fa8e7445e9b8ffaf32ca73e10ae9285bc1afc5327d0f549c84f733"
+    },
+    {
+      "name": "pyodide-core",
+      "version": "314.0.7",
+      "url": "https://github.com/pyodide/pyodide/releases/download/314.0.7/pyodide-core-314.0.7.tar.bz2",
+      "file": "/mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2",
+      "sha256": "2abdcc2e35208af406e07724cffa85bc582ced97e9028383ecf5462541393f95"
+    }
+  ]
+}

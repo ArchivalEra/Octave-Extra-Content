@@ -53,11 +53,20 @@ docs/                     ★ 经验集（来自姊妹仓的实测，接手先�
                           + 本仓第一批事实建议表（6 键，各带裸命令）
   LANES-AND-MEMORY-MODEL.md  内存架构与分支线：两档判据 + 三次混编事故原话
                           + 架构纯度闸门三判据 + 多档站点与择档 + 性能线封口清单
+zreflect/                 ★ 事实系统机制层（vendored 自上游 Einfacht）+ 本仓数据层
+  measure_extra_content.py  本仓数据层（**唯一自己写的那个文件**：量货架/工具/配方字节）
+  check_*.py / facts.py / … 机制层（声明即闸门；执行面读 registry --run <相位>）
+reflect-hooks/            git hooks（core.hooksPath 指这里）+ Einfacht.env 旋钮载体
+gates-selftest.sh         闸门自证台（每个闸门先证明自己会红）
+build/                    ★ 事实台账（FACTS.json）/ 翻案台账（retractions.json）/ 锁定源清单
+questions/                ★ 悬案（未结案的问题，每条挂可跑的结算件）
+STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
 > **接手先读**（按顺序）：① 本 README（角色与边界）→ ② `docs/FORK-PIPELINE.md`（供给纪律）
-> → ③ `docs/FACT-SYSTEM.md`（本仓**尚未**接入事实系统；那份是配方，接入是第一个交付物）
-> → ④ `docs/LANES-AND-MEMORY-MODEL.md`（内容有"档"属性，决定档案怎么标）。
+> → ③ `AGENTS.md`（本仓硬规矩 + 复跑命令）→ ④ `STATE.md`（活状态：现在是什么，数字引用台账键）
+> → ⑤ `docs/FACT-SYSTEM.md`（事实系统为什么这样接）→ ⑥ `docs/LANES-AND-MEMORY-MODEL.md`
+> （内容有"档"属性，决定档案怎么标）。
 > 与宿主的对话面 = 宿主仓 `build/113/NOTES-extra-content-seam.md`（接缝）与其 §8（组织判决）。
 
 ## 包档案形状

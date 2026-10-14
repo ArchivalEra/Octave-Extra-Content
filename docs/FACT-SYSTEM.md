@@ -17,7 +17,7 @@
 
 | 块 | 作用 | 本仓对应 |
 |---|---|---|
-| **事实台账** | 数字/断言 + **每条旁写复跑命令**，闸门每次提交逐字执行 | `build/FACTS.json`（**尚未建立**，本文是配方） |
+| **事实台账** | 数字/断言 + **每条旁写复跑命令**，闸门每次提交逐字执行 | `build/FACTS.json`（**已建立**，2026-10-14 接入完成） |
 | **翻案台账** | 被推翻的断言登记在册；它**重新出现**时报错 | `build/retractions.json` |
 | **悬案台账** | 未结案的问题，每条挂**可跑的结算件** | `.scratch/open-questions/issues/` |
 
@@ -76,14 +76,18 @@
 
 ---
 
-## §4 本仓的第一批事实（建议表，`measure_extra_content.py` 的起点）
+## §4 本仓的第一批事实（建议表 → **已落地**，2026-10-14）
+
+> ⚠️ **本表是配方期的建议**；实际落地的键见 `build/FACTS.json`（12 条）。落地时按采集器
+> 契约（`zreflect/collect.py` 原则 2）**剔除了 `content_pin` 一条**（见下），并补了几条
+> 规模事实（版本条目总数 / 含 `.oct` 的包数 / 配方字节数）。散文里引用一律用 `[[键名]]`。
 
 | 键（建议） | 量什么 | `cmd`（裸命令，自本仓根） |
 |---|---|---|
 | `shelf_packs` | 包档案数 | `ls packages/*.json \| wc -l` |
 | `shelf_verified` | 已实测验证的包数 | `grep -l '"verified": {' packages/*.json \| wc -l` |
 | `tool_selftest_pass` | 工具自证通过数 | `python3 tools/forge-shelf.py --selftest \| grep -c '^PASS'` |
-| `content_pin` | 本仓当前 tip（= 宿主 pin 的候选值） | `git rev-parse HEAD` |
+| ~~`content_pin`~~ | ~~本仓当前 tip~~ | ~~`git rev-parse HEAD`~~ —— **不采用**：tip 每提交都变 ⇒ 违反采集器原则 2（`--check` 永不收敛）。已进翻案台账 `R-001`；要引用 tip 就在正文写命令 |
 | `llvm_bundle_sha` | 配方引用的工具链 bundle sha | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz \| cut -d' ' -f1` |
 | `pyodide_core_sha` | 配方引用的运行时 sha | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 \| cut -d' ' -f1` |
 

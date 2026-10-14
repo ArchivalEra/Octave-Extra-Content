@@ -33,3 +33,21 @@ __pycache__/
 # ── 文档（管线/事实系统/内存架构经验，来自姊妹仓的实测经验集）────────────────
 !docs/
 !docs/*.md
+
+# ── 事实系统（Einfacht 机制层 + 本仓数据层 + 台账）──────────────────────────
+!zreflect/
+!zreflect/*.py
+!reflect-hooks/
+!reflect-hooks/*
+!gates-selftest.sh
+!STATE.md
+!AGENTS.md
+!build/
+!build/*.json
+!questions/
+!questions/*.md
+
+# 本地缓存/临时物（不进仓）
+__pycache__/
+*.pyc
+
