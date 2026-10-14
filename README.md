@@ -60,6 +60,10 @@ reflect-hooks/            git hooks（core.hooksPath 指这里）+ Einfacht.env 
 gates-selftest.sh         闸门自证台（每个闸门先证明自己会红）
 build/                    ★ 事实台账（FACTS.json）/ 翻案台账（retractions.json）/ 锁定源清单
 questions/                ★ 悬案（未结案的问题，每条挂可跑的结算件）
+mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回信（只追加不删）
+  README.md               命名规范 + 一封信必须有什么 + 回信纪律
+  001-host-role-boundary.md  host 问职责边界（接缝 §8.1「内容契约 ↔ UI」与口头「不管 UI」冲突）
+  002-host-r002-fixed.md     host 告知其 R-002 已修（附路径）
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
