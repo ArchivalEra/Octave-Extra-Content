@@ -46,7 +46,19 @@ recipes/                  ★ 供给配方（非包内容）
   pyodide.md              Pyodide + SymPy 运行时（符号计算的共享能力层）
 port/                     ★ 端口规范副本（权威产地 = 宿主 build/extra-content/）
   README.md               端口是什么、谁产地、怎么自证
+docs/                     ★ 经验集（来自姊妹仓的实测，接手先读这三份）
+  FORK-PIPELINE.md        供给管线：三件套 + sha256 三关 fail-closed + pin 三形态 + 5 条实测坑
+                          + 迁移/改名清点表（本仓 2026-10-14 那次迁徙的流程化）
+  FACT-SYSTEM.md          事实系统：为什么档案仓需要它 + 接入六步 + 三纪律 + 5 坑
+                          + 本仓第一批事实建议表（6 键，各带裸命令）
+  LANES-AND-MEMORY-MODEL.md  内存架构与分支线：两档判据 + 三次混编事故原话
+                          + 架构纯度闸门三判据 + 多档站点与择档 + 性能线封口清单
 ```
+
+> **接手先读**（按顺序）：① 本 README（角色与边界）→ ② `docs/FORK-PIPELINE.md`（供给纪律）
+> → ③ `docs/FACT-SYSTEM.md`（本仓**尚未**接入事实系统；那份是配方，接入是第一个交付物）
+> → ④ `docs/LANES-AND-MEMORY-MODEL.md`（内容有"档"属性，决定档案怎么标）。
+> 与宿主的对话面 = 宿主仓 `build/113/NOTES-extra-content-seam.md`（接缝）与其 §8（组织判决）。
 
 ## 包档案形状
 
