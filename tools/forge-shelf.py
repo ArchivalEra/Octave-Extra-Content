@@ -122,6 +122,40 @@ def derive_axes(kinds):
     return derive_form(kinds), list(kinds or [])
 
 
+# ── producer 自述（接缝 §4「生产者必做第 3 条：pin 自述」）────────────────────
+#   端口把 `producer` 列为**可选顶层块** `{id, pin}`：写了才能过宿主的
+#   `validate-content-list.py --producer <id>` 那条**针对性校验**（不写不算错）。
+#   本仓的身份 = **submodule commit**（宿主 pin 的就是它）⇒ `pin` 读当前 HEAD。
+#   ⚠️ `pin` 每提交都变 ⇒ **绝不进事实台账**（同 R-001）；它只活在**出表**里，
+#   出表不是渲染进 STATE.md 的机器块 ⇒ 不破坏 `--check` 收敛。
+PRODUCER_ID = "octave-extra-content"
+
+
+def _git_head(short=12):
+    """本仓 HEAD（producer.pin 用）。读不到 ⇒ None（宁缺勿假，不编一个假 sha）。"""
+    try:
+        r = subprocess.run(["git", "-C", HERE, "rev-parse", "--short=%d" % short, "HEAD"],
+                           capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return r.stdout.strip() or None if r.returncode == 0 else None
+
+
+def producer_block():
+    """`{id, pin}`；pin 读不到 ⇒ 只给 id（不编假 sha）。"""
+    pin = _git_head()
+    blk = {"id": PRODUCER_ID}
+    if pin:
+        blk["pin"] = "submodule:%s" % pin
+    return blk
+
+
+def producer_ok(doc, want_id):
+    """纯判据（自证用）：表里的 producer.id == want_id。空/缺 ⇒ False（零值守卫）。"""
+    p = (doc or {}).get("producer")
+    return bool(isinstance(p, dict) and p.get("id") == want_id)
+
+
 def load_shelf(pkg_dir=None):
     """读全部包档案 → {name: entry}。目录缺失/为空 ⇒ 调用方按零值守卫报。"""
     d = pkg_dir if pkg_dir is not None else PKG_DIR
@@ -264,7 +298,16 @@ def cmd_emit(shelf, out, octave, allow_unverified):
 
     ⚠️ schema 2（2026-10-14，接缝 §2 / port/README.md）：每条加 `form`（投送形态，
     供给期从字节派生）与 `content`（内容构成 = 今天的 kinds）两轴；`kinds` **保留为
-    兼容视图**（旧消费者照读，直到宿主端口落地 —— 见 port/README.md 待办）。
+    兼容视图**。
+
+    ★ `producer` 自述（2026-10-14，接缝 §4「生产者必做第 3 条：pin 自述」）：
+    顶层带 `{id, pin}`（pin = 本仓 submodule commit）⇒ 能过宿主
+    `validate-content-list.py --producer octave-extra-content` 的针对性校验。
+
+    ★ URL 两段式（接缝 §4）：**生产者态**的 `url` 是**上游绝对 URL**（"重取入口"，
+    `docs/FORK-PIPELINE.md` §3）；宿主装配时改写为站点态同源相对，并把上游 URL 记进
+    `upstream_url`。本仓出表时**两者都给**（`url` = 上游；`upstream_url` 同值）——
+    宿主装配时 `url` 被改写、`upstream_url` 保留，本仓这一侧不必猜宿主怎么改写。
     """
     if not shelf:
         return fatal("货架是空的 —— 空输入不是通过")
@@ -282,15 +325,18 @@ def cmd_emit(shelf, out, octave, allow_unverified):
         packs.append({
             "name": name, "version": v["version"], "size": v["size"],
             "sha256": v["sha256"], "url": v["url"],
+            "upstream_url": v["url"],               # 重取入口（宿主装配时 url 被改写为同源）
             "deps": e.get("depends") or [],
             "form": form, "content": content,
             "kinds": content,                       # 兼容视图（旧消费者照读）
         })
-    doc = {"schema": 2, "octave": octave, "packs": packs}
+    doc = {"schema": 2, "octave": octave, "producer": producer_block(), "packs": packs}
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(doc, fh, indent=1, ensure_ascii=False)
         fh.write("\n")
-    print("已写出 %s（%d 个包，schema 2）" % (out, len(packs)))
+    pin = doc["producer"].get("pin", "(pin 读不到)")
+    print("已写出 %s（%d 个包，schema 2，producer=%s %s）"
+          % (out, len(packs), PRODUCER_ID, pin))
     if skipped:
         print("  跳过 %d 个：%s" % (len(skipped), "; ".join(skipped)))
     return 0
@@ -416,6 +462,22 @@ def _selftest():
     ck("★ schema 2：kinds 空 ⇒ content 也是空（不许把空说成有内容）",
        lambda: (lambda p: p["content"] == [] and p["form"] == "pkg")(
            _emit_doc([])["packs"][0]))
+
+    # ⑤ producer 自述（接缝 §4「pin 自述」；producer.id 是宿主的 --producer 判据）
+    ck("producer：--emit 顶层带 producer.id（= octave-extra-content）",
+       lambda: _emit_doc(["m"]).get("producer", {}).get("id") == PRODUCER_ID)
+    ck("producer：pin 是 submodule:<sha>（本仓身份 = submodule commit）",
+       lambda: str(_emit_doc(["m"])["producer"].get("pin", "")).startswith("submodule:"))
+    ck("producer_ok：id 相符 ⇒ True",
+       lambda: producer_ok({"producer": {"id": PRODUCER_ID}}, PRODUCER_ID) is True)
+    ck("★ producer_ok：id 不符 ⇒ 必须 False（宿主的 --producer 判据形状）",
+       lambda: producer_ok({"producer": {"id": "someone-else"}}, PRODUCER_ID) is False)
+    ck("★ producer_ok：缺 producer 块 ⇒ 必须 False（零值守卫，不是通过）",
+       lambda: producer_ok({}, PRODUCER_ID) is False)
+    ck("★ producer_ok：producer 是 None ⇒ 必须 False（不许 AttributeError）",
+       lambda: producer_ok({"producer": None}, PRODUCER_ID) is False)
+    ck("emit：每条带 upstream_url（重取入口；两段式的生产者态）",
+       lambda: _emit_doc(["m"])["packs"][0].get("upstream_url") == "u")
 
     bad = 0
     for label, fn in cases:

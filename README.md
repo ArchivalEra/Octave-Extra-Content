@@ -26,10 +26,15 @@
 
 **本仓负责**（**生产适配器**，接缝 §8.1）：包档案（`packages/`）、供给配方（`recipes/`）、
 端口规范副本（`port/`）、**事实系统运维**（`zreflect/` + `build/` + `questions/`），
-以及**「内容契约」面向 UI 的那条边**（**内容语义**：目录四态含义 / `content` 诚实 /
-版本策略 / 许可台账 —— 见下「两条契约」）。
+**「内容契约」面向 UI 的那条边**（**内容语义**：目录四态含义 / `content` 诚实 /
+版本策略 / 许可台账），以及 **content-list 端口的推广 + 内容记录收口**
+（把标准推给各生产者；各生产者的内容记录交到本仓，一处收口 —— 见下）。
 **本仓不负责**：运行站点、装配站点字节、运行服务、定义引擎接口 —— 那些是宿主的事
 （字节同源由宿主装配：同源是 COEP 下的硬约束，跨域 fetch 实测被拦）。
+
+> **平级铁律**（用户点令 2026-10-14）：**任何不作为引擎插件的仓库都与引擎同级** ⇒
+> 本仓与 `LLVM-wasm` / `OpenModelica-Full-Wasm` / UI 仓**同级**；本仓推端口**不是派活**
+> （唯一约束来自标准）。**端口产地仍是宿主** —— 推广 ≠ 产地方，本仓推的是宿主定稿的标准。
 
 ### 两条契约（接缝 §8.1；本仓各占哪一条）
 
@@ -62,7 +67,7 @@
 
 ```
 packages/<包名>.json      每包一个档案（多版本数组；加包只加文件）
-tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 17 条）
+tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 24 条）
 recipes/                  ★ 供给配方（非包内容）
   llvm-wasm.md            clang+lld wasm 工具链（URL+sha256+首拉预算；与 LLVM-wasm release 同源事实）
   pyodide.md              Pyodide + SymPy 运行时（符号计算的共享能力层）
@@ -89,6 +94,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   003-re-role-boundary.md    本仓回信（A1 以仓库为准 / A2 接内容契约 / A3 确认 + 端口产地分歧）
   004-host-ruling.md         host 裁决端口产地 = 宿主 + 归属≠投送（回应 003 的分歧）
   005-host-port-landed.md    host 端口产地已落地 + 两件本仓侧小事（--emit 缺 producer 等）
+  006-re-port-landed.md      本仓回信（A① --emit 加 producer 已做 / A② URL 两段式确认）
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
@@ -134,7 +140,7 @@ python3 tools/forge-shelf.py --probe quaternion --cache /path/to/cache
 python3 tools/forge-shelf.py --verify --cache /path/to/cache
 python3 tools/forge-shelf.py --emit out.json --octave 11.3.0
 python3 tools/forge-shelf.py --add <包名>            # 从上游索引加新包档案
-python3 tools/forge-shelf.py --selftest              # 17 条（三类用例齐备）
+python3 tools/forge-shelf.py --selftest              # 24 条（三类用例齐备）
 ```
 
 ## 纪律
