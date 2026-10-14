@@ -73,6 +73,10 @@ sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2
 
 ## 待办（本仓视角）
 
-- [ ] 宿主 `build/upstream-lock.json` 加这一组（三条）；`provision-pyodide.sh`（宿主侧动作）
-- [ ] `packages/symbolic.json` 建档时标**能力层需求**（`needs: ["pyodide"]`，见仓根 README 的诚实说明）
-- [ ] 许可台账：把 Pyodide/SymPy/mpmath 三条写进宿主 `THIRD-PARTY-NOTICES.md`（宿主侧动作）
+- [ ] 宿主 `build/upstream-lock.json` 加这一组（三条）；`provision-pyodide.sh`（**宿主侧动作**，本仓不改宿主仓）
+- [x] `packages/symbolic.json` 建档 —— 2026-10-14 完成（`--add`/`--fetch`/`--probe` 实测，
+      `kinds=['m']`、`DESCRIPTION` 要 python/sympy/mpmath 的事实写进档案 `note`）。
+      ⚠️ **能力层的表示法未定**：原写 `needs: ["pyodide"]`，实测**接缝 §2 没有 `needs` 这个轴**
+      （§2 判决：能力层 = `form:"tree"` 普通条目、进同一张 `deps` 图、不引入新字段）⇒
+      见悬案 `questions/02-capability-layer-axis.md`；假引用已进翻案台账 `R-002`。
+- [ ] 许可台账：把 Pyodide/SymPy/mpmath 三条写进宿主 `THIRD-PARTY-NOTICES.md`（**宿主侧动作**）

@@ -67,5 +67,10 @@ sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.
 
 ## 待办（本仓视角）
 
-- [ ] 宿主 `build/upstream-lock.json` 加一条 `{name:'llvm-wasm', version:'v0.1.1', url, sha256}`（宿主侧动作）
-- [ ] 建档后再跑一次上游 release 核对（防"发布件被替换"——上游 Release 非持久制品）
+- [ ] 宿主 `build/upstream-lock.json` 加一条 `{name:'llvm-wasm', version:'v0.1.1', url, sha256}`
+      （**宿主侧动作**，本仓不改宿主仓）。本仓侧已落 `build/upstream-lock.json` 一条
+      （`check_locks.py` 每提交核 sha），宿主消费面仍待建。
+- [x] 上游 release 再核对（防"发布件被替换"——上游 Release 非持久制品）—— 2026-10-14 完成：
+      重下 `llvm-wasm-bundle-v0.1.1.tar.gz`（HTTP 200 / 34,679,853 字节），实测 sha256 与
+      配方记录**逐字一致**（`a9ba3b41…f733`）⇒ 未被替换。本仓 `build/upstream-lock.json`
+      已把这条钉住，此后每次提交都会重核。

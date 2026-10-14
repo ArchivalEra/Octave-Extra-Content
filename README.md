@@ -40,7 +40,7 @@
 
 ```
 packages/<包名>.json      每包一个档案（多版本数组；加包只加文件）
-tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 14 条）
+tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 17 条）
 recipes/                  ★ 供给配方（非包内容）
   llvm-wasm.md            clang+lld wasm 工具链（URL+sha256+首拉预算；与 LLVM-wasm release 同源事实）
   pyodide.md              Pyodide + SymPy 运行时（符号计算的共享能力层）
@@ -88,8 +88,13 @@ STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts
 ⚠️ **`kinds` 有一个已知会说谎的角落**（实测，2026-10-14）：`symbolic` 探出 `['m']`
 （与真·开箱即用的 `cgi` 判得一模一样），但它的 `DESCRIPTION` 明写
 `SystemRequirements: python, sympy (>= 1.5.1), mpmath (>= 1.0)` —— 本构建没有 Python
-运行时 ⇒ **装上跑不动**。⇒ 这类包要在档案里标**能力层需求**（接缝 §2 的 `needs` 轴，
-配方见 `recipes/pyodide.md`）。规模实测：144 个上游包里只有 **2 个**（`symbolic`、`pythonic`）。
+运行时 ⇒ **装上跑不动**。⇒ 这类包要标**能力层需求**（配方见 `recipes/pyodide.md`）。
+规模实测：144 个上游包里只有 **2 个**（`symbolic`、`pythonic`）。
+
+> ⚠️ **表示法尚未定**，且本文曾把它错引成「接缝 §2 的 `needs` 轴」（**已翻案，见 R-002**）
+> ——**实测接缝 §2 没有 `needs` 这个轴**（`grep needs` 该文件返回空），宿主侧也无任何代码读它。
+> §2 的判决是：能力层 = `form:"tree"` 的普通条目、进同一张 `deps` 图、**不引入新字段**。
+> 表示法怎么落见悬案 `questions/02-capability-layer-axis.md`。
 
 ## 用法
 
@@ -100,7 +105,7 @@ python3 tools/forge-shelf.py --probe quaternion --cache /path/to/cache
 python3 tools/forge-shelf.py --verify --cache /path/to/cache
 python3 tools/forge-shelf.py --emit out.json --octave 11.3.0
 python3 tools/forge-shelf.py --add <包名>            # 从上游索引加新包档案
-python3 tools/forge-shelf.py --selftest              # 14 条（三类用例齐备）
+python3 tools/forge-shelf.py --selftest              # 17 条（三类用例齐备）
 ```
 
 ## 纪律

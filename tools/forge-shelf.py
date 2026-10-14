@@ -104,6 +104,24 @@ def detect_kinds(tar_path):
     return sorted(kinds)
 
 
+# ── 端口 schema 2 的两个轴（接缝 §2；port/README.md 的命名纪律）───────────────
+#   `kind` 与 `kinds` 同名两义（实测缺陷：manifest 的 kind = 投送形态，catalog 的
+#   kinds = 内容构成）⇒ 收编成两个正交轴，名字不再撞：
+#     · form    = **投送形态**（供给期从字节派生：pkg | tree | oct | octdir | file | js）
+#     · content = **内容构成**（今天的 kinds：m | src | oct）
+#   本仓出的包条目都是「一个 tarball 整包投送」⇒ form 恒为 "pkg"（从 kinds 派生规则：
+#   本仓不产 tree/oct/octdir/file/js —— 那些是能力层 / 编译件 / 单文件的形态，
+#   由各自的生产者出，不是本仓货架的活）。`content` 就是 kinds 本身。
+def derive_form(kinds):
+    """投送形态（本仓只有 pkg 一种：每包一个 tarball 整包投送）。"""
+    return "pkg"
+
+
+def derive_axes(kinds):
+    """(form, content) —— 端口 schema 2 的两轴。`content` = 今天的 kinds。"""
+    return derive_form(kinds), list(kinds or [])
+
+
 def load_shelf(pkg_dir=None):
     """读全部包档案 → {name: entry}。目录缺失/为空 ⇒ 调用方按零值守卫报。"""
     d = pkg_dir if pkg_dir is not None else PKG_DIR
@@ -242,7 +260,12 @@ def write_entry(e):
 
 
 def cmd_emit(shelf, out, octave, allow_unverified):
-    """出**站点目录**（客户端读的那份）：按目标 Octave 解析版本 + 只带已验证的。"""
+    """出**站点目录**（客户端读的那份）：按目标 Octave 解析版本 + 只带已验证的。
+
+    ⚠️ schema 2（2026-10-14，接缝 §2 / port/README.md）：每条加 `form`（投送形态，
+    供给期从字节派生）与 `content`（内容构成 = 今天的 kinds）两轴；`kinds` **保留为
+    兼容视图**（旧消费者照读，直到宿主端口落地 —— 见 port/README.md 待办）。
+    """
     if not shelf:
         return fatal("货架是空的 —— 空输入不是通过")
     packs, skipped = [], []
@@ -255,16 +278,19 @@ def cmd_emit(shelf, out, octave, allow_unverified):
         if not v:
             skipped.append(name + "（无兼容 %s 的版本）" % octave)
             continue
+        form, content = derive_axes(v.get("kinds"))
         packs.append({
             "name": name, "version": v["version"], "size": v["size"],
             "sha256": v["sha256"], "url": v["url"],
-            "deps": e.get("depends") or [], "kinds": v.get("kinds") or [],
+            "deps": e.get("depends") or [],
+            "form": form, "content": content,
+            "kinds": content,                       # 兼容视图（旧消费者照读）
         })
-    doc = {"schema": 1, "octave": octave, "packs": packs}
+    doc = {"schema": 2, "octave": octave, "packs": packs}
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(doc, fh, indent=1, ensure_ascii=False)
         fh.write("\n")
-    print("已写出 %s（%d 个包）" % (out, len(packs)))
+    print("已写出 %s（%d 个包，schema 2）" % (out, len(packs)))
     if skipped:
         print("  跳过 %d 个：%s" % (len(skipped), "; ".join(skipped)))
     return 0
@@ -369,6 +395,27 @@ def _selftest():
                           tempfile.mkdtemp()) == 2)
     ck("★ emit：空货架必须报", lambda: cmd_emit({}, tempfile.mkdtemp() + "/o.json",
                                                 "11.3.0", False) == 2)
+
+    # ④ 端口 schema 2 两轴（form / content；接缝 §2）
+    def _emit_doc(kinds):
+        d = tempfile.mkdtemp()
+        sh = {"p": {"name": "p", "depends": [], "verified": {"octave": "11.3.0"},
+                    "versions": [{"version": "1.0", "sha256": "a" * 64, "size": 1,
+                                  "url": "u", "requires": [], "kinds": kinds}]}}
+        cmd_emit(sh, d + "/o.json", "11.3.0", False)
+        with open(d + "/o.json", encoding="utf-8") as fh:
+            return json.load(fh)
+
+    ck("schema 2：form 派生为 pkg，content = kinds",
+       lambda: (lambda doc: doc["schema"] == 2 and doc["packs"][0]["form"] == "pkg"
+                and doc["packs"][0]["content"] == ["m", "src"])(
+           _emit_doc(["m", "src"])))
+    ck("schema 2：kinds 保留为兼容视图（= content，旧消费者照读）",
+       lambda: (lambda p: p["kinds"] == p["content"] == ["m", "oct"])(
+           _emit_doc(["m", "oct"])["packs"][0]))
+    ck("★ schema 2：kinds 空 ⇒ content 也是空（不许把空说成有内容）",
+       lambda: (lambda p: p["content"] == [] and p["form"] == "pkg")(
+           _emit_doc([])["packs"][0]))
 
     bad = 0
     for label, fn in cases:

@@ -1,0 +1,111 @@
+{
+ "schema": 1,
+ "name": "symbolic",
+ "depends": [],
+ "upstream": {
+  "index": "gnu-octave/packages",
+  "description": "Symbolic calculation features, including common Computer Algebra System tools such as algebraic operations, calculus, equation solving, Fourier and Laplace transforms, variable precision arithmetic and other features. Compatibility with other symbolic toolboxes is intended.",
+  "links": [
+   {
+    "icon": "far fa-copyright",
+    "label": "GPL-3.0-or-later",
+    "url": "https://github.com/gnu-octave/symbolic/blob/main/COPYING"
+   },
+   {
+    "icon": "fas fa-rss",
+    "label": "news",
+    "url": "https://github.com/gnu-octave/symbolic/blob/main/NEWS"
+   },
+   {
+    "icon": "fas fa-code-branch",
+    "label": "repository",
+    "url": "https://github.com/gnu-octave/symbolic"
+   },
+   {
+    "icon": "fas fa-th-list",
+    "label": "function reference",
+    "url": "https://octave.sourceforge.io/symbolic/overview.html"
+   },
+   {
+    "icon": "fas fa-book",
+    "label": "package wiki",
+    "url": "https://github.com/gnu-octave/symbolic/wiki"
+   },
+   {
+    "icon": "fas fa-bug",
+    "label": "report a problem",
+    "url": "https://github.com/gnu-octave/symbolic/issues"
+   }
+  ]
+ },
+ "verified": {
+  "octave": "11.3.0",
+  "how": "detect_kinds（tar 内容判 m/oct）",
+  "tarball_sha": "8eb492408ec5aafe"
+ },
+ "note": "能力层需求（实测 2026-10-14）：DESCRIPTION 明写 SystemRequirements: python, sympy (>= 1.5.1), mpmath (>= 1.0)，而本构建 wasm 里没有 Python 运行时 ⇒ 装上跑不动。detect_kinds 探得 ['m']（与真·开箱即用的 cgi 同形）⇒ kinds 对这类包会说谎。size 为本地实测（上游索引未给）。能力层需求的**表达方式**（接缝 §2 判决：能力层 = deps 图里 form:'tree' 的普通条目，不需要新字段）待端口落地；见 questions/02。",
+ "versions": [
+  {
+   "version": "3.2.2",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/symbolic-3.2.2.tar.gz",
+   "sha256": "8eb492408ec5aafe4e196ec5bdbd2298e0ac068d2b754948f34b9082b9126b37",
+   "size": 276452,
+   "requires": [
+    "octave (>= 6.1.0)"
+   ],
+   "date": "2025-09-11",
+   "kinds": [
+    "m"
+   ],
+   "in_index": true
+  },
+  {
+   "version": "3.2.1",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/symbolic-3.2.1.tar.gz",
+   "sha256": "d1a6ef4d12c48fc4412ceec380f398a6cd5180e518c131ba12683e9eb8f75460",
+   "size": 273021,
+   "requires": [
+    "octave (>= 5.1.0)"
+   ],
+   "date": "2024-05-15",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "3.1.1",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/symbolic-3.1.1.tar.gz",
+   "sha256": "988d2f356ea63488ad8d1c39434760ac24ee2af4efae896c1fd93a5df934532b",
+   "size": 265964,
+   "requires": [
+    "octave (>= 5.1.0)"
+   ],
+   "date": "2023-03-19",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "3.0.1",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/symbolic-3.0.1.tar.gz",
+   "sha256": "ba99c631eb14ca51cc376e7c3e4c953ac92c060011b32f2c557354d9d0ff9ad4",
+   "size": 262730,
+   "requires": [
+    "octave (>= 5.1.0)"
+   ],
+   "date": "2022-08-09",
+   "kinds": [],
+   "in_index": true
+  },
+  {
+   "version": "3.0.0",
+   "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/symbolic-3.0.0.tar.gz",
+   "sha256": "d0181ec356a87091c7fa88ab52a3430ea69e97f9eab90e28c937f2ee5fcb27a9",
+   "size": 261091,
+   "requires": [
+    "octave (>= 5.1.0)"
+   ],
+   "date": "2022-07-05",
+   "kinds": [],
+   "in_index": true
+  }
+ ]
+}

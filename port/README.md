@@ -50,11 +50,16 @@ catalog 的 `kinds` 是内容构成）：
 
 | 侧 | 怎么测 | 现役件 |
 |---|---|---|
-| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 14 条（三类用例齐备） |
+| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 17 条（三类用例齐备） |
 | 宿主 × 假生产者 | 用夹具站（摘掉某个随站包造"只在货架上"的场景） | 宿主 `test/browser/accept-catalog-load.mjs`（27/0）+ `build/113/prep-catalog-accept-site.sh` |
 
 ## 待办
 
 - [ ] 宿主 `build/extra-content/{content-list.schema.json, validate-content-list.py, golden/, bad/}`
-- [ ] 本仓 `--emit` 输出加 `form`/`content` 两轴（`kinds` 保留为兼容视图）
-- [ ] `packages/symbolic.json` 能力层需求（`needs: ["pyodide"]`）—— 见 `recipes/pyodide.md`
+      （**宿主侧动作**，本仓不改宿主仓）
+- [x] 本仓 `--emit` 输出加 `form`/`content` 两轴（`kinds` 保留为兼容视图）—— 2026-10-14 完成
+- [x] `packages/symbolic.json` 建档（`--add`/`--fetch`/`--probe` 实测，含能力层需求事实）
+      —— 2026-10-14 完成。⚠️ 但**能力层的表示法未定**：本文原写 `needs: ["pyodide"]`，
+      实测**接缝 §2 没有 `needs` 这个轴**（§2 判决：能力层 = `form:"tree"` 普通条目、
+      进同一张 `deps` 图、不引入新字段）⇒ 见悬案 `questions/02-capability-layer-axis.md`；
+      假引用已进翻案台账 `R-002`。

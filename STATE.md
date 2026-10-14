@@ -4,7 +4,7 @@
 不手抄。机器维护的块（事实台账 + 闸门名录）在文件末尾，由
 `python3 zreflect/facts.py --render-doc STATE.md` 渲染，**不要手改**。
 
-> ⚠️ 正确写法示范：本仓的包档案数是 [[shelf_packs]]。若写成「本仓有 12 个包」，
+> ⚠️ 正确写法示范：本仓的包档案数是 [[shelf_packs]]。若写成「本仓有 13 个包」，
 > `check_facts.py` 会报**正文裸数字** —— 那个数字从写下的一刻就开始腐烂（加一个包
 > 它就成了假话，而没人记得回来改）。引用键名则永不过期。
 
@@ -49,14 +49,18 @@
 
 ## 已知缺口（如实写，不假装查过）
 
-- **端口 schema 有代际差**：`port/README.md` 写 `schema: 2`（`form`/`content` 两轴），
-  而 `tools/forge-shelf.py --emit` 仍出 `schema: 1` + `kinds`。悬案见
-  `questions/01-port-schema-2.md`（挂可跑的结算件）。
-- **`packages/symbolic.json` 尚未建档**：README 与 `docs/FACT-SYSTEM.md` 都拿
-  `symbolic` 举例（它是**能力层需求**的关键案例：纯 `.m` 却要 Python/SymPy），
-  但档案还没建；建档时要标 `needs: ["pyodide"]`（见 `recipes/pyodide.md`）。
+- **端口 schema 2 本仓侧已完成**（2026-10-14）：`--emit` 现在出 `schema: 2`，每条带
+  `form`（投送形态，本仓恒为 `pkg`）与 `content`（内容构成 = 旧的 `kinds`），`kinds`
+  保留为兼容视图。**宿主侧**的校验器与端口产地（`build/extra-content/`）仍是待落地
+  （宿主侧动作，本仓不改宿主仓）—— 见 `port/README.md` 待办。
+- **能力层的表示法未定**：`symbolic` 已建档（[[shelf_needs_capability]] 个包标了能力层
+  需求），但「怎么表达这条需求」还没定 —— 本文与 `recipes/pyodide.md` 曾错引成
+  「接缝 §2 的 `needs` 轴」（**已翻案，见 R-002**），**实测接缝 §2 没有 `needs` 这个轴**
+  （§2 判决：能力层 = `form:"tree"` 普通条目、进同一张 `deps` 图、不引入新字段）。
+  表示法见悬案 `questions/02-capability-layer-axis.md`。
 - **`verified` 只标了 `kinds`**：档案里的 `verified` 来自 `--probe`（tar 内容判 m/oct），
-  **不等于「真跑通」**；「能不能真用」这一层还没有独立证据链（`docs/FACT-SYSTEM.md` §2 C4 点名的缺口）。
+  **不等于「真跑通」**；「能不能真用」这一层还没有独立证据链（`docs/FACT-SYSTEM.md` §2 C4
+  点名的缺口）—— `symbolic` 正是这条缺口的活例子（探出 `['m']` 却要 Python 运行时）。
 
 <!-- AUTO:FACTS -->
 > 本区块由 `zreflect/facts.py --render-doc` 从 `FACTS.json` 渲染，**不要手改**（pre-commit 会重算并 `git add`）。
@@ -64,20 +68,21 @@
 
 | 键 | 值 | 测于 | 复跑命令 |
 |---|---|---|---|
-| `docs_count` | **3** | 2026-10-14T17:14:52+0800 | `ls docs/*.md | wc -l` |
-| `llvm_bundle_bytes` | **34679853** | 2026-10-14T17:14:52+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz` |
-| `llvm_bundle_sha` | `a9ba3b41e5fa8e74…` | 2026-10-14T17:14:52+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz | cut -d' ' -f1` |
-| `port_docs_count` | **1** | 2026-10-14T17:14:52+0800 | `ls port/*.md | wc -l` |
-| `pyodide_core_bytes` | **6757104** | 2026-10-14T17:14:52+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
-| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-14T17:14:52+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
-| `recipes_count` | **2** | 2026-10-14T17:14:52+0800 | `ls recipes/*.md | wc -l` |
-| `shelf_oct_packs` | **1** | 2026-10-14T17:14:52+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
-| `shelf_packs` | **12** | 2026-10-14T17:14:51+0800 | `ls packages/*.json | wc -l` |
-| `shelf_verified` | **12** | 2026-10-14T17:14:51+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
-| `shelf_versions` | **47** | 2026-10-14T17:14:51+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
-| `tool_selftest_pass` | **14** | 2026-10-14T17:14:52+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
+| `docs_count` | **3** | 2026-10-14T17:48:54+0800 | `ls docs/*.md | wc -l` |
+| `llvm_bundle_bytes` | **34679853** | 2026-10-14T17:48:54+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz` |
+| `llvm_bundle_sha` | `a9ba3b41e5fa8e74…` | 2026-10-14T17:48:54+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz | cut -d' ' -f1` |
+| `port_docs_count` | **1** | 2026-10-14T17:48:54+0800 | `ls port/*.md | wc -l` |
+| `pyodide_core_bytes` | **6757104** | 2026-10-14T17:48:54+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
+| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-14T17:48:54+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
+| `recipes_count` | **2** | 2026-10-14T17:48:54+0800 | `ls recipes/*.md | wc -l` |
+| `shelf_needs_capability` | **1** | 2026-10-14T17:48:54+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
+| `shelf_oct_packs` | **1** | 2026-10-14T17:48:54+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
+| `shelf_packs` | **13** | 2026-10-14T17:48:54+0800 | `ls packages/*.json | wc -l` |
+| `shelf_verified` | **13** | 2026-10-14T17:48:54+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
+| `shelf_versions` | **52** | 2026-10-14T17:48:54+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
+| `tool_selftest_pass` | **17** | 2026-10-14T17:48:54+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
 
-12 条事实。
+13 条事实。
 <!-- /AUTO:FACTS -->
 
 <!-- AUTO:GATES -->

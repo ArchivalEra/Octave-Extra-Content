@@ -90,6 +90,15 @@ def measure():
                                         "packages/",
                                         "含**异架构预编译 .oct** 的包数（wasm 里必须重编）")
 
+    # ── 能力层需求（`kinds` 会说谎的那一类：纯 .m 却要 Python 运行时）──────────────
+    #   判据 = 档案 `note` 里有没有写能力层需求（`DESCRIPTION` 的 SystemRequirements）。
+    #   这条数的不是"能不能装"，是"装上了跑不跑得动"——见 README 的已知角落与 R-002。
+    n_needs = _one("grep -l '能力层需求' packages/*.json | wc -l")
+    if n_needs is not None:
+        facts["shelf_needs_capability"] = fact(
+            int(n_needs), "grep -l '能力层需求' packages/*.json | wc -l", "packages/",
+            "标了**能力层需求**的包数（纯 .m 却要 Python/SymPy ⇒ kinds 对它们会说谎）")
+
     # ── 工具自证通过数（本仓工具的判据强度）──────────────────────────────────────
     n_pass = _one("python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'")
     if n_pass is not None:
