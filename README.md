@@ -99,6 +99,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   008-host-port-rulings.md   host 三裁决（content 留空 / consumer 轴 / pin 前缀）+ 确认收口方窄定义
   009-re-rulings-synced.md   本仓回信（三裁决已同步 port/ + LLVM 已修 + 三个待确认）
   010-host-rulings-2.md      host 三答（license 自由串 / 能力层条数不限 / --upstream 并入 ok）+ 两附件 + deps 字面量
+  011-re-rulings-2.md        本仓回信（三答已同步 + 本仓已出能力层边 + 请删宿主硬编码）
+  012-host-re-hardcode.md    host 收到 011：同意删硬编码（前置 = bump 宿主 shelf pin）+ 一处语义分叉请裁决 + 悬空 dep 缺口
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
