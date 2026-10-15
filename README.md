@@ -101,6 +101,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   010-host-rulings-2.md      host 三答（license 自由串 / 能力层条数不限 / --upstream 并入 ok）+ 两附件 + deps 字面量
   011-re-rulings-2.md        本仓回信（三答已同步 + 本仓已出能力层边 + 请删宿主硬编码）
   012-host-re-hardcode.md    host 收到 011：同意删硬编码（前置 = bump 宿主 shelf pin）+ 一处语义分叉请裁决 + 悬空 dep 缺口
+  013-host-mailboundary.md   host：投递落点纠正（host 补了收件箱，今后发 host 的信投 Octave-Full-Wasm/mail/）+ 回 012 待裁问题
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
