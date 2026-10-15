@@ -122,6 +122,44 @@ def derive_axes(kinds):
     return derive_form(kinds), list(kinds or [])
 
 
+# ── deps 闭合（生产者侧**部分**闭合；完整闭合在装配态，见下）────────────────────
+#   背景（host mail/012 指出、本仓实测确认）：`deps` 可以指向**本仓表外**的 name ——
+#   能力层条目（`form:"tree"`，如 pyodide）由**宿主装配器**产出，不在本仓 `--emit` 里。
+#   ⇒ 本仓实测：`symbolic.deps == ["pyodide"]` 而 emit 的表里**没有** pyodide 条目 ——
+#   这是**合法的部分视图**，不是悬空（装配态 pyodide 会在）。
+#   ⚠️ 但"指向表外"给了 typo 可乘之机（`depends: ["pyodid"]` 无人拦）。
+#   ⇒ 本仓可查的**部分闭合** = dep 目标必须落在 **{货架包名} ∪ {能力层名}**；
+#      能力层名 = `recipes/*.md` 的 basename（**每家能力层必须有一份配方** ⇒ 名字可派生、
+#      可对账：加一层能力 = 加一份 recipe.md，不改代码）。
+#   完整闭合（真·表内解析）在**装配态**（宿主 `check-forge-catalog.py` 的 R9）——
+#   那里全表俱在；本仓的表按设计是**部分**的，故只做部分闭合。
+def capability_names(recipes_dir=None):
+    """能力层名 = `recipes/*.md` 的 basename（排序）。读不到目录 ⇒ []（宁缺勿假）。"""
+    d = recipes_dir if recipes_dir is not None else os.path.join(HERE, "recipes")
+    try:
+        return sorted(n[:-3] for n in os.listdir(d) if n.endswith(".md"))
+    except OSError:
+        return []
+
+
+def deps_closure_problems(names, deps_map, cap_names):
+    """**部分闭合**判据（纯函数，自证用）。返回问题清单（[] = 通过）。
+
+    `names` = 本表能解析的 name 集（货架包）；`deps_map` = {谁: [目标…]}；
+    `cap_names` = 表外合法目标（能力层名）。目标 ∉ names ∪ cap_names ⇒ 报（typo / 未知）。
+    """
+    allowed = set(names or []) | set(cap_names or [])
+    out = []
+    for who in sorted(deps_map or {}):
+        for tgt in deps_map[who] or []:
+            if tgt not in allowed:
+                out.append("`%s` 的 deps 指向 `%s` —— 既不在货架（%d 个包）也不在能力层"
+                           "（%s）⇒ typo 或未知目标"
+                           % (who, tgt, len(names or []),
+                              ", ".join(sorted(cap_names or [])) or "无"))
+    return out
+
+
 # ── producer 自述（接缝 §4「生产者必做第 3 条：pin 自述」）────────────────────
 #   端口把 `producer` 列为**可选顶层块** `{id, pin}`：写了才能过宿主的
 #   `validate-content-list.py --producer <id>` 那条**针对性校验**（不写不算错）。
@@ -331,6 +369,17 @@ def cmd_emit(shelf, out, octave, allow_unverified):
             "kinds": content,                       # 兼容视图（旧消费者照读）
         })
     doc = {"schema": 2, "octave": octave, "producer": producer_block(), "packs": packs}
+    # ★ deps 部分闭合（host mail/012）：目标必须落在 {货架包} ∪ {能力层名}，否则
+    #   typo/未知会被带进表（客户端 install 那一刻才炸）。这是**本仓可查的部分**；
+    #   完整闭合在装配态（宿主 R9）。
+    problems = deps_closure_problems([p["name"] for p in packs],
+                                     {p["name"]: p["deps"] for p in packs},
+                                     capability_names())
+    if problems:
+        for x in problems:
+            print("  ! %s" % x, file=sys.stderr)
+        return fatal("emit 的 deps 部分闭合不过（%d 个问题，见上）—— 修档案的 depends"
+                     "或补 recipes/<能力层>.md" % len(problems))
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(doc, fh, indent=1, ensure_ascii=False)
         fh.write("\n")
@@ -497,6 +546,32 @@ def _selftest():
        lambda: _emit_doc(["m"])["packs"][0]["deps"] == [])
     ck("★ 能力层边：emit 里不出现 needs 字段（§2：不加新字段）",
        lambda: "needs" not in _emit_with_dep()["packs"][0])
+
+    # ⑦ deps 部分闭合（host mail/012：指向表外的 typo 今天没人拦）
+    ck("部分闭合：目标在货架里 ⇒ 不报",
+       lambda: deps_closure_problems(["a", "b"], {"a": ["b"]}, []) == [])
+    ck("部分闭合：目标是能力层名（表外合法）⇒ 不报",
+       lambda: deps_closure_problems(["symbolic"], {"symbolic": ["pyodide"]}, ["pyodide"]) == [])
+    ck("部分闭合：无 deps ⇒ 不报",
+       lambda: deps_closure_problems(["a"], {"a": []}, []) == [])
+    ck("★ 部分闭合：目标是 typo / 未知 ⇒ 必须报",
+       lambda: any("typo" in x for x in deps_closure_problems(
+           ["symbolic"], {"symbolic": ["pyodid"]}, ["pyodide"])))
+    ck("★ 部分闭合：货架包指向不存在的货架包 ⇒ 必须报",
+       lambda: any("既不在货架" in x for x in deps_closure_problems(
+           ["a"], {"a": ["nope"]}, [])))
+    ck("★ 部分闭合：能力层名为空 + 表外目标 ⇒ 必须报（零值守卫：没有能力层就没有合法表外目标）",
+       lambda: deps_closure_problems(["a"], {"a": ["pyodide"]}, []) != [])
+    ck("capability_names：从 recipes/ 派生（本仓有 pyodide 与 llvm-wasm 两份配方）",
+       lambda: {"pyodide", "llvm-wasm"} <= set(capability_names()))
+    ck("capability_names：目录不存在 ⇒ []（宁缺勿假，不炸）",
+       lambda: capability_names("/no/such/dir") == [])
+    ck("★ emit：货架档案 depends 指向未知目标 ⇒ emit 必须报（fatal 退 2）",
+       lambda: cmd_emit({"a": {"name": "a", "depends": ["nope"],
+                               "verified": {"octave": "11.3.0"},
+                               "versions": [{"version": "1", "sha256": "a" * 64, "size": 1,
+                                             "url": "u", "requires": [], "kinds": ["m"]}]}},
+                        tempfile.mkdtemp() + "/o.json", "11.3.0", False) == 2)
 
     bad = 0
     for label, fn in cases:
