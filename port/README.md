@@ -62,6 +62,15 @@ catalog 的 `kinds` 是内容构成）：
 > PROBLEM。根因**不是它的错** —— `content` 的原意是"包的源构成"，能力层**没有合法取值**。
 > 它已改为 `content: []` ⇒ 现在 `ok`。
 
+### ★ 宿主第二批答复（2026-10-15，回应本仓 `mail/009`；已落产地）
+
+| # | 问题 | 答复 |
+|---|---|---|
+| ① | `license` 收紧成枚举？ | **不收紧，保持自由字符串/对象**。判据：真实产物**逐文件混合**（LLVM 13 条里四档许可，两个 tar 天然混合）⇒ 枚举会**逼生产者说谎或拆条**；许可台账的价值在**如实**。⚠️ 诚实边界：**无机器判据核"许可写对了没"**（它是记账字段，不参与 fail-closed；唯一 fail-closed 依据是 `sha256`）。 |
+| ② | 「普通条目」限制条数吗？ | **不限制**（"普通" = 它不特殊：同一套遍历/同一张图/同一份 schema）。判据：读消费侧代码 —— `assets-loader.js` 闭包遍历按名入图、**一行不看条数**。⇒ LLVM 出 13 条**合法**。 |
+| ③ | `--upstream` 重跑修后的表？ | **已重跑，并入 `ok`**（13 条 + 字节 stage 端到端；隔离临时站，未碰 8761）。⇒ 工具链条目进图。 |
+| 附 | `size`/`url` 不一致（本仓独立发现） | **由 `form` 决定，都是有意的**：单文件形态 `size` = `url` 指向文件的字节；**`form:"tree"` 的 `size` = 整棵树字节预算**（= `url` 所在目录所有文件之和）。现役 pyodide 即此形态（`size` 22,013,349 = 整目录；`url` 指树里主 wasm 9,598,218）。**本仓不用改**；站点闸门加 R8 sanity（只拦自相矛盾，不参与 fail-closed）。 |
+
 ## 协商规则（唯一从"最大灵活"方案拿的一条）
 
 > 新轴**只能追加**，且必须声明 `"optional": true` 才允许旧消费者**忽略**；
@@ -78,7 +87,7 @@ catalog 的 `kinds` 是内容构成）：
 
 | 侧 | 怎么测 | 现役件 |
 |---|---|---|
-| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 24 条（三类用例齐备）+ 过宿主校验器 `--producer` ⇒ `ok` |
+| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 27 条（三类用例齐备）+ 过宿主校验器 `--producer` ⇒ `ok` |
 | 宿主 × 假生产者 | 用夹具站（摘掉某个随站包造"只在货架上"的场景） | 宿主 `test/browser/accept-catalog-load.mjs`（27/0）+ `build/113/prep-catalog-accept-site.sh` |
 
 ## 待办
@@ -95,7 +104,9 @@ catalog 的 `kinds` 是内容构成）：
       —— 2026-10-14 完成。⚠️ 能力层的**表示法已定**（接缝 §2：`form:"tree"` 普通条目 +
       依赖边，**不引入新字段**）；宿主已出 `golden/{runtime,toolchain}.json` 两个样件示范。
       假引用 `needs` 已进翻案台账 `R-002`。
-- [ ] **本仓侧能力层落点**（`symbolic` 的 deps 边指向 pyodide 条目）：**宿主侧已完成**
-      （`provision-pyodide.sh` 供三件资产 + 装配器产 `form:"tree"` 条目并入同一张 packs +
-      `symbolic` 靠 deps 边指向；`accept-capability-layer` 12/0）—— 本仓侧要在 `--emit`
-      里出这条边（见悬案 `questions/02-capability-layer-axis.md`）。
+- [x] **本仓侧能力层落点**（`symbolic` 的 deps 边指向 pyodide 条目）：**本仓已完成** ——
+      `packages/symbolic.json` 的 `depends: ["pyodide"]` ⇒ `--emit` 出的 `symbolic` 条目
+      `deps == ["pyodide"]`（字面量由宿主 `mail/010` 确认）；`--selftest` 加 3 条断言
+      （有边 / 无边不臆造 / 不出现 `needs`）。悬案 `questions/02` 已结案。
+      ⚠️ 宿主侧原有一条**同义硬编码**（`forge-catalog.py` 的 `if p["name"] == "symbolic"`）——
+      已在 `mail/011` 请它删掉（本仓的边数据驱动，可接替它）。

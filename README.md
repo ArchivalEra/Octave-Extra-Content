@@ -67,7 +67,7 @@
 
 ```
 packages/<包名>.json      每包一个档案（多版本数组；加包只加文件）
-tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 24 条）
+tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 27 条）
 recipes/                  ★ 供给配方（非包内容）
   llvm-wasm.md            clang+lld wasm 工具链（URL+sha256+首拉预算；与 LLVM-wasm release 同源事实）
   pyodide.md              Pyodide + SymPy 运行时（符号计算的共享能力层）
@@ -144,7 +144,7 @@ python3 tools/forge-shelf.py --probe quaternion --cache /path/to/cache
 python3 tools/forge-shelf.py --verify --cache /path/to/cache
 python3 tools/forge-shelf.py --emit out.json --octave 11.3.0
 python3 tools/forge-shelf.py --add <包名>            # 从上游索引加新包档案
-python3 tools/forge-shelf.py --selftest              # 24 条（三类用例齐备）
+python3 tools/forge-shelf.py --selftest              # 27 条（三类用例齐备）
 ```
 
 ## 纪律

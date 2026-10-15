@@ -85,7 +85,7 @@ GitHub Release 资产**可以被删/被替换**。⇒ 配方写 URL + sha256 之
 "同一版本两个不同 sha"的身份坑 —— 那边是**上游自己重打包**造成的。）
 
 ### 坑 5 · `--selftest` 必须三档齐备（否则闸门会"空输入变绿"）
-本仓工具的 24 条自证里显式含：**正常不报 / 该报的必须报 / 空输入必须报**。
+本仓工具的 27 条自证里显式含：**正常不报 / 该报的必须报 / 空输入必须报**。
 实测过的假绿形状：站点同时缺文件 ⇒ parity 报"完全一致"；`declared == {}` ⇒ `verdict:"ok"`。
 ⇒ 每个新判据都要问："**输入消失时它会绿吗？**" 会 ⇒ 加零值守卫。
 
@@ -124,7 +124,7 @@ GitHub Release 资产**可以被删/被替换**。⇒ 配方写 URL + sha256 之
 # 字节核对（本仓）
 python3 tools/forge-shelf.py --verify --cache /mnt/hdd/octave-wasm-build/third_party/forge
 # 工具自证（三类用例齐备）
-python3 tools/forge-shelf.py --selftest            # ⇒ 24 PASS / 0 fail
+python3 tools/forge-shelf.py --selftest            # ⇒ 27 PASS / 0 fail
 # 身份（本仓当前 tip —— pin 的候选值）
 git rev-parse HEAD
 # 配方里的 sha（抽一条）

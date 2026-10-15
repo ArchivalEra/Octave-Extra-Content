@@ -479,6 +479,25 @@ def _selftest():
     ck("emit：每条带 upstream_url（重取入口；两段式的生产者态）",
        lambda: _emit_doc(["m"])["packs"][0].get("upstream_url") == "u")
 
+    # ⑥ 能力层边（接缝 §2 落法：deps 指向 form:"tree" 的能力层条目，不加 needs 字段）
+    #    本仓的活：`symbolic` 要 Python/SymPy ⇒ depends 带 "pyodide"（宿主 mail/010 给的字面量）。
+    def _emit_with_dep():
+        d = tempfile.mkdtemp()
+        sh = {"symbolic": {"name": "symbolic", "depends": ["pyodide"],
+                           "verified": {"octave": "11.3.0"},
+                           "versions": [{"version": "1.0", "sha256": "a" * 64, "size": 1,
+                                         "url": "u", "requires": [], "kinds": ["m"]}]}}
+        cmd_emit(sh, d + "/o.json", "11.3.0", False)
+        with open(d + "/o.json", encoding="utf-8") as fh:
+            return json.load(fh)
+
+    ck("能力层边：档案 depends 里的 pyodide 出现在 emit 的 deps 里（§2 落法）",
+       lambda: _emit_with_dep()["packs"][0]["deps"] == ["pyodide"])
+    ck("★ 能力层边：档案 depends 为空 ⇒ deps 也是空（不臆造边）",
+       lambda: _emit_doc(["m"])["packs"][0]["deps"] == [])
+    ck("★ 能力层边：emit 里不出现 needs 字段（§2：不加新字段）",
+       lambda: "needs" not in _emit_with_dep()["packs"][0])
+
     bad = 0
     for label, fn in cases:
         try:
