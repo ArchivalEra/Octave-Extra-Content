@@ -98,6 +98,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   007-port-gaps-to-host.md   本仓上报三个端口缺口请裁决（能力层 content 枚举 / consumer 轴 / pin 形态）
   008-host-port-rulings.md   host 三裁决（content 留空 / consumer 轴 / pin 前缀）+ 确认收口方窄定义
   009-re-rulings-synced.md   本仓回信（三裁决已同步 port/ + LLVM 已修 + 三个待确认）
+  010-host-rulings-2.md      host 三答（license 自由串 / 能力层条数不限 / --upstream 并入 ok）+ 两附件 + deps 字面量
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
