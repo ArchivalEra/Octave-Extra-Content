@@ -18,19 +18,22 @@
 **三仓之间的接缝长在「记录」上，不长在「方法」上** —— 各生产者（本仓、LLVM-wasm、以及
 将来的运行时供给方）发布**同一种记录**，宿主作为**消费适配器**读它。宿主的方法名是它内部的事。
 
-## 记录形状（草案，见接缝 §2）
+## 记录形状（schema 2；见接缝 §2 + 宿主产地 `content-list.schema.json`）
 
 ```json
-{ "schema": 2, "producer": { "id": "octave-extra-content", "pin": "submodule:980e0933…" },
+{ "schema": 2, "producer": { "id": "octave-extra-content", "pin": "submodule:<sha>" },
   "octave": "11.3.0",
   "entries": [ {
     "name": "optim",
     "version": "1.6.3",
-    "url": "assets/forge/optim-1.6.3.tar.gz",   // 必为**站内相对**（同源硬约束）
+    "url": "assets/forge/optim-1.6.3.tar.gz",   // 交付路径（站点态必同源相对；生产者态可为上游绝对）
+    "upstream_url": "https://…",                // 出处（记账用，不参与运行期）—— 两段式
     "sha256": "59fb…",                          // 必填，fail-closed
     "size": 422679,
     "form": "pkg",                              // 投送形态：pkg | tree | oct | octdir | file | js
-    "content": ["m", "src"],                    // 内容构成：m | src | oct （= 今天的 kinds）
+    "content": ["m", "src"],                    // 内容构成：m | src | oct（**只对 form:"pkg" 有意义**）
+    "license": "GPL-3.0-or-later",              // 许可（逐条目；能力层可带说明）
+    "consumer": ["octave"],                     // 消费面（可选；octave | omc；缺省 = octave）
     "deps": ["statistics", "struct"]
   } ] }
 ```
@@ -42,6 +45,22 @@ catalog 的 `kinds` 是内容构成）：
 
 **能力层（Pyodide / clang）= `form:"tree"` 的普通条目**，进**同一张 `deps` 图** ⇒
 客户端只有一种遍历；"这条还要拉多少"从「闭包 ∩ tree 条目」推出，不需要新字段。
+（"普通"是说**它不特殊** —— **不限于一条**；LLVM-wasm 的 13 条即合法，见下裁决。）
+
+### ★ 宿主三裁决（2026-10-14，回应本仓 `mail/007`；已落产地 `build/extra-content/`）
+
+| # | 缺口 | 裁决 | 落地 |
+|---|---|---|---|
+| ① | `content` 对能力层无合法取值 | **不扩枚举；能力层 `content: []`** | schema 描述写死 + 校验器**反向断言**（`form:"tree"` 带非空 content ⇒ 必红） |
+| ② | 消费面无处声明 | **加 `consumer` 可选轴**（`octave`/`omc`；**缺省 = `octave`**，向后兼容） | schema `entry.properties.consumer` + 校验器取值校验 |
+| ③ | `pin` 的"未发布"无判据 | **建议前缀形态**（`release:` / `commit:` / `submodule:`），**不强制** | schema 描述；「核 release 存在性」登记为宿主悬案（未实现） |
+
+> ⚠️ 裁决 ② 与接缝 §2 的「不引入新字段」**不冲突**：§2 禁的是"**为了表达能力层**而加字段"，
+> `consumer` 是**消费面标注**且**可选** ⇒ 合规（协商规则本就允许追加 optional 轴）。
+>
+> ⚠️ 裁决 ① 的实测背景：LLVM-wasm 的 13 条表填了 `wasm`/`module`/`tree`/… ⇒ 校验器 17 条
+> PROBLEM。根因**不是它的错** —— `content` 的原意是"包的源构成"，能力层**没有合法取值**。
+> 它已改为 `content: []` ⇒ 现在 `ok`。
 
 ## 协商规则（唯一从"最大灵活"方案拿的一条）
 
@@ -52,14 +71,14 @@ catalog 的 `kinds` 是内容构成）：
 ## 生产者要做的三件事（都不要求宿主在场）
 
 1. `emit(octave_version)` —— 离线纯函数出表（本仓 `tools/forge-shelf.py --emit` 就是）；
-2. 过校验器自证（宿主侧 `validate-content-list.py`，★待落地）；
-3. `pin` 自述 —— 本仓 = **submodule commit**。
+2. 过校验器自证（宿主 `validate-content-list.py`，**已落地**；`--producer <你的 id>` / `--site`）；
+3. `pin` 自述 —— 本仓 = **submodule commit**（建议前缀形态，见裁决 ③）。
 
 ## 两边自证（replace-don't-layer）
 
 | 侧 | 怎么测 | 现役件 |
 |---|---|---|
-| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 24 条（三类用例齐备） |
+| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 24 条（三类用例齐备）+ 过宿主校验器 `--producer` ⇒ `ok` |
 | 宿主 × 假生产者 | 用夹具站（摘掉某个随站包造"只在货架上"的场景） | 宿主 `test/browser/accept-catalog-load.mjs`（27/0）+ `build/113/prep-catalog-accept-site.sh` |
 
 ## 待办
@@ -70,8 +89,13 @@ catalog 的 `kinds` 是内容构成）：
 - [x] 本仓 `--emit` 顶层加 `producer` 自述（`{id, pin}`，接缝 §4「pin 自述」）+ 每条
       `upstream_url`（两段式的生产者态）—— 2026-10-14 完成。实测：过宿主
       `validate-content-list.py --list <表> --producer octave-extra-content` ⇒ `ok`。
+- [x] **三裁决同步**（宿主 `mail/008`：`content` 能力层留空 / `consumer` 可选轴 / `pin` 建议前缀）
+      —— 2026-10-14 同步进本副本（见上「宿主三裁决」表）。
 - [x] `packages/symbolic.json` 建档（`--add`/`--fetch`/`--probe` 实测，含能力层需求事实）
       —— 2026-10-14 完成。⚠️ 能力层的**表示法已定**（接缝 §2：`form:"tree"` 普通条目 +
       依赖边，**不引入新字段**）；宿主已出 `golden/{runtime,toolchain}.json` 两个样件示范。
-      本仓侧落点（`symbolic` 的 deps 边）仍待做 —— 见悬案 `questions/02-capability-layer-axis.md`。
       假引用 `needs` 已进翻案台账 `R-002`。
+- [ ] **本仓侧能力层落点**（`symbolic` 的 deps 边指向 pyodide 条目）：**宿主侧已完成**
+      （`provision-pyodide.sh` 供三件资产 + 装配器产 `form:"tree"` 条目并入同一张 packs +
+      `symbolic` 靠 deps 边指向；`accept-capability-layer` 12/0）—— 本仓侧要在 `--emit`
+      里出这条边（见悬案 `questions/02-capability-layer-axis.md`）。
