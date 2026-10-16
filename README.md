@@ -138,13 +138,20 @@ STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts
 ⚠️ **`kinds` 有一个已知会说谎的角落**（实测，2026-10-14）：`symbolic` 探出 `['m']`
 （与真·开箱即用的 `cgi` 判得一模一样），但它的 `DESCRIPTION` 明写
 `SystemRequirements: python, sympy (>= 1.5.1), mpmath (>= 1.0)` —— 本构建没有 Python
-运行时 ⇒ **装上跑不动**。⇒ 这类包要标**能力层需求**（配方见 `recipes/pyodide.md`）。
+运行时 ⇒ **装上跑不动**。⇒ 这类包的**能力层需求 = `depends` 边**指向能力层条目
+（`symbolic` → `pyodide`，配方见 `recipes/pyodide.md`）。
 规模实测：144 个上游包里只有 **2 个**（`symbolic`、`pythonic`）。
 
-> ⚠️ **表示法尚未定**，且本文曾把它错引成「接缝 §2 的 `needs` 轴」（**已翻案，见 R-002**）
-> ——**实测接缝 §2 没有 `needs` 这个轴**（`grep needs` 该文件返回空），宿主侧也无任何代码读它。
-> §2 的判决是：能力层 = `form:"tree"` 的普通条目、进同一张 `deps` 图、**不引入新字段**。
-> 表示法怎么落见悬案 `questions/02-capability-layer-axis.md`。
+> 该表示法**已落地并结案**（悬案 `questions/02` resolved；接缝 §2 判决：能力层 =
+> `form:"tree"` 的普通条目 + 依赖边，**不引入新字段**）。本文曾把它错引成「接缝 §2 的
+> `needs` 轴」——**已翻案，见 R-002**。能力层依赖是**硬依赖**（站点没供能力层 ⇒ `install`
+> 响亮失败，2026-10-15 裁决，见 `mail/014`）。
+
+★ **逐版真探**（2026-10-16，修 N5）：`kinds` 与 `size` **全部 52 条版本记录都从真字节探出**
+（先逐条核 sha256 再 `detect_kinds`，fail-closed）—— 不再有"未经探包的作者主张"。
+曾有的 1 条矛盾（`statistics-1.7.3` 声明 `['m','oct']` 而字节里 0 个 `.oct`，系上游索引手抄）
+与 38 条空 `kinds`（`verified` 条目级、只覆盖选中版的根因）已全修。
+`arch` 轴三档语义见 `port/README.md`（纯 `.m` 包不带 `arch` ⇒ 本仓 `--emit` 不产该字段）。
 
 ## 用法
 

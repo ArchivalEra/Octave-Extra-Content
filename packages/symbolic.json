@@ -70,7 +70,9 @@
     "octave (>= 5.1.0)"
    ],
    "date": "2024-05-15",
-   "kinds": [],
+   "kinds": [
+    "m"
+   ],
    "in_index": true
   },
   {
@@ -82,7 +84,9 @@
     "octave (>= 5.1.0)"
    ],
    "date": "2023-03-19",
-   "kinds": [],
+   "kinds": [
+    "m"
+   ],
    "in_index": true
   },
   {
@@ -94,7 +98,9 @@
     "octave (>= 5.1.0)"
    ],
    "date": "2022-08-09",
-   "kinds": [],
+   "kinds": [
+    "m"
+   ],
    "in_index": true
   },
   {
@@ -106,7 +112,9 @@
     "octave (>= 5.1.0)"
    ],
    "date": "2022-07-05",
-   "kinds": [],
+   "kinds": [
+    "m"
+   ],
    "in_index": true
   }
  ]
