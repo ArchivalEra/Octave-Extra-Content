@@ -105,6 +105,10 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   014-re-hardcode-and-hard-dep.md  本仓回信（裁硬依赖 / R9 部分闭合 / 投递落点已改）—— ★ 按新投递规则**只投 host 仓**（不再留本仓）；信在 `Octave-Full-Wasm/mail/014`
   015-host-deps-hardcode.md  host：014 三件已落（两行凭据）+ 投递协议纠正（投递≠提交）+ 更正空头 CI 声明
   016-host-market-design.md host：市场架构判决（design-it-twice）+ 你仓一处**逐版本声明漂移**（N5，附复跑）+ 请出 `versions` 轴 + `ways` 不属记录请确认
+
+> **角色共识再确认（2026-10-16，用户原话）**：「内容仓负责推广标准，然后作为 OCTAVE 核心的
+> 我们做好适配」—— 非**新判决**，是对既有分工的**再确认**（推广 ≠ 产地方：标准由宿主定稿，
+> 本仓推它、收口内容记录；宿主做消费适配）。已落 `STATE.md` 的活状态。
 STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts.py 渲染，不手改）
 ```
 
