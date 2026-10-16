@@ -298,29 +298,47 @@ def cmd_verify(shelf, cache):
 
 
 def cmd_probe(shelf, name, cache, octave):
-    """探包：kinds 探测 + 记录 verified（**只记量到的事实**：kinds 来自 tar 内容）。"""
+    """探包：**逐版探**（2026-10-16，修 N5 的防再犯 —— 此前只探 pick_version 选中的那版，
+    多版本包的非选中版从未被证实 ⇒ statistics-1.7.3 的假 kinds 躺了两天）。
+
+    对档案里**全部**版本逐条：sha 相符的本地字节 ⇒ detect_kinds 真值写回 `kinds`、
+    实测字节数写回 `size`；本地没有该版字节 ⇒ **跳过并明说**（不编、不猜）。
+    `verified` 仍为条目级（它记"何时用哪个 Octave 探过"），但逐版的真值在每版自己的
+    `kinds` 上 —— 那才是 `--emit` 的 versions[] 取数的地方。
+    """
     e = shelf.get(name)
     if not e:
         return fatal("货架上没有包: %s" % name)
-    v = pick_version(e, octave)
-    if not v:
-        return fatal("%s 没有满足 Octave %s 的版本" % (name, octave))
-    p = tarball_path(e, v, cache)
-    if not os.path.isfile(p):
-        return fatal("先取包：tools/forge-shelf.py --fetch %s" % name)
-    if sha256_file(p) != v["sha256"]:
-        return fatal("本地 tarball 与档案 sha 不符")
-    kinds = detect_kinds(p)
-    v["kinds"] = kinds
-    e["verified"] = {"octave": octave, "how": "detect_kinds（tar 内容判 m/oct）",
-                     "tarball_sha": v["sha256"][:16]}
+    vers = e.get("versions") or []
+    if not vers:
+        return fatal("%s 档案里没有版本" % name)
+    probed, skipped, mismatch = 0, [], []
+    for v in vers:
+        p = tarball_path(e, v, cache)
+        if not os.path.isfile(p):
+            skipped.append(v["version"])
+            continue
+        if sha256_file(p) != v["sha256"]:
+            mismatch.append(v["version"])
+            continue
+        v["kinds"] = detect_kinds(p)          # 真值（从字节派生，不抄上游索引）
+        v["size"] = os.path.getsize(p)        # 实测字节数（进度条用；不作第二断言）
+        probed += 1
+    if mismatch:
+        return fatal("本地字节与档案 sha 不符（%s）—— 先 --verify 修档案，别拿坏字节探"
+                     % ", ".join(mismatch))
+    if probed == 0:
+        return fatal("一个版本都没探成（%d 版本地字节全缺？）—— 先 --fetch %s"
+                     % (len(vers), name))
+    v0 = pick_version(e, octave) or vers[0]
+    e["verified"] = {"octave": octave, "how": "detect_kinds 逐版探（tar 内容判 m/oct；sha 先行核对）",
+                     "tarball_sha": v0["sha256"][:16], "probed_versions": probed}
     write_entry(e)
-    verdict = {"m": "纯 .m ⇒ v1 按需装可行",
-               "m+src": ".m 开箱可用；src/ 是可选加速件（不编也能用）⇒ v1 可行",
-               "m+oct": "⚠️ 随包带预编译 .oct（异架构）⇒ 必须重编，见设计稿 §6A",
-               "oct": "只有 .oct ⇒ 必须重编",
-               "src": "只有 src/（无 .m）⇒ 必须编译"}.get("+".join(kinds), "见 kinds")
-    print("%s %s：kinds=%s ⇒ %s" % (name, v["version"], kinds, verdict))
+    print("%s：逐版探 %d/%d 完成（kinds+size 全部真值）" % (name, probed, len(vers)))
+    if skipped:
+        print("  - 未探（本地无字节，如实跳过）：%s" % ", ".join(skipped))
+    if mismatch:
+        print("  ! sha 不符已拒：%s" % ", ".join(mismatch))
     return 0
 
 
@@ -329,6 +347,34 @@ def write_entry(e):
     with open(p, "w", encoding="utf-8") as fh:
         json.dump(e, fh, indent=1, ensure_ascii=False)
         fh.write("\n")
+
+
+def candidate_rows(e, octave):
+    """档案 → versions[] 候选行（宿主 schema `candidate` 的形状，三不变量的①③由本函数保证）。
+
+    本仓的 staged 判定 = 该版 `kinds` 有**真值**（--probe 逐版探过、sha 相符的本地字节）
+    ⇒ 带 form/content；未探（kinds 空）⇒ `stage:"withheld"` + `withheld_cause:"bytes-not-staged"`
+    且**不带**派生轴（不许编 —— 宿主校验器不变量③）。
+    **纯函数**（自证直接喂它）。
+    """
+    rows = []
+    for v in e.get("versions") or []:
+        kinds = v.get("kinds") or []
+        row = {"version": v["version"], "sha256": v["sha256"], "url": v["url"],
+               "size": v.get("size") or 0}
+        req = v.get("requires") or []
+        if req:
+            row["requires"] = req
+        if kinds:
+            form, content = derive_axes(kinds)
+            row["stage"] = "staged"
+            row["form"] = form
+            row["content"] = content
+        else:
+            row["stage"] = "withheld"
+            row["withheld_cause"] = "bytes-not-staged"
+        rows.append(row)
+    return rows
 
 
 def cmd_emit(shelf, out, octave, allow_unverified):
@@ -360,6 +406,7 @@ def cmd_emit(shelf, out, octave, allow_unverified):
             skipped.append(name + "（无兼容 %s 的版本）" % octave)
             continue
         form, content = derive_axes(v.get("kinds"))
+        cands = candidate_rows(e, octave)
         packs.append({
             "name": name, "version": v["version"], "size": v["size"],
             "sha256": v["sha256"], "url": v["url"],
@@ -367,6 +414,10 @@ def cmd_emit(shelf, out, octave, allow_unverified):
             "deps": e.get("depends") or [],
             "form": form, "content": content,
             "kinds": content,                       # 兼容视图（旧消费者照读）
+            # ★ versions[]（宿主 schema `candidate`；裁决见 mail/018/019）：
+            #   顶层标量与选中候选逐字同源（同一 dict 取的字段 ⇒ 不变量②天然成立）；
+            #   staged/withheld 语义见 candidate_rows。
+            "versions": cands,
         })
     doc = {"schema": 2, "octave": octave, "producer": producer_block(), "packs": packs}
     # ★ deps 部分闭合（host mail/012）：目标必须落在 {货架包} ∪ {能力层名}，否则
@@ -572,6 +623,45 @@ def _selftest():
                                "versions": [{"version": "1", "sha256": "a" * 64, "size": 1,
                                              "url": "u", "requires": [], "kinds": ["m"]}]}},
                         tempfile.mkdtemp() + "/o.json", "11.3.0", False) == 2)
+
+    # ⑧ versions[] 候选集（宿主 schema `candidate`；裁决 mail/018/019，三不变量①③在本仓侧）
+    def _emit_multi_version():
+        d = tempfile.mkdtemp()
+        sh = {"p": {"name": "p", "depends": [], "verified": {"octave": "11.3.0"},
+                    "versions": [
+                        {"version": "2.0", "sha256": "b" * 64, "size": 2,
+                         "url": "u2", "requires": ["octave (>= 8.1.0)"], "kinds": ["m", "src"]},
+                        {"version": "1.0", "sha256": "a" * 64, "size": 1,
+                         "url": "u1", "requires": [], "kinds": []}]}}
+        cmd_emit(sh, d + "/o.json", "11.3.0", False)
+        with open(d + "/o.json", encoding="utf-8") as fh:
+            return json.load(fh)
+
+    ck("versions[]：多版本候选全部进表（不丢版本信息）",
+       lambda: (lambda vs: len(vs) == 2 and {v["version"] for v in vs} == {"2.0", "1.0"})(
+           _emit_multi_version()["packs"][0]["versions"]))
+    ck("versions[]：已探版本 staged + 带派生轴（form/content）",
+       lambda: (lambda r: r["stage"] == "staged" and r["form"] == "pkg"
+                and r["content"] == ["m", "src"])(
+           [r for r in _emit_multi_version()["packs"][0]["versions"]
+            if r["version"] == "2.0"][0]))
+    ck("versions[]：未探版本 withheld + 不带派生轴（不许编）",
+       lambda: (lambda r: r["stage"] == "withheld"
+                and r["withheld_cause"] == "bytes-not-staged"
+                and "form" not in r and "content" not in r)(
+           [r for r in _emit_multi_version()["packs"][0]["versions"]
+            if r["version"] == "1.0"][0]))
+    ck("★ versions[] 不变量②：顶层标量 == 选中候选（version/sha256/url 逐字）",
+       lambda: (lambda p: any(p["version"] == c["version"] and p["sha256"] == c["sha256"]
+                              and p["url"] == c["url"]
+                              for c in p["versions"]))(
+           _emit_multi_version()["packs"][0]))
+    ck("★ candidate_rows：versions 两两重复 ⇒ 上游自己会乱（本函数不重不漏地映射，"
+       "重复是档案错，emit 照实出并由宿主不变量①拦）",
+       lambda: [r["version"] for r in candidate_rows(
+           {"versions": [{"version": "1", "sha256": "a" * 64, "url": "u", "kinds": ["m"]},
+                         {"version": "1", "sha256": "b" * 64, "url": "u", "kinds": []}]},
+           "11.3.0")] == ["1", "1"])
 
     bad = 0
     for label, fn in cases:

@@ -116,7 +116,7 @@ TARGET_FEATURES 子节读（`build/113/oct-arch.py`）—— **不从目录名�
 
 | 侧 | 怎么测 | 现役件 |
 |---|---|---|
-| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 36 条（三类用例齐备）+ 过宿主校验器 `--producer` ⇒ `ok` |
+| 生产者 × 假宿主 | 只跑校验器（它只有接受面） | 本仓 `--selftest` 41 条（三类用例齐备）+ 过宿主校验器 `--producer` ⇒ `ok` |
 | 宿主 × 假生产者 | 用夹具站（摘掉某个随站包造"只在货架上"的场景） | 宿主 `test/browser/accept-catalog-load.mjs`（27/0）+ `build/113/prep-catalog-accept-site.sh` |
 
 ## 待办
