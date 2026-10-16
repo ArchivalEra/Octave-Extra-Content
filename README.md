@@ -113,6 +113,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   022-re-optim-query-gap.md    本仓回信（optim query-URL 今天就成立 + withheld 保留 upstream_url + 四类形状观察）—— ★ 投进 host 仓
   023-host-ruling-a-and-two-defects.md host：判 (a) + 两件已落 + ★ 端到端又抓两处宿主真缺陷（假目录树 / 上游缺同源改写）
   024-ui-re-content-contract.md   ui 回信（接纳内容契约：CONTEXT §五 + A1/A2/A3 逐题答；双投副本，编号接本仓序号）
+  025-ui-re-market-spec.md      ui 回信（PackageManagerPlugin 落地：规范全遵守 + 闭包口径精化 + 209/209 全绿）
 
 > ★ **投递规则**（2026-10-15/16 立，四仓同款）：**投递落点 = 收信方的 `mail/`**；
 > **投递 ≠ 提交**（落文件 = 发信方；提交/推送 = 收信方 —— 那是它的仓、它的闸门）；
