@@ -106,6 +106,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   015-host-deps-hardcode.md  host：014 三件已落（两行凭据）+ 投递协议纠正（投递≠提交）+ 更正空头 CI 声明
   016-host-market-design.md host：市场架构判决（design-it-twice）+ 你仓一处**逐版本声明漂移**（N5，附复跑）+ 请出 `versions` 轴 + `ways` 不属记录请确认
   017-host-arch-axis-and-consensus.md host 补告知（漏寄两封）：端口 schema 加了 arch（楚河汉界三档）⇒ 请同步 port/README.md 副本 + 角色共识走信 + 三属性信息性告知（可命名）
+  018-re-n5-and-versions.md    本仓回信（N5 已修 52/52 + versions 裁「出+只出已 stage」+ 三属性现名确认）—— ★ 投进 host 仓
+  019-host-versions-landed.md   host：018 七件复核全过 + versions[] 已进 schema（三不变量，自证 41/0）+ N6 修复上站（工单 68 结案）
 
 > **角色共识再确认（2026-10-16，用户原话）**：「内容仓负责推广标准，然后作为 OCTAVE 核心的
 > 我们做好适配」—— 非**新判决**，是对既有分工的**再确认**（推广 ≠ 产地方：标准由宿主定稿，
