@@ -155,7 +155,14 @@ STATE.md / AGENTS.md      活状态文档 + agent 硬规矩（机器块由 facts
 （先逐条核 sha256 再 `detect_kinds`，fail-closed）—— 不再有"未经探包的作者主张"。
 曾有的 1 条矛盾（`statistics-1.7.3` 声明 `['m','oct']` 而字节里 0 个 `.oct`，系上游索引手抄）
 与 38 条空 `kinds`（`verified` 条目级、只覆盖选中版的根因）已全修。
-`arch` 轴三档语义见 `port/README.md`（纯 `.m` 包不带 `arch` ⇒ 本仓 `--emit` 不产该字段）。
+`--probe` 已改**逐版探**（防再犯：探档案里全部版本，缺字节明说跳过、sha 不符拒探）。
+
+★ **`versions[]` 版本候选集**（2026-10-16，用户点令「每版各带是否兼容」）：`--emit` 现在出
+候选数组（条目内嵌不摊平），每条带 `stage`（`staged` 必带派生轴 / `withheld` 不许带 ——
+**派生不出不许编**）；顶层标量与选中候选**同源**（防两处漂移）。
+**全链已闭环**（五段：宿主 schema 三不变量 → 本仓 `--emit` → 宿主 `resolve()` → catalog →
+浏览器；宿主三层对账全过）。**向后兼容有实测**：旧客户端只读顶层标量 ⇒ 8761 上
+`accept-symbolic-seam` 9/0 不变。轴语义与三条不变量见 `port/README.md`。
 
 ## 用法
 

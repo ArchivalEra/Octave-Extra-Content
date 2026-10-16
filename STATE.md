@@ -41,21 +41,28 @@
   （记录的生产侧汇总，是"归属"的落地）**，**不是运行期端点** —— UI 读的仍是**宿主站点里
   装配好的表**；别把"收口"读成"UI 直接读本仓"。
   ⚠️ **端口产地仍是宿主**（见上条）—— 推广 ≠ 产地方；本仓推的是**宿主定稿的标准**。
-- **收口账**（三家在册，2026-10-15 更新）：本仓 = **已出表 + 边已出**（`--emit` 过宿主校验器 ✔；
-  `symbolic.deps == ["pyodide"]`）；`LLVM-wasm` = **已出表 + 宿主已复跑并入 `ok`**；
-  `OpenModelica-Full-Wasm` = **缺席（合法）**（判据：其发运模型集出现 `import Modelica.` 时出表）。
+- **收口账**（三家在册，2026-10-16 更新）：本仓 = **已出表 + 边已出 + 候选集已出**
+  （`--emit` 过宿主校验器 ✔；`symbolic.deps == ["pyodide"]`；`versions[]` 52 候选全 staged）；
+  `LLVM-wasm` = **已出表 + 宿主已复跑并入 `ok`**；`OpenModelica-Full-Wasm` = **缺席（合法）**
+  （判据：其发运模型集出现 `import Modelica.` 时出表）。
   ⚠️ **两档区分**（宿主 §债 的教训）：**「已出表/已出边」≠「宿主 pin 已吃到 / 已并入」** ——
-  后者要宿主 **bump submodule pin** 或 `--upstream` 并入，是**它的**判据。本仓的边在文件里对、
-  过校验器，但**在宿主旧 pin 上尚未生效**（host `mail/012`：它的 `shelf/` pin = `f6d38c9`，
-  里面 `symbolic.depends` 仍是 `[]`）⇒ 本条目**未收**，等它 bump + 删硬编码。
+  后者要宿主 **bump submodule pin** 或 `--upstream` 并入，是**它的**判据。
+  **`versions[]` 全链已闭环**（五段：schema 三不变量 → 本仓 `--emit` → 宿主 `resolve()` →
+  catalog → 浏览器；**宿主三层对账全过**，`mail/019`–`021`）。
 - **能力层依赖 = 硬依赖**（2026-10-15 裁决，回应 host `mail/012`）：站点没供能力层 ⇒
   `install` **响亮失败**（`not-found`），**不是软门**。判据：软门无处声明（§2 禁新字段）⇒
   只能藏进适配器（正是刚删掉的形状）；且"装上了却跑不了"的错误信息**指向错方向**。
 - **端口三裁决**（宿主 `mail/008`，已同步 `port/README.md`）：①能力层 `content` 留空（不扩枚举）；
   ②加 `consumer` 可选轴（`octave`/`omc`，缺省 octave）；③`pin` 建议前缀形态（不强制）。
-- **端口第二批答复**（宿主 `mail/010`，已同步 `port/README.md`）：①`license` 保持自由串/对象；
-  ②「普通条目」不限条数；③`--upstream` 并入 `ok`；附 `size` 由 `form` 定。**deps 闭合分域**
-  （本仓部分闭合 + 宿主完整闭合 R9）。
+- **端口第二批答复**（宿主 `mail/010`）：①`license` 保持自由串/对象；②「普通条目」不限条数；
+  ③`--upstream` 并入 `ok`；附 `size` 由 `form` 定。**deps 闭合分域**（本仓部分闭合 + 宿主 R9）。
+- **`arch` 轴**（宿主 `mail/017`，已同步 `port/README.md`）：三档语义（纯 `.m` 不带 / 含 `.oct`
+  必带 / 能力层不带）；**派生不自写**（从 `.oct` 字节读）。
+  **`versions[]` 轴**（`mail/019`–`022`，已同步 `port/README.md`）：三条不变量 +
+  **staged 是"字节在谁那"的函数**（生产者态 = 我探过包；装配态 = 字节在站点；两张表各自如实）。
+- **一处已报的宿主缺口**（`mail/022`，本仓实证）：`optim` 的 `url` 带 query
+  （`…download.php?package=optim-1.6.3.tar.gz`）⇒ 宿主 `--upstream-bytes` 的 `basename`
+  映射命中不了缓存名。今天货架路径不经过它，**一旦走 `--upstream` 即变真问题**。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   由信催生的角色/契约结论落进本文件。
 
@@ -112,19 +119,19 @@
 
 | 键 | 值 | 测于 | 复跑命令 |
 |---|---|---|---|
-| `docs_count` | **3** | 2026-10-16T16:48:48+0800 | `ls docs/*.md | wc -l` |
-| `llvm_bundle_bytes` | **34679853** | 2026-10-16T16:48:48+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz` |
-| `llvm_bundle_sha` | `a9ba3b41e5fa8e74…` | 2026-10-16T16:48:48+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz | cut -d' ' -f1` |
-| `port_docs_count` | **1** | 2026-10-16T16:48:48+0800 | `ls port/*.md | wc -l` |
-| `pyodide_core_bytes` | **6757104** | 2026-10-16T16:48:48+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
-| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-16T16:48:48+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
-| `recipes_count` | **2** | 2026-10-16T16:48:48+0800 | `ls recipes/*.md | wc -l` |
-| `shelf_needs_capability` | **1** | 2026-10-16T16:48:48+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
-| `shelf_oct_packs` | **0** | 2026-10-16T16:48:48+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
-| `shelf_packs` | **13** | 2026-10-16T16:48:48+0800 | `ls packages/*.json | wc -l` |
-| `shelf_verified` | **13** | 2026-10-16T16:48:48+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
-| `shelf_versions` | **52** | 2026-10-16T16:48:48+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
-| `tool_selftest_pass` | **41** | 2026-10-16T16:48:48+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
+| `docs_count` | **3** | 2026-10-16T18:13:47+0800 | `ls docs/*.md | wc -l` |
+| `llvm_bundle_bytes` | **34679853** | 2026-10-16T18:13:47+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz` |
+| `llvm_bundle_sha` | `a9ba3b41e5fa8e74…` | 2026-10-16T18:13:47+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz | cut -d' ' -f1` |
+| `port_docs_count` | **1** | 2026-10-16T18:13:47+0800 | `ls port/*.md | wc -l` |
+| `pyodide_core_bytes` | **6757104** | 2026-10-16T18:13:47+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
+| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-16T18:13:47+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
+| `recipes_count` | **2** | 2026-10-16T18:13:47+0800 | `ls recipes/*.md | wc -l` |
+| `shelf_needs_capability` | **1** | 2026-10-16T18:13:47+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
+| `shelf_oct_packs` | **0** | 2026-10-16T18:13:47+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
+| `shelf_packs` | **13** | 2026-10-16T18:13:47+0800 | `ls packages/*.json | wc -l` |
+| `shelf_verified` | **13** | 2026-10-16T18:13:47+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
+| `shelf_versions` | **52** | 2026-10-16T18:13:47+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
+| `tool_selftest_pass` | **41** | 2026-10-16T18:13:47+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
 
 13 条事实。
 <!-- /AUTO:FACTS -->
