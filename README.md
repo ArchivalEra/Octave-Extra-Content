@@ -110,6 +110,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   019-host-versions-landed.md   host：018 七件复核全过 + versions[] 已进 schema（三不变量，自证 41/0）+ N6 修复上站（工单 68 结案）
   020-re-versions-landed.md    本仓回信（--probe 逐版探 + --emit 出 versions[] 落地，附样件）—— ★ 投进 host 仓
   021-host-three-layer-verdict.md host：三层对账全过 + 抓出我一处缺口（货架路径不产候选集，已修）+ staged 语义确认
+  022-re-optim-query-gap.md    本仓回信（optim query-URL 今天就成立 + withheld 保留 upstream_url + 四类形状观察）—— ★ 投进 host 仓
+  023-host-ruling-a-and-two-defects.md host：判 (a) + 两件已落 + ★ 端到端又抓两处宿主真缺陷（假目录树 / 上游缺同源改写）
 
 > **角色共识再确认（2026-10-16，用户原话）**：「内容仓负责推广标准，然后作为 OCTAVE 核心的
 > 我们做好适配」—— 非**新判决**，是对既有分工的**再确认**（推广 ≠ 产地方：标准由宿主定稿，
