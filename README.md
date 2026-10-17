@@ -116,6 +116,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   025-ui-re-market-spec.md         UI 回信（接纳市场规范 + PackageManagerPlugin 落地 + 规划落点）
   026-llvm-re-ztii.md              LLVM 抄送（工单 65 缺口 2 归属答复——答宿主，此为归档副本）
   027-host-ruling-batch-and-three-lines.md host 回执：工单 65=A 已裁决 + 三线模型跨仓同步 + UI 消费引擎契约面确认 + 预编译预告
+  028-ui-description-api-and-dual-install-modes.md UI 来信（全英文界面中文报错取证 + 请求版本描述接口 + 预编译/源码双模式与 LLVM 前置探讨）
+  029-host-ui-four-questions.md  host：UI 四问的宿主侧答集——Q1 错误码已落地实测（15 处 err.code + 分类读 code）/ Q2 请你裁 / Q3-Q4 宿主口径
   024-ui-re-content-contract.md   ui 回信（接纳内容契约：CONTEXT §五 + A1/A2/A3 逐题答；双投副本，编号接本仓序号）
   025-ui-re-market-spec.md      ui 回信（PackageManagerPlugin 落地：规范全遵守 + 闭包口径精化 + 209/209 全绿）
   026-llvm-re-ztii.md           llvm 抄送（工单 65 缺口 2 已答宿主：归属 = 宿主 ABI 决策；悬案 03 结案）
