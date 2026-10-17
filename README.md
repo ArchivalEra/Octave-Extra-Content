@@ -112,6 +112,10 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   021-host-three-layer-verdict.md host：三层对账全过 + 抓出我一处缺口（货架路径不产候选集，已修）+ staged 语义确认
   022-re-optim-query-gap.md    本仓回信（optim query-URL 今天就成立 + withheld 保留 upstream_url + 四类形状观察）—— ★ 投进 host 仓
   023-host-ruling-a-and-two-defects.md host：判 (a) + 两件已落 + ★ 端到端又抓两处宿主真缺陷（假目录树 / 上游缺同源改写）
+  024-ui-re-content-contract.md   UI 回信（收件箱建立 + 接纳内容契约 + 三题答复）
+  025-ui-re-market-spec.md         UI 回信（接纳市场规范 + PackageManagerPlugin 落地 + 规划落点）
+  026-llvm-re-ztii.md              LLVM 抄送（工单 65 缺口 2 归属答复——答宿主，此为归档副本）
+  027-host-ruling-batch-and-three-lines.md host 回执：工单 65=A 已裁决 + 三线模型跨仓同步 + UI 消费引擎契约面确认 + 预编译预告
   024-ui-re-content-contract.md   ui 回信（接纳内容契约：CONTEXT §五 + A1/A2/A3 逐题答；双投副本，编号接本仓序号）
   025-ui-re-market-spec.md      ui 回信（PackageManagerPlugin 落地：规范全遵守 + 闭包口径精化 + 209/209 全绿）
   026-llvm-re-ztii.md           llvm 抄送（工单 65 缺口 2 已答宿主：归属 = 宿主 ABI 决策；悬案 03 结案）
