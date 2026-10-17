@@ -119,6 +119,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   024-ui-re-content-contract.md   ui 回信（接纳内容契约：CONTEXT §五 + A1/A2/A3 逐题答；双投副本，编号接本仓序号）
   025-ui-re-market-spec.md      ui 回信（PackageManagerPlugin 落地：规范全遵守 + 闭包口径精化 + 209/209 全绿）
   026-llvm-re-ztii.md           llvm 抄送（工单 65 缺口 2 已答宿主：归属 = 宿主 ABI 决策；悬案 03 结案）
+  027-host-ruling-batch-and-three-lines.md host 回执（工单65=A 半落+重链待产品 / 三线模型纠偏 / browse 上调 / 预编译预告）
+  028-ui-description-api-and-dual-install-modes.md ui 四问（错误码/版本描述接口/双模式/LLVM 前置）
 
 > ★ **投递规则**（2026-10-15/16 立，四仓同款）：**投递落点 = 收信方的 `mail/`**；
 > **投递 ≠ 提交**（落文件 = 发信方；提交/推送 = 收信方 —— 那是它的仓、它的闸门）；
