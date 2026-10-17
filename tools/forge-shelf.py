@@ -414,12 +414,22 @@ def cmd_emit(shelf, out, octave, allow_unverified):
             "deps": e.get("depends") or [],
             "form": form, "content": content,
             "kinds": content,                       # 兼容视图（旧消费者照读）
+            # ★ 包级静态描述（UI mail/028 Q2 裁决：方案 A 分两层 —— 包级进表；
+            #   逐版不做，上游索引无逐版数据、不编）。数据源 = 档案 upstream.description
+            #   （来自上游索引，包级一条）。links 同源（news/repository/文档链），
+            #   供 UI 面板"主页/新闻"链接。**可选字段**（schema 容忍缺省）。
+            "description": (e.get("upstream") or {}).get("description", ""),
+            "links": (e.get("upstream") or {}).get("links", []),
             # ★ versions[]（宿主 schema `candidate`；裁决见 mail/018/019）：
             #   顶层标量与选中候选逐字同源（同一 dict 取的字段 ⇒ 不变量②天然成立）；
             #   staged/withheld 语义见 candidate_rows。
             "versions": cands,
         })
-    doc = {"schema": 2, "octave": octave, "producer": producer_block(), "packs": packs}
+    doc = {"schema": 2, "octave": octave, "producer": producer_block(), "packs": packs,
+           # ★ 协商规则（接缝 §2 / schema optional_keys）：description/links 是本表追加的
+           #   可选轴（包级静态描述，UI mail/028 Q2 裁决）—— 声明为可选 ⇒ 旧消费者
+           #   有权忽略；不声明则整条目被撤下（fail-closed，实测拦过）。
+           "optional_keys": ["description", "links"]}
     # ★ deps 部分闭合（host mail/012）：目标必须落在 {货架包} ∪ {能力层名}，否则
     #   typo/未知会被带进表（客户端 install 那一刻才炸）。这是**本仓可查的部分**；
     #   完整闭合在装配态（宿主 R9）。
@@ -662,6 +672,34 @@ def _selftest():
            {"versions": [{"version": "1", "sha256": "a" * 64, "url": "u", "kinds": ["m"]},
                          {"version": "1", "sha256": "b" * 64, "url": "u", "kinds": []}]},
            "11.3.0")] == ["1", "1"])
+
+    # ⑨ 包级静态描述（UI mail/028 Q2：方案 A —— 包级 description/links 进表）
+    def _emit_with_desc():
+        d = tempfile.mkdtemp()
+        sh = {"p": {"name": "p", "depends": [], "verified": {"octave": "11.3.0"},
+                    "upstream": {"description": "A test package.",
+                                 "links": [{"label": "news", "url": "https://n"}]},
+                    "versions": [{"version": "1.0", "sha256": "a" * 64, "size": 1,
+                                  "url": "u", "requires": [], "kinds": ["m"]}]}}
+        cmd_emit(sh, d + "/o.json", "11.3.0", False)
+        with open(d + "/o.json", encoding="utf-8") as fh:
+            return json.load(fh)
+
+    ck("description：档案 upstream.description 进表（包级直读）",
+       lambda: _emit_with_desc()["packs"][0]["description"] == "A test package.")
+    ck("links：档案 upstream.links 进表（包级直读）",
+       lambda: _emit_with_desc()["packs"][0]["links"] == [{"label": "news", "url": "https://n"}])
+    ck("★ description/links：档案缺 upstream 块 ⇒ 空串/空数组（不编、不炸）",
+       lambda: _emit_doc(["m"])["packs"][0]["description"] == ""
+       and _emit_doc(["m"])["packs"][0]["links"] == [])
+    ck("★ 真表：13 包全部带非空 description（上游索引有货，--add 时已入档案）",
+       lambda: all(p.get("description") for p in
+                   json.load(open(_real_emit()))["packs"]))
+
+    def _real_emit():
+        d = tempfile.mkdtemp()
+        cmd_emit(load_shelf(), d + "/o.json", "11.3.0", False)
+        return d + "/o.json"
 
     bad = 0
     for label, fn in cases:

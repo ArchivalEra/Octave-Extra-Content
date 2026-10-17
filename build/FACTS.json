@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated": "2026-10-16T23:17:57+0800",
+ "generated": "2026-10-17T14:45:20+0800",
  "_why": "事实台账：每条 = 一个**测出来**的值 + 复跑命令 + 出处。别手改，跑 zreflect/facts.py。",
  "facts": {
   "shelf_packs": {
    "value": 13,
    "cmd": "ls packages/*.json | wc -l",
    "source": "packages/",
-   "measured_at": "2026-10-16T23:17:56+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-14",
    "note": "货架上的包档案数（每包一文件）"
   },
@@ -15,7 +15,7 @@
    "value": 13,
    "cmd": "grep -l '\"verified\": {' packages/*.json | wc -l",
    "source": "packages/",
-   "measured_at": "2026-10-16T23:17:56+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-14",
    "note": "已验证（--probe 实测过）的包数；未验证的默认不上架"
   },
@@ -23,7 +23,7 @@
    "value": 52,
    "cmd": "python3 -c \"import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))\"",
    "source": "packages/",
-   "measured_at": "2026-10-16T23:17:56+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-14",
    "note": "全部包档案里的版本条目总数"
   },
@@ -31,7 +31,7 @@
    "value": 0,
    "cmd": "python3 -c \"import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))\"",
    "source": "packages/",
-   "measured_at": "2026-10-16T23:17:56+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-16",
    "note": "含**异架构预编译 .oct** 的包数（wasm 里必须重编）"
   },
@@ -39,23 +39,23 @@
    "value": 1,
    "cmd": "grep -l '能力层需求' packages/*.json | wc -l",
    "source": "packages/",
-   "measured_at": "2026-10-16T23:17:56+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-14",
    "note": "标了**能力层需求**的包数（纯 .m 却要 Python/SymPy ⇒ kinds 对它们会说谎）"
   },
   "tool_selftest_pass": {
-   "value": 41,
+   "value": 45,
    "cmd": "python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'",
    "source": "tools/forge-shelf.py",
-   "measured_at": "2026-10-16T23:17:57+0800",
-   "first_seen": "2026-10-16",
+   "measured_at": "2026-10-17T14:45:19+0800",
+   "first_seen": "2026-10-17",
    "note": "取包工具自证通过数（三类用例齐备）"
   },
   "recipes_count": {
    "value": 2,
    "cmd": "ls recipes/*.md | wc -l",
    "source": "recipes/",
-   "measured_at": "2026-10-16T23:17:57+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-14",
    "note": "供给配方数"
   },
@@ -63,7 +63,7 @@
    "value": 3,
    "cmd": "ls docs/*.md | wc -l",
    "source": "docs/",
-   "measured_at": "2026-10-16T23:17:57+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-14",
    "note": "经验集文档数"
   },
@@ -71,7 +71,7 @@
    "value": 1,
    "cmd": "ls port/*.md | wc -l",
    "source": "port/",
-   "measured_at": "2026-10-16T23:17:57+0800",
+   "measured_at": "2026-10-17T14:45:19+0800",
    "first_seen": "2026-10-14",
    "note": "端口规范副本数"
   },
@@ -79,7 +79,7 @@
    "value": "a9ba3b41e5fa8e7445e9b8ffaf32ca73e10ae9285bc1afc5327d0f549c84f733",
    "cmd": "sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz | cut -d' ' -f1",
    "source": "recipes/llvm-wasm.md",
-   "measured_at": "2026-10-16T23:17:57+0800",
+   "measured_at": "2026-10-17T14:45:20+0800",
    "first_seen": "2026-10-14",
    "note": "LLVM-wasm 工具链 bundle 的 sha（发布件身份）"
   },
@@ -87,7 +87,7 @@
    "value": 34679853,
    "cmd": "stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz",
    "source": "recipes/llvm-wasm.md",
-   "measured_at": "2026-10-16T23:17:57+0800",
+   "measured_at": "2026-10-17T14:45:20+0800",
    "first_seen": "2026-10-14",
    "note": "LLVM-wasm 工具链 bundle 的字节数"
   },
@@ -95,7 +95,7 @@
    "value": "2abdcc2e35208af406e07724cffa85bc582ced97e9028383ecf5462541393f95",
    "cmd": "sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1",
    "source": "recipes/pyodide.md",
-   "measured_at": "2026-10-16T23:17:57+0800",
+   "measured_at": "2026-10-17T14:45:20+0800",
    "first_seen": "2026-10-14",
    "note": "Pyodide 运行时 core 的 sha（符号计算能力层的底座）"
   },
@@ -103,7 +103,7 @@
    "value": 6757104,
    "cmd": "stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2",
    "source": "recipes/pyodide.md",
-   "measured_at": "2026-10-16T23:17:57+0800",
+   "measured_at": "2026-10-17T14:45:20+0800",
    "first_seen": "2026-10-14",
    "note": "Pyodide 运行时 core 的字节数"
   }

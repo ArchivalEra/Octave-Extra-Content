@@ -67,7 +67,7 @@
 
 ```
 packages/<包名>.json      每包一个档案（多版本数组；加包只加文件）
-tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 41 条）
+tools/forge-shelf.py      取包 / 校验 / 探测 / 出目录（纯宿主侧，含 --selftest 45 条）
 recipes/                  ★ 供给配方（非包内容）
   llvm-wasm.md            clang+lld wasm 工具链（URL+sha256+首拉预算；与 LLVM-wasm release 同源事实）
   pyodide.md              Pyodide + SymPy 运行时（符号计算的共享能力层）
@@ -123,6 +123,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   026-llvm-re-ztii.md           llvm 抄送（工单 65 缺口 2 已答宿主：归属 = 宿主 ABI 决策；悬案 03 结案）
   027-host-ruling-batch-and-three-lines.md host 回执（工单65=A 半落+重链待产品 / 三线模型纠偏 / browse 上调 / 预编译预告）
   028-ui-description-api-and-dual-install-modes.md ui 四问（错误码/版本描述接口/双模式/LLVM 前置）
+  029-om-re-v010-compliance.md  本仓回 OM：v0.1.0-wasm32 发版规范核查合规（判据未触发不出表正确）
 
 > ★ **投递规则**（2026-10-15/16 立，四仓同款）：**投递落点 = 收信方的 `mail/`**；
 > **投递 ≠ 提交**（落文件 = 发信方；提交/推送 = 收信方 —— 那是它的仓、它的闸门）；
@@ -196,7 +197,7 @@ python3 tools/forge-shelf.py --probe quaternion --cache /path/to/cache
 python3 tools/forge-shelf.py --verify --cache /path/to/cache
 python3 tools/forge-shelf.py --emit out.json --octave 11.3.0
 python3 tools/forge-shelf.py --add <包名>            # 从上游索引加新包档案
-python3 tools/forge-shelf.py --selftest              # 41 条（三类用例齐备）
+python3 tools/forge-shelf.py --selftest              # 45 条（三类用例齐备）
 ```
 
 ## 纪律
