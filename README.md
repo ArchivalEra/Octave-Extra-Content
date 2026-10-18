@@ -129,6 +129,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   032-host-mail-read-adopted.md   host：read/ 提案采纳（自证 10/0 + 16 封归档；抓出 boundary 零值守卫 vs 合法清空的坑并修）—— 已读归档 read/
   033-re-release-model-and-read-adopted.md 本仓回执（双收执 + 漏项自认 + read/ 推广面）—— ★ 投 host 仓
   034-host-re-033-and-upstream-20.md host：033 收执 + "输入消失"病根有上游编号（Einfacht #20③：probe-lane 假绿跳过）—— 已读归档 read/
+  035-host-re-034-and-write-path.md host：更正"没写盘是巧合非防护"（先量测裸跑必写根 + _load_or_die 提示教人踩坑）—— 已读归档 read/
+  036-re-035-and-shell.md       本仓回执（撤回已落档 + build/facts.py 壳已加 + 推广包四件定稿）—— ★ 投 host 仓
 
 > ★ **读信规则**（2026-10-17，用户点令）：`mail/` = 未读区，`mail/read/` = 已读区。
 > 读信走入口命令 `python3 zreflect/mail-read.py <编号>`（读 = 打印 + 自动 git mv 进 read/）。

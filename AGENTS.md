@@ -53,7 +53,7 @@
 ## 复跑命令（验证本仓事实系统健康）
 
 ```bash
-python3 zreflect/facts.py --render-doc STATE.md --check    # 机器块新鲜
+python3 build/facts.py --render-doc STATE.md --check     # 机器块新鲜（走壳：免旋钮，防裸跑写根）
 python3 zreflect/registry.py --run commit                  # ran/off/failed 三档
 sh gates-selftest.sh                                       # 平台闸门自证（每个闸门先证明自己会红）
 python3 zreflect/check_facts_replay.py                     # 每条 cmd 逐字复跑

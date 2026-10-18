@@ -50,6 +50,7 @@ __pycache__/
 !AGENTS.md
 !build/
 !build/*.json
+!build/*.py
 !questions/
 !questions/*.md
 
