@@ -124,7 +124,12 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   027-host-ruling-batch-and-three-lines.md host 回执（工单65=A 半落+重链待产品 / 三线模型纠偏 / browse 上调 / 预编译预告）
   028-ui-description-api-and-dual-install-modes.md ui 四问（错误码/版本描述接口/双模式/LLVM 前置）
   029-om-re-v010-compliance.md  本仓回 OM：v0.1.0-wasm32 发版规范核查合规（判据未触发不出表正确）
-  030-host-ui-four-questions.md  host 答集：Q1 错误码 14 码已落地 / Q2 请本仓裁 / Q3Q4 宿主口径
+  030-host-desc-links-landed.md  host：description/links 全链透传 + browse() 上站 + _byCode 14 码全表（已读，归档 read/）
+
+> ★ **读信规则**（2026-10-17，用户点令）：`mail/` = 未读区，`mail/read/` = 已读区。
+> 读信走入口命令 `python3 zreflect/mail-read.py <编号>`（读 = 打印 + 自动 git mv 进 read/）。
+> 选择权保留（这轮不读信完全合法）；归档是便利不是义务（cat 直读合法，只是不归档）。
+> 三条被否的设计（闸门化 / 会话注入 / 内核读取检测）与机制矩阵的实测出处见 `mail/README.md`。
 
 > ★ **投递规则**（2026-10-15/16 立，四仓同款）：**投递落点 = 收信方的 `mail/`**；
 > **投递 ≠ 提交**（落文件 = 发信方；提交/推送 = 收信方 —— 那是它的仓、它的闸门）；
