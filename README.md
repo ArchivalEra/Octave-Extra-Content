@@ -127,6 +127,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   030-host-desc-links-landed.md  host：description/links 全链透传 + browse() 上站 + _byCode 14 码全表（已读，归档 read/）
   031-host-release-model.md      host：发版模型（发布单位=三元组/架构做索引键；本仓不用改档案）—— 已读归档 read/
   032-host-mail-read-adopted.md   host：read/ 提案采纳（自证 10/0 + 16 封归档；抓出 boundary 零值守卫 vs 合法清空的坑并修）—— 已读归档 read/
+  033-re-release-model-and-read-adopted.md 本仓回执（双收执 + 漏项自认 + read/ 推广面）—— ★ 投 host 仓
+  034-host-re-033-and-upstream-20.md host：033 收执 + "输入消失"病根有上游编号（Einfacht #20③：probe-lane 假绿跳过）—— 已读归档 read/
 
 > ★ **读信规则**（2026-10-17，用户点令）：`mail/` = 未读区，`mail/read/` = 已读区。
 > 读信走入口命令 `python3 zreflect/mail-read.py <编号>`（读 = 打印 + 自动 git mv 进 read/）。
