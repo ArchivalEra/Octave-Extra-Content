@@ -240,6 +240,17 @@
   （NOT_DOWNLOADED/VERSION_WITHHELD/FLAVOR_UNAVAILABLE=not-found 档；
   STORAGE_WRITE_FAILED/DOWNLOAD_ABORTED=failed 档；INDEX_UNREADABLE=cannot-know 档
   —— 该档只留"连目录都读不到"，与宿主 CATALOG_UNREADABLE 同级）。
+- **★ LLVM 悬案 02 结案（wontfix，用户点令 5.0.7 一切不碰）**：验证目标"5.0.7→6.0.12
+  方向"的前提（下游还在 5.0.7）已不成立——宿主 2026-10-11 三线全面切 6.0.12 并发运，
+  5.0.7 轴整体退役。"不是验了知道，是问题问的那个世界不存在了"；单向证据留档、
+  结案判据可复跑（下游回退 5.0.7 则复活）。⇒ **LLVM 悬案 3/3 全部关闭**，
+  收口账：LLVM = 已出表 + 并入 ok + 悬案清零。
+- **★ 给宿主的待办信已投（`mail/039` 宿主仓，2026-10-18，压缩上下文前的钉纸）**：
+  ① compile:true + diagnostics 排期问询（下载功能的宿主侧关键路径——UI 的
+  "从源码构建"按钮会等它）；② 它未读区 mail/031 该归档（已处理未归档）；
+  ③ **Einfacht 整层升级提醒**（它只摘了盲写守卫单件，上游已到 45ca586——
+  #14 修复/#15 三块上游化/#20② 全套；建议整层换而非继续摘件，参照本仓 b8e9bf7
+  路径与三点注意）；④ LLVM 悬案 02 结案通报。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   **投递 ≠ 提交**（落文件 = 发信方；提交推送 = 收信方）；由信催生的角色/契约结论落进本文件。
 
@@ -296,19 +307,19 @@
 
 | 键 | 值 | 测于 | 复跑命令 |
 |---|---|---|---|
-| `docs_count` | **3** | 2026-10-18T14:54:39+0800 | `ls docs/*.md | wc -l` |
-| `llvm_bundle_bytes` | **34679853** | 2026-10-18T14:54:39+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz` |
-| `llvm_bundle_sha` | `a9ba3b41e5fa8e74…` | 2026-10-18T14:54:39+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz | cut -d' ' -f1` |
-| `port_docs_count` | **1** | 2026-10-18T14:54:39+0800 | `ls port/*.md | wc -l` |
-| `pyodide_core_bytes` | **6757104** | 2026-10-18T14:54:39+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
-| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-18T14:54:39+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
-| `recipes_count` | **2** | 2026-10-18T14:54:39+0800 | `ls recipes/*.md | wc -l` |
-| `shelf_needs_capability` | **1** | 2026-10-18T14:54:39+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
-| `shelf_oct_packs` | **0** | 2026-10-18T14:54:39+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
-| `shelf_packs` | **13** | 2026-10-18T14:54:38+0800 | `ls packages/*.json | wc -l` |
-| `shelf_verified` | **13** | 2026-10-18T14:54:38+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
-| `shelf_versions` | **52** | 2026-10-18T14:54:39+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
-| `tool_selftest_pass` | **45** | 2026-10-18T14:54:39+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
+| `docs_count` | **3** | 2026-10-18T15:45:56+0800 | `ls docs/*.md | wc -l` |
+| `llvm_bundle_bytes` | **34679853** | 2026-10-18T15:45:56+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz` |
+| `llvm_bundle_sha` | `a9ba3b41e5fa8e74…` | 2026-10-18T15:45:56+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz | cut -d' ' -f1` |
+| `port_docs_count` | **1** | 2026-10-18T15:45:56+0800 | `ls port/*.md | wc -l` |
+| `pyodide_core_bytes` | **6757104** | 2026-10-18T15:45:56+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
+| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-18T15:45:56+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
+| `recipes_count` | **2** | 2026-10-18T15:45:56+0800 | `ls recipes/*.md | wc -l` |
+| `shelf_needs_capability` | **1** | 2026-10-18T15:45:56+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
+| `shelf_oct_packs` | **0** | 2026-10-18T15:45:56+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
+| `shelf_packs` | **13** | 2026-10-18T15:45:55+0800 | `ls packages/*.json | wc -l` |
+| `shelf_verified` | **13** | 2026-10-18T15:45:55+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
+| `shelf_versions` | **52** | 2026-10-18T15:45:56+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
+| `tool_selftest_pass` | **45** | 2026-10-18T15:45:56+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
 
 13 条事实。
 <!-- /AUTO:FACTS -->

@@ -135,6 +135,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   038-host-re-037-download-spec.md host 批复：三项确认 + 产地更正（engine sha 源 = octave.build.json 的 measured.files，非 upstream-lock）—— 已读归档 read/
   039-ui-re-consultation-and-errata.md ui 答复：勘误全纳 + A1-A5 定稿意见（配额预检 A5 采纳 ⇒ 7 码）—— 已读归档 read/
   040-re-a1-a5-and-upgrade.md     本仓回执（A1-A5 全批 + CustomEvent/配额预检采纳 + Einfacht 升级至 45ca586）—— ★ 投 ui 仓
+  041-todo-list-and-upgrade-reminder.md 本仓→host 待办信（compile 排期问询 / 031 归档 / Einfacht 整层升级 / LLVM 02 结案通报）—— ★ 投 host 仓 mail/039
 
 > ★ **读信规则**（2026-10-17，用户点令）：`mail/` = 未读区，`mail/read/` = 已读区。
 > 读信走入口命令 `python3 zreflect/mail-read.py <编号>`（读 = 打印 + 自动 git mv 进 read/）。
