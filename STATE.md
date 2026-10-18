@@ -205,6 +205,18 @@
     但类 undefined——静默失败）。pre/ 存逐文件 .oct 字节（装载期按 manifest files[].path
     摆位，.oct 的家 = getarchdir 公式 archprefix/<name>-<version>/<arch>/）。
     **兼容判据写死：布局正确 = 原生 Octave 对它跑三连全通**（实测脚本即验收脚本雏形）。
+- **★ 用户裁决⑤：源码包装载的必要条件 = LLVM 工具链已下载**（2026-10-18，
+  端到端实测后落规）：**含 `src` 的源码包** ⇒ 现场编译 ⇒ **LLVM 能力层在场是必要条件**
+  （未下载 ⇒ 装载界面拒绝并提示预下载）；**预编译包随便装载**（不受此约束，arch 闸门
+  照旧）；**纯 `.m` 包不受此约束**（无 src 无可编译件——宿主验收 C5 实证 m-only 明说）。
+  **端到端证据链**（全部真跑）：① 前置检查判据模拟 4 正例 + 3 反向（LLVM 未下载 +
+  含 src ⇒ BLOCKED / 已下载 ⇒ OK / 纯 .m 无需 / 预编译不受限；不存在包/版本/非法 kind 必拒）；
+  ② 宿主 `accept-compile-extension` **11/0**（真字节：cell2cell.cc → 真 .oct 13405B →
+  `exist=3` dlopen 识别 → 真调用；C1b 证明编译路径消费四件供给 llvm/worker/headers/config
+  ——LLVM 在场**事实上**就是必要条件；C6 坏源响亮报错）。**规格缺口顺带暴露**：
+  站点 forge-catalog 的 packs 里**没有 llvm-wasm 能力层条目**（只有 pyodide）——
+  下载模块按表现表读不到它 ⇒ 宿主装配器需把 llvm-wasm 作为 form:tree 条目进表
+  （其逐件 sha 在宿主处，与 artifacts 同判据）——已并入给宿主的待办。
 - **★ UI 咨询答复已收（`mail/039`，A1–A5 定稿意见）**：A1 三入口足够（离散事件点拉取
   index，非 rAF 轮询；建议 manifest 写入后发 `octave:download-changed` CustomEvent——
   零订阅成本，采纳）；A2 onProgress 契约完备（total 缺失走波浪动画**不伪造百分比**；
