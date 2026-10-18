@@ -177,6 +177,30 @@
   （上游机制，归 B4/#20 上游化）。形态一由 registry 的 OFF: 聚合防（C2）。
   **推广提醒已记**：read/ 附带给 LLVM/OM/UI 时带上 #20③ + **#20②**（默认值形态：
   先确认有没有 facts.py 仓内壳；OM/UI 更可能撞 ②，LLVM 撞 ③——一个包盖两形态）。
+- **★ 纯下载模块设计已定稿**（2026-10-18，design-it-twice 四子代理 A/B/C/D + 用户四裁决；
+  规格信投宿主/UI `mail/037`）：
+  - **判决**：骨架取 C（常见调用者优先：download/index/unit 三入口、裸参数、拉取式状态）
+    + 接缝哲学取 D（**下载/装载之间的接缝长在记录上**——OPFS 里的已核验字节 +
+    manifest 记录 schema:1 + provenance 回显 url+sha256，与 content-list 端口同构）
+    + 三收紧（A 的 url/sha 只从目录解析调用方给不了；B 的 remove 吸收取消；A 的
+    目录漂移对账——记录 sha vs 当日目录 sha 失配自动重下）。
+  - **用户四裁决**：① 同包多档并存允许（硬闸门在装载期 ARCH_MISMATCH，下载层只记账）；
+    ② **引擎纳入同一解耦**（kind:'engine'，arch=lane；UI 的 upstream-lock.json 七条锁
+    就是引擎的目录记录雏形；换引擎=下载另一档+装载界面重新拉起，零特殊代码路径）；
+    ③ 删除走 Octave 文件树（下载产物是 OPFS 普通文件，用户自己管理——不做下载管理面板，
+    DownloadStore 无 remove 方法）；④ **自编产物不留存**（compile:true 编完即装载进 MEMFS、
+    不写 OPFS 不产生记录；无目录事实 ⇒ 不校验——'不许编'纪律的反面应用）。
+  - **三类生命周期**：持久层（OPFS）= 源码/预编译/引擎，全带 sha 验证才算已下载；
+    会话层（MEMFS）= 装载态 + 自编产物，关网页即没。
+  - **★ OPFS 布局（原生 Octave 实测定稿，11.3.0 本机）**：
+    `downloads/{src,pre,engine}/` + manifest.json。核心判据 = **src/ 用上提布局**
+    （inst/ 内容提到包根 + packinfo/DESCRIPTION）—— 实测：上提布局原生 Octave
+    `pkg rebuild → pkg list → pkg load` 三连全通、与原生安装包共存 load 成功；
+    可见性三要素 = 目录名 `<name>-<version>` + `packinfo/DESCRIPTION` + 一次 rebuild
+    （pkg list 走缓存清单不扫盘）；`.m` 必须在包根（多套一层子目录 ⇒ pkg load 无报错
+    但类 undefined——静默失败）。pre/ 存逐文件 .oct 字节（装载期按 manifest files[].path
+    摆位，.oct 的家 = getarchdir 公式 archprefix/<name>-<version>/<arch>/）。
+    **兼容判据写死：布局正确 = 原生 Octave 对它跑三连全通**（实测脚本即验收脚本雏形）。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   **投递 ≠ 提交**（落文件 = 发信方；提交推送 = 收信方）；由信催生的角色/契约结论落进本文件。
 
