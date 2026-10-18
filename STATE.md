@@ -185,8 +185,12 @@
     + 三收紧（A 的 url/sha 只从目录解析调用方给不了；B 的 remove 吸收取消；A 的
     目录漂移对账——记录 sha vs 当日目录 sha 失配自动重下）。
   - **用户四裁决**：① 同包多档并存允许（硬闸门在装载期 ARCH_MISMATCH，下载层只记账）；
-    ② **引擎纳入同一解耦**（kind:'engine'，arch=lane；UI 的 upstream-lock.json 七条锁
-    就是引擎的目录记录雏形；换引擎=下载另一档+装载界面重新拉起，零特殊代码路径）；
+    ② **引擎纳入同一解耦**（kind:'engine'，arch=lane；换引擎=下载另一档+装载界面
+    重新拉起，零特殊代码路径。**sha 源更正（host `mail/038`，已核实）**：不是 UI 的
+    `upstream-lock.json`（那是第三方源码锁，9 条无引擎条目）——是
+    **`<站点>/<lane>/octave.build.json` 的 `measured.files`**（每档一份的产物身份证，
+    三件套逐件 sha 实测在；与 src/pre 同构：核验依据 = 部署产物自证，不为 engine
+    开特例、不造第二产地）；
     ③ 删除走 Octave 文件树（下载产物是 OPFS 普通文件，用户自己管理——不做下载管理面板，
     DownloadStore 无 remove 方法）；④ **自编产物不留存**（compile:true 编完即装载进 MEMFS、
     不写 OPFS 不产生记录；无目录事实 ⇒ 不校验——'不许编'纪律的反面应用）。
@@ -201,6 +205,20 @@
     但类 undefined——静默失败）。pre/ 存逐文件 .oct 字节（装载期按 manifest files[].path
     摆位，.oct 的家 = getarchdir 公式 archprefix/<name>-<version>/<arch>/）。
     **兼容判据写死：布局正确 = 原生 Octave 对它跑三连全通**（实测脚本即验收脚本雏形）。
+- **★ 下载规格宿主批复（`mail/038`，三项确认 + 一处产地更正）**：
+  ① engine sha 源 = `octave.build.json` 的 `measured.files`（每档一份，产物自证 ——
+  I1 因此更干净：src/pre/engine 三者核验依据同构）；② `ARCH_MISMATCH` 口径确认
+  （宿主现役实现 `assets-loader.js:678`：装载期 plan 阶段、hostArch 不读引擎、
+  能力层 form:tree 豁免 —— 与裁决①"下载层只记账"完全一致，两层判断对象不同不塌陷）；
+  ③ **`install()` 暂不收敛 DownloadStore**（宿主判决：install 是同步原子链无时间 gap，
+  切两段只多一次 OPFS 往返无收益；两套 staged 语义不同——"字节在站点" vs
+  "字节在 OPFS 且与今日目录对上账"——收敛 = 同一事实两产地（#20③ 形状）；
+  新 6 码在一步到位的 install 里不该出现。**两条链并存各管各的**：
+  install=站点随附即时装载 / DownloadStore=市场先下后装。将来若收敛由宿主发起走 mail，
+  判据 = 两套 staged 语义能合并成一个）；④ 6 个新错误码按 `[state,cause]` 预填表
+  （NOT_DOWNLOADED/VERSION_WITHHELD/FLAVOR_UNAVAILABLE=not-found 档；
+  STORAGE_WRITE_FAILED/DOWNLOAD_ABORTED=failed 档；INDEX_UNREADABLE=cannot-know 档
+  —— 该档只留"连目录都读不到"，与宿主 CATALOG_UNREADABLE 同级）。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   **投递 ≠ 提交**（落文件 = 发信方；提交推送 = 收信方）；由信催生的角色/契约结论落进本文件。
 

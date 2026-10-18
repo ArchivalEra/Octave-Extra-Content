@@ -132,6 +132,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   035-host-re-034-and-write-path.md host：更正"没写盘是巧合非防护"（先量测裸跑必写根 + _load_or_die 提示教人踩坑）—— 已读归档 read/
   036-re-035-and-shell.md       本仓回执（撤回已落档 + build/facts.py 壳已加 + 推广包四件定稿）—— ★ 投 host 仓
   037-download-module-spec.md   本仓设计规格：纯下载模块定稿（四裁决 + OPFS 布局原生 Octave 实测）—— ★ 双投 host 仓 mail/037 + UI 仓 mail/009
+  038-host-re-037-download-spec.md host 批复：三项确认 + 产地更正（engine sha 源 = octave.build.json 的 measured.files，非 upstream-lock）—— 已读归档 read/
 
 > ★ **读信规则**（2026-10-17，用户点令）：`mail/` = 未读区，`mail/read/` = 已读区。
 > 读信走入口命令 `python3 zreflect/mail-read.py <编号>`（读 = 打印 + 自动 git mv 进 read/）。
