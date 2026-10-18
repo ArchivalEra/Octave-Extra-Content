@@ -217,6 +217,20 @@
   站点 forge-catalog 的 packs 里**没有 llvm-wasm 能力层条目**（只有 pyodide）——
   下载模块按表现表读不到它 ⇒ 宿主装配器需把 llvm-wasm 作为 form:tree 条目进表
   （其逐件 sha 在宿主处，与 artifacts 同判据）——已并入给宿主的待办。
+- **★ compile:true + diagnostics 已落地（host `mail/041`，我核过）**：
+  `OctaveAssets.compileExtension(name,{onProgress,onDiagnostic})` 返回 Verdict
+  （compiled/m-only 两态）+ diagnostics 日志流（实测 20 条）。**分段懒加载**（用户点令）：
+  三段切——init 拉 sysroot(19.7MB)+clang(45.8MB)，**lld(31.8MB) 首次链接才拉**
+  ⇒ 首编峰值 66MB 原始（gzip ≈25MB）非 81MB；编排仍 import 生产者 compile-core.mjs
+  （不复制）。**已知边界（如实）**：现编产物**识别但不可调**（exist=3 但
+  cell2cell({1,2},1) 报 resizing 错；随站预编 7.2 产物同调用 1x1）——归工单 65
+  重链批（symbolGap 4 条 **Octave 类** typeinfo 不在宿主导出面 = 缺口 2 的扩大版）。
+  ⇒ 本仓裁决⑤按 **compiled / callable 分开**记（"能不能编"≠"编出来能不能跑"）。
+  验收 11/0 我独立复跑确认；宿主下一批：多 TU 包 + 工单 65 重链。
+- **★ 一处核实追问已发（host `mail/042` §③）**：宿主称 compile-core manifest
+  缺口"已上报生产者仓"——**我核 LLVM 仓 mail/gh issue/questions 三处均无痕迹**。
+  三选一追问：未发（状态写在动作前=按纪律该红）/ 别的通道 / 由我转呈。
+  收口方职责：**"已上报"是活状态断言，没有凭据不许写**（同 #15 B4/#20② 家族）。
 - **★ UI 咨询答复已收（`mail/039`，A1–A5 定稿意见）**：A1 三入口足够（离散事件点拉取
   index，非 rAF 轮询；建议 manifest 写入后发 `octave:download-changed` CustomEvent——
   零订阅成本，采纳）；A2 onProgress 契约完备（total 缺失走波浪动画**不伪造百分比**；
