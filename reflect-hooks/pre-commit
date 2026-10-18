@@ -1,7 +1,7 @@
 #!/bin/sh
-# pre-commit：重渲染事实块并跑全部闸门 —— Einfacht 平台（vendored 自上游）。
+# pre-commit：重渲染事实块并跑全部闸门 —— 从 Octave-Full-Wasm 的 pre-commit 迁移泛化。
 #
-# 两个原则（上游 + 姊妹仓实践）：
+# 两个原则（那边踩出来的）：
 #   · 机器块是**机器维护**的：提交前重渲染并 `git add`，人不手改数字；
 #   · 提交时刻是**检查活状态断言**的最后一道闸（过了这一刻，过时断言就进了历史）。
 set -e
@@ -30,9 +30,4 @@ fi
 #    glob 与声明（GATE = meta(…, runs_at=…)）是两套谓词，会分叉（doctor 曾
 #    只能靠「不叫 check_」表达频率）。执行面只认声明 —— 名字不再承重。
 #    off 态被单列（C2）：`ran N / off M / failed K`，off 不是通过。
-#
-# ⚠️ `REFLECT_LOCKS` **内联传**（不是全局 export）：它是「配了就必须存在」的旋钮，
-#    而 gates-selftest.sh 的**跨仓库夹具**是临时目录、当然没有 build/upstream-lock.json
-#    ⇒ 全局配 ⇒ 夹具里 FATAL（误报「名字写死在代码里」）。经验集坑 2，姊妹仓同款。
-REFLECT_LOCKS=build/upstream-lock.json \
-  python3 zreflect/registry.py --run commit || exit 1
+python3 zreflect/registry.py --run commit || exit 1

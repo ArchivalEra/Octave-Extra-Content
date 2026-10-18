@@ -22,9 +22,7 @@ if [ -f "$DOC" ]; then
 fi
 # ② 全部闸门：**执行面唯一产地**（C1）—— 同 pre-commit，跑 runs_at="commit"
 #    的闸门并聚合 ran/off/failed（别再 glob：谓词只有声明一处）。
-# ⚠️ `REFLECT_LOCKS` **内联传**（同 pre-commit，经验集坑 2）：不内联 ⇒ 本相位
-#    check_locks 会 OFF（「配了就必须存在」的旋钮不能全局配，见 Einfacht.env 注释）。
-REFLECT_LOCKS=build/upstream-lock.json python3 zreflect/registry.py --run commit || exit 1
+python3 zreflect/registry.py --run commit || exit 1
 
 # ③ 三语 README：**每次推送必须三份同批更新**（缺一份 ⇒ 拒推）。
 #    判据住在 check_readme_sync.py 的 --changed 模式（--selftest 齐全，名录发现得到它）；

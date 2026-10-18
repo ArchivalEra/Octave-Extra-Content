@@ -62,18 +62,8 @@ REGISTRY = {
     "REFLECT_WORLD_LINE": ("value", "", "world 线覆盖（CI / 特殊跑法）"),
     "REFLECT_AB": ("file", "ab.json", "A/B 同旗标闸门的规格名"),
     "REFLECT_PINS": ("file", "pins.json", "派生树 pin 一致性闸门的规格名"),
-    # ★ 本仓新增（两条）：
-    #  · REFLECT_LOCKS —— 锁定源清单（URL + 文件 + sha256）。上游没有可 git 化的仓的
-    #    供给件（工具链 bundle、Pyodide 运行时）正是这个形状：recipes/*.md 记 URL+sha256，
-    #    这里落成可核对的清单（check_locks.py 读它；姊妹仓同款补丁）。
-    "REFLECT_LOCKS": ("file", "build/upstream-lock.json",
-                      "锁定源清单（URL+文件+sha256）的规格名"),
-    #  · REFLECT_MEASURE_MODULE —— 数据层模块名可配（facts.py 的 measure_repo() 分派读它）。
-    #    姊妹仓把模块名写死在 facts.py 的 import 里 ⇒ 换仓库必须改代码；本仓读这个
-    #    旋钮（默认 measure_extra_content）⇒ 「换仓库只换一个文件」才真成立。
-    #    ⚠️ 登记才算数：不登记 ⇒ 扫描面里的记号被当幻影旋钮当场拦下（C4）。
-    "REFLECT_MEASURE_MODULE": ("value", "measure_extra_content",
-                               "本仓数据层模块名（换仓库只换它）"),
+    "REFLECT_LOCKS": ("file", "upstream-lock.json", "锁定源清单闸门的规格名"),
+    "REFLECT_MEASURE_MODULE": ("value", "", "采集模块名（换仓只改 env 一行；空 = 用占位 measure_example）"),
 }
 
 KINDS = ("file", "list", "dir", "number", "flag", "value")
