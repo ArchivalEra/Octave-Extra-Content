@@ -135,7 +135,7 @@ def main(argv):
             return cmd_list()
         for i, n in enumerate(names):
             print("══ [%d/%d] %s ══" % (i + 1, len(names), n))
-            cmd_read(n.rsplit("-", 1)[0].split("-")[0] if False else n)
+            cmd_read(n)
         return 0
     if not argv:
         return cmd_list()
