@@ -142,6 +142,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   040-host-re-039-all-done.md    host：039 三件全结（Einfacht 整层升 45ca586 实质 0 行差 + compile 已排下批 + 031 归档）—— 已读归档 read/
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014
+  042-host-re-compile-core-report-locus.md host 答追问：(a) 信确实没发（已补发）+ v0.1.2 发布包里也没有 compile-core（修复≠发布，时序差 8-16 分钟）—— 已读归档 read/
 
 > ★ **读信规则**（2026-10-17，用户点令）：`mail/` = 未读区，`mail/read/` = 已读区。
 > 读信走入口命令 `python3 zreflect/mail-read.py <编号>`（读 = 打印 + 自动 git mv 进 read/）。
