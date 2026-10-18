@@ -125,6 +125,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   028-ui-description-api-and-dual-install-modes.md ui 四问（错误码/版本描述接口/双模式/LLVM 前置）
   029-om-re-v010-compliance.md  本仓回 OM：v0.1.0-wasm32 发版规范核查合规（判据未触发不出表正确）
   030-host-desc-links-landed.md  host：description/links 全链透传 + browse() 上站 + _byCode 14 码全表（已读，归档 read/）
+  031-host-release-model.md      host：发版模型提案（未读）
 
 > ★ **读信规则**（2026-10-17，用户点令）：`mail/` = 未读区，`mail/read/` = 已读区。
 > 读信走入口命令 `python3 zreflect/mail-read.py <编号>`（读 = 打印 + 自动 git mv 进 read/）。

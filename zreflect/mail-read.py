@@ -62,14 +62,25 @@ def _match(query):
 
 
 def _archive(name):
-    """读过了 ⇒ git mv 进 read/（未跟踪文件退普通 rename）。返回是否成功。"""
+    """读过了 ⇒ git mv 进 read/（未跟踪文件退普通 rename）。返回是否成功。
+
+    ⚠️ 同名冲突拒覆盖（试验场实测 bug#1，2026-10-18）：read/ 已有同名信时，
+    git mv 本身会拒，但 rename 兜底会**静默覆盖** ⇒ 旧信丢失（违反"内容不可消失"）。
+    修法：目标已存在 ⇒ 不动，报错让人处理（重投同名信本身可疑——编号就该唯一）。
+    """
     os.makedirs(READ, exist_ok=True)
+    dst = os.path.join(READ, name)
+    if os.path.exists(dst):
+        print("FATAL: mail/read/%s 已存在 —— 同名重投？编号应唯一；"
+              "不覆盖旧信（内容不可消失）。新信留在未读区，先人工处置。"
+              % name, file=sys.stderr)
+        return False
     r = subprocess.run(["git", "-C", HERE, "mv", os.path.join("mail", name),
                         os.path.join("mail", "read", name)],
                        capture_output=True, text=True)
     if r.returncode == 0:
         return True
-    src, dst = os.path.join(MAIL, name), os.path.join(READ, name)
+    src = os.path.join(MAIL, name)
     if os.path.isfile(src):
         os.rename(src, dst)
         return True
@@ -108,7 +119,9 @@ def cmd_read(query, keep=False):
     if _archive(name):
         print("\n── 已读，归档 mail/read/%s" % name, file=sys.stderr)
         return 0
-    print("\n── ⚠️ 归档失败（git mv 与 rename 都没成）—— 信留在未读区，内容已读",
+    # 归档失败的两形（_archive 已打 FATAL 细节）：同名冲突拒覆盖 / git 异常。
+    # 信留在未读区、内容已读 —— fail-open（工具坏了不拦人读信）。
+    print("\n── ⚠️ 归档失败 —— 信留在未读区（内容已读；这不是断言面，不拦你）",
           file=sys.stderr)
     return 1
 
@@ -154,6 +167,17 @@ def _selftest():
          lambda: open(os.path.join(READ, "001-a.md"), encoding="utf-8").read() == "# 001 · x\n"),
         ("★ 未读区剩下的是没读的那封（002 还在）",
          lambda: "002-b.md" in unread()),
+        ("★ 同名冲突拒覆盖（试验场 bug#1）：read/ 已有同名 ⇒ _archive 拒 + 新信留未读区",
+         lambda: (
+             # 再投一封同名 001-a，归档必须拒
+             open(os.path.join(MAIL, "001-a.md"), "w").write("# 001 · 冲突版\n"),
+             not _archive("001-a.md"),
+             # 旧信（read/ 里的）内容未被覆盖
+             open(os.path.join(READ, "001-a.md"), encoding="utf-8").read() == "# 001 · x\n",
+             # 新信留在未读区
+             "001-a.md" in unread(),
+         )[1] and (open(os.path.join(READ, "001-a.md"), encoding="utf-8").read() == "# 001 · x\n")
+         and "001-a.md" in unread()),
     ]
     # ⚠️ 顺序（本文件第一版的真实 bug）：lambda 在执行时才读全局 MAIL/READ ——
     #    恢复 saved 必须在**全部用例跑完之后**，否则夹具变量被换回真仓路径，
