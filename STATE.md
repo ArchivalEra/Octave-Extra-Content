@@ -352,8 +352,28 @@
   - **UI 体量信已投**（`mail/016` → ui 仓）：OM 站 162MB（引擎单体 71.1MB vs Octave
     28.3MB）、8 客户端形态、MSL 运行时装载、omc_* 接口跨引擎工作流入口——
     DownloadStore/PackageManager 的设计输入（不改已定规格）。
-  - 三个子代理继续钓：FMI/OMPlot 真用、egui/dioxus 资源完整性、filepick/recorder/
-    lane/embed（战果回来另落）。
+  - **★ 子代理三路战果（全收，2026-10-19）**：
+    - **★ OM 发信级缺陷（已亲验复现 + 投 OM `mail/008`）：Export FMU 全挂** ——
+      simulator 默认 BouncingBall → Export FMU → `fmu_link.rs: unrecognized dylink.0
+      subsection: 6`（klu 库链接元数据解析失败，~170ms 响亮红错、页面不挂死、两次独立
+      复现）。**连锁**：FMI Simulator 页在纯浏览器环境拿不到任何可加载 FMU（站点无示例
+      FMU + 自产通道断）⇒ 该客户端对普通访客完全不可用。报错形态是好的（红错+rust 栈），
+      坏在链接器功能。
+    - **OM 其余全绿**：OMPlot 真画图（7 变量 → svg 出图）+ 反钓（假/空 .mat 红错
+      `Corrupt header (1)` 且再喂真件恢复）；FMI 假 .fmu 红错且 Simulate 保持禁用、
+      状态机回位；egui/dioxus 双变体真起真交互（`getVersion()="-rust"`、`2+3`=5；
+      资源链逐件 HEAD 无一 404 无一空）。
+    - **OM UX 事实（建议级）**：MSL 首启 ~2 分钟不可交互（egui/dioxus 默认
+      `installMsl=true` 拉 19MB zip，worker 支持 `installMsl:false` 未用）；
+      FMI 页缺示例 FMU 出路（缺陷修复前的过渡）。
+    - **Octave 站剩余桥四点全过（无发信级）**：webfilepick（裸调如实报 fltk 门禁；
+      装资产后两步协议跑通；**0 字节/255B/300B 超长名/Unicode+emoji 名全扛住**）；
+      webaudiorec（空队列 drain 无异常；无麦克风 → 明确 error 三态 + Octave 侧清晰
+      报错，不用空矩阵假成功；recordblocking 如实报 T10 边界）；lane 反钓（`?lane=不存在`
+      静默当无覆盖回落 w64，与 lane.js 声明一致）；embed 模式正常（evalJSON ok）。
+      轻微观察（不发信）：拼错 lane 名无 console 告警；裸 uigetfile 未提示可懒装载资产。
+  - **钓鱼执法第一轮总结：发信级缺陷 ×2**（宿主音频播放链 / OM Export FMU），
+    其余 **15 项全绿**，环境澄清 ×2。两封信均已投，等修复回执后复验。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   **投递 ≠ 提交**（落文件 = 发信方；提交推送 = 收信方）；由信催生的角色/契约结论落进本文件。
 
