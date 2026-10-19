@@ -222,10 +222,9 @@
   （compiled/m-only 两态）+ diagnostics 日志流（实测 20 条）。**分段懒加载**（用户点令）：
   三段切——init 拉 sysroot(19.7MB)+clang(45.8MB)，**lld(31.8MB) 首次链接才拉**
   ⇒ 首编峰值 66MB 原始（gzip ≈25MB）非 81MB；编排仍 import 生产者 compile-core.mjs
-  （不复制）。**已知边界（如实）**：现编产物**识别但不可调**（exist=3 但
-  cell2cell({1,2},1) 报 resizing 错；随站预编 7.2 产物同调用 1x1）——归工单 65
-  重链批（symbolGap 4 条 **Octave 类** typeinfo 不在宿主导出面 = 缺口 2 的扩大版）。
-  ⇒ 本仓裁决⑤按 **compiled / callable 分开**记（"能不能编"≠"编出来能不能跑"）。
+  （不复制）。~~**已知边界（如实）**：现编产物**识别但不可调**~~（**已翻案，见下条
+  「实测第二轮」**：C2c 现编语义正确，与预编同值）。裁决⑤的 **compiled / callable
+  分开记**口径**保留**（"能不能编"≠"编出来能不能跑"仍是正确判据形状，只是两者现都为真）。
   验收 11/0 我独立复跑确认；宿主下一批：多 TU 包 + 工单 65 重链。
 - **★ host 039 三件待办全部办结（`mail/040`，我核实过）**：① compile 排期已兑现
   （041 落地）；② 031 归档✓；③ **Einfacht 整层升 45ca586**——7 文件与上游
@@ -388,6 +387,30 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ 实测第二轮·第一批 Octave 站（2026-10-19，用户批准计划，六项全绿 + 一翻案）**：
+  - **★ known boundary 翻案**：上条「现编产物识别但不可调」**已过时**——宿主
+    `accept-compile-extension` **C2c：现编 cell2cell({1,2},1)=1x1 且 (,2)=1x2，与预编
+    产物同值**（我亲跑该套件 **16/0**，含 C8 多 TU：cell2cell+partint 双模块、partint
+    不变式、产物架构==宿主档）。多 TU 批（cc8e47f）把 resizing 边界修掉了。
+  - **compile 线 v0.1.3 回归 16/0**（宿主判据原样跑）；**市场目录对账**：我 `--emit`
+    13 包 vs 站点 forge-catalog 15 条**逐字段零分歧**（form/content/consumer/version/
+    sha256；站点多出的 llvm-wasm/pyodide = 能力层条目，形状正确；站点 shelf_commit
+    285af2f 是我 HEAD 祖先——宿主按需换 pin，正常滞后）。
+  - **裁决⑤数据面全绿**：`accept-capability-layer` **12/0**（目录 pyodide tree 条目 →
+    install('symbolic') 闭包**先 pyodide 后 symbolic** → `layers().pyodide.ready=true`
+    （22,013,349B 真就位）→ 反向：能力层不被误当包拉 tarball）+
+    `accept-symbolic-seam` **9/0**（含 R1/R2 反向：非 python system 调用不被吞、
+    桥缺失清晰报错）。llvm-wasm 条目 + v0.1.3 供给（manifest 14 条亲验在前）⇒
+    「未装 LLVM ⇒ src 包拒载」的**数据面就绪**；装载期硬闸门归 UI DownloadStore + 宿主
+    装载界面（第三批 UI 实测再验行为面）。
+  - **音频链独立复钓**：手势解锁 → `sound(sin(2π440·0.5s))` → AudioContext
+    running + drained=1 + 页面活（23ms 返回 = m-bundle 异步 drain 形状，播放语义按
+    宿主 accept-audio 50/0 判据成立；「阻塞时长==音频时长」未验，记观察）。
+  - **forge 包装载抽测**：宿主 `accept-forge` **22/0**（含 struct 预编 .oct exist、
+    geometry→matgeom 依赖自动解析、32 资产联动）权威盖棺；我的独立钓（cgi/statistics/
+    optim 独立页 pkg load + 真调用）见装载提示与页面存活，`__R__` 断言缺席判定为
+    **工装时序问题非站点缺陷**（宿主判据同款场景全绿）。
+  - 小计：第一批 6 项 **全绿 + 1 翻案**；无发信级缺陷。
 - **★ 宿主音频链修复复验收执（2026-10-19，host `658f001` 三层修复 → 我 `mail/046` 复验
   结案）**：① 缺件补编——audiodevinfo.oct 进 TREE_MODS + 38 aliases（`exist
   ('__player_audioplayer__')` 0→**3**，`__player_*.oct` 别名文件铺进 oct/）；② 真播放 =
