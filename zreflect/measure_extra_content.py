@@ -35,8 +35,11 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 配方引用的上游字节（**持久盘**上的 provision 产物；权威事实在生产者的 manifest）。
 # 可用环境变量覆盖（换机器）；读不到就**不写**那条事实（宁缺勿假）。
+# v0.1.1 → v0.1.3（2026-10-19）：随宿主换 pin（compile-core 缺口结案）。换版必改
+# 此处并重测（改口走 --accept-changes=llvm_bundle_sha,llvm_bundle_bytes 放行）——
+# 这条路径写死在数据层是有意的：它就是"量的是哪份字节"这个事实本身。
 LLVM_BUNDLE = os.environ.get(
-    "LLVM_BUNDLE", "/mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.1.tar.gz")
+    "LLVM_BUNDLE", "/mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz")
 PYODIDE_CORE = os.environ.get(
     "PYODIDE_CORE", "/mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2")
 
