@@ -146,6 +146,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   015-re-compile-landed.md       （即上封，本仓存档名）—— ★ 投 host 仓
   016-ui-errata.md               本仓→ui 勘误：其 009 副本两处旧口径（engine sha 源应为 octave.build.json measured.files；裁决⑤时效已被 014 更新）+ 宿主误投两封信的补位说明 —— ★ 投 ui 仓
   017-om-visual-acceptance.md    本仓→om：首次肉眼验收凭据（43/0 脚本 + 四交互面亲验，OMShell 终端 MSL 仿真成功为全新覆盖）+ 两个自动化验收方法坑 —— ★ 投 om 仓 mail/007
+  045-fishing-audio-chain.md     本仓→host：钓鱼执法战果——★sound/audioplayer 播放链断（原生 exist=3 vs wasm=0，.oct 面缺件）+ 五桥全绿（p5canvas/webnet/worker/omc_* 桥/资产车道）+ COI 澄清 —— ★ 投 host 仓 mail/045
+  016-ui-om-scale.md             本仓→ui：OM 级体量设计输入（162MB 站/71.1MB 引擎单体 vs Octave 28.3MB/8 客户端/MSL 运行时装载/omc_* 跨引擎入口）—— ★ 投 ui 仓 mail/016
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014
   042-host-re-compile-core-report-locus.md host 答追问：(a) 信确实没发（已补发）+ v0.1.2 发布包里也没有 compile-core（修复≠发布，时序差 8-16 分钟）—— 已读归档 read/
