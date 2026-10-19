@@ -321,6 +321,16 @@
     仍写 `upstream-lock.json`（宿主已更正为 octave.build.json measured.files）+
     裁决⑤"别接不存在的接口"已被 014 时效更新（compile 已落地）。
   - **Einfacht #15 仍 OPEN**（上游 issue 列表亲验，#14–#20 全开）——反哺线不动，等上游。
+- **★ OM 首次肉眼验收（2026-10-19，用户点令「验收几乎空白」后的补课）**：v0.1.0-wasm32
+  全过——四套脚本断言 **43/0**（omc-page 10 / samepage 8 / mat-handshake 14 / omc-bridge 11，
+  判据原样跑零漂移）+ 四个交互面真浏览器亲验（omc-bridge 演示页 / samepage 双引擎同页握手
+  闭环 / 站点首页 7 客户端路由 / **OMShell 终端**：页面自装 MSL 4.1.0 后真敲
+  `simulate(ChuaCircuit, stopTime=100)` → LOG_SUCCESS、timeTotal 0.741s、产出 .mat）。
+  **OMShell 是全新覆盖**——四套脚本无一碰它，它是站点侧栏用户第一站，此前零验收。
+  两个自动化验收方法坑记档（已投 OM `mail/007`）：①终端 Enter 走 form submit，
+  CUA keypress 打不进去（人类无影响）；②外壳 iframe 动态 src 卡 frameLocator
+  （直开子页 URL 正常）。**验收环境可复跑**：`serve-coi.py 8765 site-omc` + 四个
+  `test/browser/run-*.sh`。收口账：OM = 规范合规 + 脚本 43/0 + 肉眼四面全过。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   **投递 ≠ 提交**（落文件 = 发信方；提交推送 = 收信方）；由信催生的角色/契约结论落进本文件。
 
