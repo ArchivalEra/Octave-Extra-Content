@@ -331,6 +331,29 @@
   CUA keypress 打不进去（人类无影响）；②外壳 iframe 动态 src 卡 frameLocator
   （直开子页 URL 正常）。**验收环境可复跑**：`serve-coi.py 8765 site-omc` + 四个
   `test/browser/run-*.sh`。收口账：OM = 规范合规 + 脚本 43/0 + 肉眼四面全过。
+- **★ 钓鱼执法第一轮（2026-10-19，用户点令「各种插件都用用，出问题发信不修」）**：
+  对两站点全部插件面故意使坏式验收。**发信级缺陷 ×1，全绿 ×5，环境澄清 ×2**：
+  - **★ 缺陷（已投宿主 `mail/045`）：音频播放链断** —— `sound/audioplayer/audiorecorder`
+    全部 `__player_audiorecorder__`/`__player_audioplayer__` undefined（wasm 产物 exist=0
+    **vs 原生 11.3.0 exist=3**，原生对照拿下；`.m` 面在 FS、`.oct` 面不在产物也不在资产
+    目录；宿主 accept-dldfcn 验过 audioread 读文件但**从未测播放链**——「文件里对、
+    装配态才见真章」又一例）。JS 侧 webaudio 桥本身是好的。
+  - **全绿**：p5canvas（plot→drawnow→560x420 真图、单例替换、close all 生效）/ webnet
+    （懒加载后 urlread 全链通、坏 URL 4ms 明确失败）/ worker 模式（eval、长算不冻主线程、
+    `while(1)` 可 interrupt、terminate 无僵尸 promise）/ **omc_* MATLAB 兼容桥**
+    （并发 3 提交 seq 单调且应答不串、`\n` 转义命令 ok、collect 不存在 seq=99999
+    **明说 pending**、同 seq 幂等取回——协议自洽，E 线「为 Octave 服务」链成立）/
+    资产车道（catalog 35 资产名与货架对得上）。
+  - **环境澄清**：audioread 在无 COI 页 dlopen 必死（LinkError shared=1 vs imported=0）
+    ——嵌入式浏览器首测撞的是这个；宿主同款 headless（COI=true）下 audioread 系 4 个
+    .oct 全部 dlopen 成功。**非缺陷**；lane 无 COI⇒w64-base / COI⇒w64 与声明一致。
+  - **OM Simulator 钓**：坏模型 → `Simulation failed after 6 ms` + 解析器原文上屏
+    （错误可见带定位，不静默）。OMShell 首开自动装 MSL（三包 SHA 同源、装完 Ready）。
+  - **UI 体量信已投**（`mail/016` → ui 仓）：OM 站 162MB（引擎单体 71.1MB vs Octave
+    28.3MB）、8 客户端形态、MSL 运行时装载、omc_* 接口跨引擎工作流入口——
+    DownloadStore/PackageManager 的设计输入（不改已定规格）。
+  - 三个子代理继续钓：FMI/OMPlot 真用、egui/dioxus 资源完整性、filepick/recorder/
+    lane/embed（战果回来另落）。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   **投递 ≠ 提交**（落文件 = 发信方；提交推送 = 收信方）；由信催生的角色/契约结论落进本文件。
 
