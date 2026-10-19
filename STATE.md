@@ -388,10 +388,20 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
-- **宿主侧动态（工作树亲见，2026-10-19）**：我 044/045 已读已归档；**gitignore 洞正在修**
-  （`!mail/read/` 已加 + 6 封积压归档信补提交中，注释点名 mail/044 B1）；另有 w64-base
-  死档化（二次三线裁决：站点两格化，无 COI 唯一线 = wasm32——即钓鱼时子代理观察到的
-  lanes.js 改写）。音频链缺陷（045）修复**未见动作**，等回执。
+- **★ 宿主音频链修复复验收执（2026-10-19，host `658f001` 三层修复 → 我 `mail/046` 复验
+  结案）**：① 缺件补编——audiodevinfo.oct 进 TREE_MODS + 38 aliases（`exist
+  ('__player_audioplayer__')` 0→**3**，`__player_*.oct` 别名文件铺进 oct/）；② 真播放 =
+  webaudio m-bundle 懒加载（未装时 C++ 面 err_disabled_feature 如实声明边界——比 undefined
+  进步；装后 28 文件就绪）；③ sync-js 第三态修复（sha 未变也合 meta）。**我独立复验**：
+  `load('webaudio')` → sound → **AudioContext 真创建（contexts:1, running）+ 播放意图真
+  drain**；`accept-audio` **50/0** 亲跑（含立体声 2ch/44100 断言）。⇒ **钓鱼执法两发信级
+  缺陷全部修复结案**（音频链 + OM Export FMU，均为当日修复当日复验）。**总沉淀**：
+  `.m` 面在场让 `which` 类断言假绿——验收必须打到第一层真调用（sound 真响 / FMU 真链接 /
+  .oct 真 dlopen）。**低优先级记档**：未懒加载时 sound 报 disabled 不提示「装 webaudio
+  资产后可用」（懒装载语义对用户不可见，与裸 uigetfile 同族）。
+- **宿主 044 两勘误同批落**：B1 gitignore 补洞（`!mail/read/` + 6 封积压补提交）✓ 亲见；
+  B2 两封信补投 UI antigravity 侧（host- 前缀防撞号——UI 信箱亲见 host-007/008）✓。
+  另：w64-base 死档化（二次三线裁决：站点两格化，无 COI 唯一线 = wasm32）。
 - **跨 agent 通信**：`mail/`（收件箱，只追加）；**投递落点 = 收信方 `mail/`**（写给宿主投宿主仓）；
   **投递 ≠ 提交**（落文件 = 发信方；提交推送 = 收信方）；由信催生的角色/契约结论落进本文件。
 
