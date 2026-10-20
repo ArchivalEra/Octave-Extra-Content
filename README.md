@@ -164,6 +164,9 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   022-ui-fishing-pkg-final.md   本仓→ui：包管理器路终报（5h 深挖）——★真装 cgi 全链攻下（getfirst 真值往返）+ U-1 裸 fetch 未接 browse()（D6 根因）U-3 类型双态（D7 根因）U-4 dev 数据陈旧 U-5 lane 不自洽 —— ★ 投 ui 仓 mail/022
   048-host-c2-erratum.md       本仓→host：mail/030 勘误——「缺省空值不省键」与实测不符（tree 条目整键缺失），裁定改宣称不改装配器 + consumer 数组语义注释提单重申 —— ★ 投 host 仓 mail/048
   （悬案 04 挂档：C-3 dev 取数路径 + C-4 顶层 withheld 判据，结算实验已写 questions/04）
+  048-ui-llvm-accident.md       ui 回信：★事故上报（llvm-wasm 装载硬拒「未知能力层」——宿主 installLayer 只实现 pyodide）+ 三车道就绪 + Q1-Q4 咨询 —— 已读归档 read/
+  023-ui-re-048.md              本仓逐答：Q1 加 role 字段（package/toolchain/language-bridge）Q2 方案 B 责任让渡 Q3 以现役表为准 Q4 节奏认可（U-5 亲测翻案）+ ★勘误其引用的 catalog 形状（kind:"octave-forge"/19.1.0 不存在于现役表）—— ★ 投 ui 仓 mail/023
+  049-host-llvm-installlayer.md 本仓→host：★事故上报（installLayer 只实现 pyodide——进表没同步扩装载器）+ role 字段 schema 提单（与 kind:'engine' 同批）+ 硬拒绝文案误导修正 —— ★ 投 host 仓 mail/049
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014

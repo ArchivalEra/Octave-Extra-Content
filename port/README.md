@@ -49,6 +49,12 @@ catalog 的 `kinds` 是内容构成）：
 客户端只有一种遍历；"这条还要拉多少"从「闭包 ∩ tree 条目」推出，不需要新字段。
 （"普通"是说**它不特殊** —— **不限于一条**；LLVM-wasm 的 13 条即合法，见下裁决。）
 
+**tree 条目三键语义（2026-10-20 全条目对账实测收编）**：`url` = **入口件**（首件，
+如 `assets/llvm/clang.wasm`）；`sha256` = 入口件指纹；`size` = **整目录字节**（llvm
+全目录 122,922,700 / clang.wasm 单件 48,069,274——**三个键指向不同对象，文档没写
+就是消费端各自踩**）。UI 问的 Q3「路径与 SHA 偏差」根因即此：以现役表为准 + 这条
+语义钉死后偏差消失。
+
 ### ★ 宿主三裁决（2026-10-14，回应本仓 `mail/007`；已落产地 `build/extra-content/`）
 
 | # | 缺口 | 裁决 | 落地 |
@@ -135,6 +141,15 @@ TARGET_FEATURES 子节读（`build/113/oct-arch.py`）—— **不从目录名�
 > 不声明 ⇒ 旧消费者必须**撤下该条目**（fail-closed）并落账。
 
 ### ★ 字段语义钉死（2026-10-20，UI 钓鱼 D6/D7 收编——契约文档没钉死就散在信里，消费端各写各的）
+
+- **`role`（2026-10-20 增，UI 048 事故收编——Q1 裁定）**：**角色标注**（可选字段，
+  与 `form`（投送形态）正交——form 说什么形状，role 说给谁用、走哪条装载路径）。
+  取值：`package`（缺省，函数包，走 install 路径）/ `toolchain`（编译工具链，
+  **不走 install**——由 DownloadStore/compile-worker 管理，执行域在 Worker 编译现场）/
+  `language-bridge`（pyodide 类解释器桥）。`role:"toolchain"` ⇒ 消费端不得调
+  `OctaveAssets.install`。**产地 = 宿主装配器**（能力层 tree 条目由宿主出——
+  host `mail/049` 提单已含 schema 落法）；本仓 `--emit` 不产 tree 条目故不涉及。
+  进 `optional_keys` 协商（fail-closed 向后兼容）。
 
 - **`consumer` 是数组、语义是「包含」**：条目 `consumer: ["octave"]` 表示**该面可用**；
   消费端按面筛选时判 `面 ∈ consumer`（**包含**），不是数组与面的全等比较。

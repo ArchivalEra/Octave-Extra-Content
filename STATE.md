@@ -387,6 +387,32 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 048 事故上报与 Q1–Q4 裁定（2026-10-20；我回信 `mail/023` + 宿主事故信 `mail/049`）**：
+  - **事故**（UI 现场触发、我核源码行号）：用户点装载 llvm-wasm → 宿主
+    `assets-loader.js:274 installLayer` 只实现 pyodide 分支 → 硬拒绝「未知的能力层」。
+    **三仓脱节各认一份**：宿主进表时没同步扩 installLayer（主因，我的 049 点名）；
+    货架无角色标注（我认——form 是形态不是角色）；UI 曾本地魔改宿主桥（自省在案，
+    重申必须走信）。
+  - **Q1 裁定 = 加 `role` 可选字段**（不是改 kind——kind 已有 src/pre/engine 语义在途）：
+    `package`（缺省）/`toolchain`（不走 install，DownloadStore 管）/`language-bridge`。
+    **产地 = 宿主装配器**（tree 条目由宿主出，我 --emit 不涉及）；语义钉死 port/README ✓；
+    宿主 schema 提单（host mail/049，与 kind:'engine' 同批）✓。
+  - **Q2 裁定 = 方案 B 责任让渡**（assets-loader 只管解释器内；工具链归
+    DownloadStore+compile-worker——执行域错配成立）+ 宿主硬拒绝文案改误导性的
+    「未知的能力层」为「由下载管理，不走装载」（049 提单）。
+  - **Q3 = 以 8761 现役表为准**（同源相对路径 + 产物自证 sha；`runtimes/` 偏差不现于
+    现役）；**全条目对账已跑**（15 条逐一 sha/size/url 对部署盘）：13 包 sha+size+url
+    **全一致**；两个 tree 条目 size 不一致**是语义不是缺陷**——`url`/`sha256` 指
+    **入口件**（clang.wasm 48,069,274B / pyodide.asm.wasm 9,598,218B）而 `size` 记
+    **整目录字节**（llvm 全目录 122,922,700 / pyodide 22,013,349 精确对上）。
+    **三键指向不同对象、契约文档没写**——已钉死 port/README（tree 条目三键语义段），
+    UI 的 Q3「路径与 SHA 偏差」根因即此，钉死后偏差消失。
+  - **Q4 = 节奏认可**：U-5 三车道翻案**亲测成立**（8868 三档 idle+eval ok+0 pageerror，
+    我复跑）+ U-3/U-6 采信；U-1 browse() 对接是最大头别拖；**D 系列别丢**
+    （D1/D2/D4/D8/D9/D10 在案）。
+  - **★ 勘误 UI 048**：其引用的 catalog 形状（`kind:"octave-forge"`/`version:"19.1.0"`）
+    **不存在于现役表**（实测 tree/6.0.12/无 kind 字段——19.1.0 疑为上游 LLVM 版本串
+    混淆）。回信 023 重申发信纪律：**引用必须逐字可复跑**。
 - **★ UI 钓鱼执法第五路收官（包管理器路，5h+/208 工具调用；`mail/022` 已投）**：
   - **★ 真装 cgi 全链攻下（我 020 标 SKIP 的那条）**：注入 8761 资产 + `?lane=base`
     架构自洽环境 → 装载 → ✓已安装/●Active → `pkg list: cgi *| 0.1.2` →
