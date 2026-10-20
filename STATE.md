@@ -387,6 +387,41 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ 实测第二轮·第二批 OM 站（2026-10-20，断电次日续跑，四项全绿零发信级）**：
+  - **⑦ 五模型 Export FMU 回归 5/5**（真切换真导出）：BouncingBall（前验）+
+    PID_Controller（474 步 617 ODE）+ DistrictHeating（DAE mode、707 ODE、t∈[0,10800]）+
+    DoublePendulum（963 ODE）+ **FullRobot R3（6236 ODE、5 chunks、build 3000ms+sim 991ms）**
+    —— 五个模型全部 Run→Export→下载真触发（文件名各异）。**工装假象记档**：断电前
+    首跑「EXPORTED×5」实为下拉选择未生效（选错 select + label 大小写），五次导的都是
+    默认模型——修正选择器（`selects[1]` + option 文本精确匹配）后才算真验。
+    **验收纪律沉淀：断言「换了」必须以可观测状态变化为据（banner 模型名），不能只看动作返回**。
+  - **⑧ MSL 大模型深水**：Robot R3 全库装载后堆内存 25MB（performance.memory 实测），
+    PID 4MB / DistrictHeating 8MB / 双摆 10MB——无爆栈、页面全程可交互。
+  - **⑨ 同页双引擎数值正确性**（samepage，物理判据）：hmax=**1.0000**（= 初始高度）、
+    hend=-0.9556（∈ 物理合理域 e=0.7 末端衰减）、7 变量（含 der 消毒改名×4）、
+    N=628 采样、反向坏件明确拒收——**全部真值**，非脚本自报。
+  - **⑩ OMPlot Compare + 三格式**：双结果文件装载（2 files、7 vars 628 pts ×2）+
+    Compare 按钮解禁 ✓；simulator 三格式下载 `.arrow/.mat/.csv` 全部真触发
+    （下载按钮在 `#downloadRes`，结果 ready 才现——工装曾按「文本含 Download」找按钮
+    误报 NO_DL，按 id 定位即中）。
+  - 小计：第二批 4 项全绿，**零发信级缺陷**；两处工装坑（select 错位/按钮定位）均已
+    识破并沉淀为验收纪律，未污染结论。
+- **★ UI 开工回执（`mail/047`，2026-10-19）+ 我的三问回信（`mail/018`）+ 双提单**：
+  - **UI 落地事实（我亲跑复验）**：DownloadStore 9/9（多引擎并发下载、OPFS
+    `downloads/engine/{lane}/`、下载不触发布局）+ 双列双引擎 15/15（Octave 三档单选 ×
+    OM 独立勾选、`supervisor.boot({lane, enableOmc})` 双引擎并发、MEMFS `/tmp` 握手）。
+    UI 自我勘误两条（曾把 omc 塞进单选车道 = 「用户全程 Octave 语境」违例，已重构翻案）。
+  - **三问裁定（我 018）**：Q1 引擎清单 = **扩展 forge-catalog 加 `kind:'engine'` 条目**
+    （不新开 engine-catalog.json——同一事实两产地 = #20③ 形状；arch=lane 沿宿主 031
+    裁决；逐件 sha 仍从产物自证取）；Q2 MSL = 三段答（现状运行时 GitHub 拉 / MEMFS
+    落点 `/.openmodelica/libraries/` 三包 / 产物化待 OM）；Q3 进度 = **CustomEvent**
+    （`omc:simulate-progress`）+ 无事件回落「不定进度胶囊」（不伪造百分比）。
+  - **双提单已投**：宿主 `mail/047`（schema 加 kind 字段，含 optional_keys fail-closed
+    向后兼容设计；UI 两步走零阻塞）+ OM `mail/011`（MSL 产物化问询 + omc 驱动进度
+    事件钩子问询）。
+  - **口径更正（已告知 UI）**：其界面「omc wasm32 · 71MB」的 74,579,404B 是 -Oz
+    压缩后数字——建议标「压缩后」并从产物清单实时取，别硬编码（OM 昨天刚换过产物，
+    快照会漂）。
 - **★ 实测第二轮·第一批 Octave 站（2026-10-19，用户批准计划，六项全绿 + 一翻案）**：
   - **★ known boundary 翻案**：上条「现编产物识别但不可调」**已过时**——宿主
     `accept-compile-extension` **C2c：现编 cell2cell({1,2},1)=1x1 且 (,2)=1x2，与预编
