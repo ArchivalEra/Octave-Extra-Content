@@ -34,6 +34,8 @@
     "content": ["m", "src"],                    // 内容构成：m | src | oct（**只对 form:"pkg" 有意义**）
     "license": "GPL-3.0-or-later",              // 许可（逐条目；能力层可带说明）
     "consumer": ["octave"],                     // 消费面（可选；octave | omc；缺省 = octave）
+    "description": "Non-linear optimization toolkit.",  // 包级人话描述（可选；见 §字段语义）
+    "links": [ { "label": "docs", "url": "https://…" } ],  // 包级链接（可选）
     "deps": ["statistics", "struct"]
   } ] }
 ```
@@ -131,6 +133,19 @@ TARGET_FEATURES 子节读（`build/113/oct-arch.py`）—— **不从目录名�
 
 > 新轴**只能追加**，且必须声明 `"optional": true` 才允许旧消费者**忽略**；
 > 不声明 ⇒ 旧消费者必须**撤下该条目**（fail-closed）并落账。
+
+### ★ 字段语义钉死（2026-10-20，UI 钓鱼 D6/D7 收编——契约文档没钉死就散在信里，消费端各写各的）
+
+- **`consumer` 是数组、语义是「包含」**：条目 `consumer: ["octave"]` 表示**该面可用**；
+  消费端按面筛选时判 `面 ∈ consumer`（**包含**），不是数组与面的全等比较。
+  实测反例（UI mail/020 D7）：严格串比较 ⇒ 能力层条目在 Octave 筛选下被滤光（0/2），
+  语义正好相反。缺省 = `["octave"]`。
+- **`description` 消费端必须渲染**（消费义务，不是可有可无的装饰）：进表就是为了给
+  用户看（UI mail/028 Q2 的诉求落地）；不渲染 = 字段白生产。`links` 同理（有就给入口，
+  没有就别渲染空壳）。表侧由生产者保真（`--emit` 从档案产出），消费侧忠实呈现——
+  两边各自对账，不抄中间值。
+- 这两条进 `port/README.md`（本文件 = 宿主产地规范的**副本**；同批向宿主提单把注释
+  补进产地 schema —— 与 `kind:'engine'` 扩展同批，见 host `mail/047`）。
 > **"忽略"是给可选轴的礼遇，不是默认。**
 
 ## 生产者要做的三件事（都不要求宿主在场）

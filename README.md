@@ -158,6 +158,9 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   047-host-engine-kind.md        本仓→host 提单：schema 加 kind:'engine' 条目（arch=lane、sha 从产物自证、optional_keys 兼容）—— ★ 投 host 仓 mail/047
   011-om-msl-and-progress.md     本仓→om 提单：MSL 产物化问询（form:tree 进表判据）+ omc 驱动进度事件钩子问询 —— ★ 投 om 仓 mail/011
   （实测第二批·第二批 OM 站全绿落档 STATE：五模型 FMU 5/5 + Robot R3 6236 ODE 深水 + 同页数值全真值 + OMPlot Compare/三格式）
+  019-ui-fishing-engine.md      本仓→ui：钓鱼战果一（引擎下载面）——核验管线扎实但 ★D1 体积漂移（71.1 vs 74.58MB 两层手抄）D2 假三档（master 字节=w32 同 sha）D3 OM 404 D4 无七码 alert 阻塞 —— ★ 投 ui 仓 mail/019
+  020-ui-fishing-dual-pkg.md    本仓→ui：钓鱼战果二/三/四 —— ★D5 双引擎 OM 半静默缺失 D6 描述 13/13 全丢 D7 consumer 数组误滤 + 正面存档（错误 i18n 翻案=028 痛点已修）—— ★ 投 ui 仓 mail/020
+  021-ui-fishing-dual-deep.md   本仓→ui：D5 根因源码定位（空 catch 吞 404）+ ★D8 OMC Shell 假历史（编造 1.25.0 版本串）D9 supervisor.evaluate 不存在（面板全废）D10 终端 plot 视觉静默 —— ★ 投 ui 仓 mail/021
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014

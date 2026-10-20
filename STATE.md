@@ -387,6 +387,34 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 钓鱼执法四路全收（2026-10-20，用户点令「疯狂钓鱼」；019/020/021 三信已投）**：
+  四路并行（引擎下载 / 双引擎 / 包管理器 / 通用界面），**发信级缺陷 D1–D10 共十条**，基本面
+  扎实（下载核验管线 sha/原子/幂等/不阻塞全过、终端执行链响亮、错误 i18n 翻案=028 痛点
+  已修、三语/主题/dock/视口/404 全过、pageerror=0）：
+  - **D1 体积硬编码已漂**：OM 显示 71.1MB vs 真实 74,579,404B=74.58MB（Content-Length
+    亲测）——显示层与 DownloadStore:604 两层手抄两层漂；A5 配额预检连带失效。
+  - **D2 假三档**：master/IP 档字节与 wasm32-final **逐文件同 sha 同字节**（build.json
+    diff 亲验为空）——`lanes/master/` 快照是 w32 product 构建，w64 回退永远轮不到。
+  - **D3 OM 字节投送面未接**：`/repo/Octave/omc/` 404——OM 下载必失败。
+  - **D4 错误无七码 + alert() 阻塞**：四类失败全弹裸 alert，DownloadError 的 code/state
+    在 UI 边界被丢弃。
+  - **D5 双引擎静默假成功**：勾 OM → boot 承诺 Physics Engine → omc import 404 被空
+    catch 吞（`WasmEmbedAdapter.ts:111,127,131`）→ 状态 idle 成功态但 omc_* 全 undefined。
+  - **D6 描述字段全丢**：13/13 包描述显示「无详细描述」（catalog 里全有真值）——
+    **028 Q2 自己要的接口落地了没接**。
+  - **D7 consumer 数组误滤**：严格串比较 ⇒ 能力层在 Octave 筛选下 0/2——契约语义是
+    **包含**不是全等。
+  - **D8 OMC Shell 假历史**：硬编码 `getVersion→1.25.0~dev-wasm32 success`（omc 真实
+    返回 "-rust"）——**取不到也不许编**。
+  - **D9 supervisor.evaluate 不存在**：OmcShellPanel:73 调的方法 EngineSupervisor 没有
+    （只有 eval/evalJSON，亲验 :522/:551）——OMC Shell 面板完全不可用。
+  - **D10 终端 plot 视觉静默**：plot 不 flush（notebook 有 prepareCode 补 drawnow、终端
+    没有）——对照实验坐实（补 drawnow 即出图）。
+  - **我侧契约动作（D6/D7 的根因侧）**：字段语义钉死进 `port/README.md`——`consumer`
+    是数组语义为**包含**；`description`/`links` 消费端**必须渲染**（消费义务）；与
+    `kind:'engine'` 同批向宿主提单补 schema 注释。
+  - 观察项若干（llvm-wasm 条目渲染缺失、i18n 死键 brand_tag、hue 不钳制、375px dock、
+    dev 无 COI 头、ErrnoError 刷屏）——020/021 信内备案。
 - **★ 实测第二轮·第二批 OM 站（2026-10-20，断电次日续跑，四项全绿零发信级）**：
   - **⑦ 五模型 Export FMU 回归 5/5**（真切换真导出）：BouncingBall（前验）+
     PID_Controller（474 步 617 ODE）+ DistrictHeating（DAE mode、707 ODE、t∈[0,10800]）+
