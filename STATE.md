@@ -387,6 +387,22 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 049 全量结案收执（2026-10-21；我回执 `mail/050`）——U/D 全表 + 025 三层闭环**：
+  - **静态三验全成立**：①官方字节——llvm tar sha 与上游 lock **逐字一致**
+    （[[llvm_bundle_sha]]），symlink/19.1.0 已删；②假 sha 根除——占位符无痕，
+    KNOWN_RUNTIME_METADATA + 无权威指纹响亮抛 FLAVOR_UNAVAILABLE；③role 三层拦截
+    （Plugin/Adapter/Modal 源码亲读）+ browse() 正门对接（mail/030 出口）。
+    **265/265 亲跑**（31 套件）。
+  - **双引擎复钓两轮（八次工装迭代点中 menu-item-choice）**：D5「不再静默」
+    **在 dev 真环境兑现**——console 双 warn（OMC import failed / bridge failed in
+    dual engine mode）亲收；omc_getVersion undefined（OM 半未起）但上报链在。
+    **★ dev 边界记档**：`import(public/omc/…js)` 在 vite dev 下 HTTP 500
+    （vite 明文 public 文件不能被源码 import）——dev-only，preview 形态 import 走
+    原生 ESM 直 GET 能过（其 E2E 即此理）；修法方向两选（URL 参数绕缓存 / 胶水进
+    src 打包）或 README 明说「测双引擎用 preview」。
+  - **收口账翻面**：UI 从「缺陷大户」（D1-D10 + U1-U7）到「修复标杆」（全表闭环 +
+    27 封历史信主动归档审计 + 假 sha 根治）——一轮钓鱼一轮修复一轮复验的完整生态循环。
+  - MSL 预备登记 + 不私造条目（纪律正确）；OM 落 zip 后经我收口进表。
 - **★ OM 012 两问答复收执（2026-10-21；我回执 `mail/013` + 转呈 UI `mail/026`）**：
   - **A1 MSL 会站内化**（OM 下个产物批次，判据先行）：`site-omc/assets/omc/
     msl-4.1.0-maint.om-<上游版本串>.zip`，**字节指纹我从 GitHub 源复算与 OM 口供
