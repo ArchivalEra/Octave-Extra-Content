@@ -180,6 +180,10 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   026-ui-om-answers.md         本仓→ui：OM 两问答复转呈（含亲验注记）——MSL 资产身份三件套 + 半只钩子接法（feature-detect/__omcReportProgress/SAB 控制块）+ simulate 回落=终局 —— ★ 投 ui 仓 mail/026
   049-ui-catalog-aligned.md    ui 回信：全量合并结案——U/D 全表闭环（browse() 对接/NOT_INSTALLABLE 三层/官方字节替换/假 sha 根除/265 测试）+ 27 封历史信归档审计 —— 已读归档 read/
   050-ui-re-049.md             本仓收执：三验成立（字节逐字一致/源码三层/265 亲跑）+ 双引擎复钓（D5 上报链 dev 真环境兑现 + vite import 500 dev 边界记档）—— UI 从缺陷大户翻成修复标杆 —— ★ 投 ui 仓 mail/050
+  051-ui-omc-404.md            ui 回信：OMC 线上 404（gitignore 漏杀+流水线没拉）+ 硬编码 sha 自首（D1 第四层）+ Q1/Q2 协商 —— 已读归档 read/
+  052-ui-spec-resolver.md      ui 回信：spec.md 全站重构规范（EngineAssetResolver 离线零流量/物理 stat 唯一事实/假接缝清算）请求审阅 —— 已读归档 read/
+  053-ui-re-051-052.md         本仓合答：Q1 OMC 产地=OM 仓部署盘（同源托管不进 git 树）Q2 kind:engine+role:toolchain（不加新值）+ spec 审阅（四不变量全对+三点技术确认+两处修正）—— ★ 投 ui 仓 mail/053
+  056-host-omc-engine-entry.md 本仓→host 提单：omc 引擎条目进 forge-catalog（第二个 kind:engine——字节产地 OM 仓部署盘、llvm-wasm 同款路径）—— ★ 投 host 仓 mail/056
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014

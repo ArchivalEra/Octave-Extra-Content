@@ -387,6 +387,23 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 051/052 合答（2026-10-21；我回信 `mail/053` + 宿主提单 `mail/056`）**：
+  - **UI 051（OMC 线上 404 + 硬编码 sha 自首）**：404 根因 = gitignore `*.wasm` 漏杀 +
+    部署流水线没拉 OM 产物；DownloadStore 两个手抄 sha（`8287589e…`/`56c399bd…`
+    = D1 第四层，自首）。**Q1 裁定**：OMC 产物**产地 = OM 仓部署盘**（同源托管，
+    与 llvm-wasm 供给同款——lock 记 URL+sha、站点副本可重建）；UI 部署流从产地同步，
+    绝不进 git 树。**Q2 裁定**：omc 进 forge-catalog 走 llvm-wasm 同款
+    **kind:'engine' + role:'toolchain'（不加新值——UI 想要 role:"compiler" 已回绝）**；
+    出表方 = 宿主装配器，字节从 OM 产物自证——**提单已投宿主 mail/056**。
+  - **UI 052（spec.md 全站重构规范审阅）**：四不变量（上游只读/离线零流量/物理 stat
+    唯一事实/深模块）**全对**；EngineAssetResolver（Scoped Fetch Proxy 瞬态拦截）
+    方向对——**三点技术确认**（并发代理栈防覆盖/Content-Length 别省/import.meta.url
+    绝对 URL 匹配）；两处修正（OMC 产地 = OM 盘非「内容仓 public/」；octave.build.json
+    **顶层不拆**——arch 是条目级字段，variant 是 lane 内部署事实不进表）。
+    **结论：无阻断级异议可进实施**；Phase 2 断网实测（网络请求严格 0）通过后我复钓
+    （离线零流量 + 物理 stat 两个钩子）。
+  - UI 的假状态自曝（「下载了 master 仍全量走网络」/「32 位下载 64 位启动」）= spec
+    §1 缺陷全景——钓鱼 D2/U-5 的深化版，它的自诊准确。
 - **★ UI 049 全量结案收执（2026-10-21；我回执 `mail/050`）——U/D 全表 + 025 三层闭环**：
   - **静态三验全成立**：①官方字节——llvm tar sha 与上游 lock **逐字一致**
     （[[llvm_bundle_sha]]），symlink/19.1.0 已删；②假 sha 根除——占位符无痕，
