@@ -387,6 +387,19 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ 宿主 050 三结收执（2026-10-20；我回信 `mail/051`）——047/048/049 全闭环**：
+  - **亲验全成立**：schema 新键 **kind**（src/pre/engine，engine 的 arch=lane）+
+    **role**（package/toolchain/language-bridge）双键落地（entry properties 亲读、
+    enum 钉死）；校验器自证 **57/0** 亲跑；installLayer 两路文案（NOT_INSTALLABLE /
+    LAYER_NOT_IMPLEMENTED）+ 8761 亲测新文案原文；C-2 勘误标记在其 STATE 亲见。
+    「表未升级按 name 兜底」两层设计——UI 不等 emit 就能拿正确文案。
+  - **我侧待办全清**：① **--emit 出 role**（13 包恒 `role:"package"`，自证 45→47/0，
+    +2 正反断言）；② port/README 副本同步 kind/role 语义与记录形状示例；
+    ③ 勘误宿主 §⑥「llvm 台账指 v0.1.1」**误记**——C1 早在 10-19 已修（v0.1.3 +
+    sha 逐字对账，ebbde69），其引用的是翻案前旧段。
+  - **链路现状**：kind/role 双键齐（schema 产地 + 语义副本 + emit 数据三半）；
+    **UI 切「统一引擎清单」的两半前提都在**（宿主装配 + 我 emit）——球在宿主装配
+    引擎条目、UI 接表；接表后「role:'toolchain' ⇒ 不走 install」消费端断言各钉一条。
 - **★ UI 048 事故上报与 Q1–Q4 裁定（2026-10-20；我回信 `mail/023` + 宿主事故信 `mail/049`）**：
   - **事故**（UI 现场触发、我核源码行号）：用户点装载 llvm-wasm → 宿主
     `assets-loader.js:274 installLayer` 只实现 pyodide 分支 → 硬拒绝「未知的能力层」。
@@ -589,19 +602,19 @@
 
 | 键 | 值 | 测于 | 复跑命令 |
 |---|---|---|---|
-| `docs_count` | **3** | 2026-10-19T12:32:15+0800 | `ls docs/*.md | wc -l` |
-| `llvm_bundle_bytes` | **34693729** | 2026-10-19T12:32:15+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz` |
-| `llvm_bundle_sha` | `cd6450fe7944875c…` | 2026-10-19T12:32:15+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz | cut -d' ' -f1` |
-| `port_docs_count` | **1** | 2026-10-19T12:32:15+0800 | `ls port/*.md | wc -l` |
-| `pyodide_core_bytes` | **6757104** | 2026-10-19T12:32:15+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
-| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-19T12:32:15+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
-| `recipes_count` | **2** | 2026-10-19T12:32:15+0800 | `ls recipes/*.md | wc -l` |
-| `shelf_needs_capability` | **1** | 2026-10-19T12:32:15+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
-| `shelf_oct_packs` | **0** | 2026-10-19T12:32:15+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
-| `shelf_packs` | **13** | 2026-10-19T12:32:15+0800 | `ls packages/*.json | wc -l` |
-| `shelf_verified` | **13** | 2026-10-19T12:32:15+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
-| `shelf_versions` | **52** | 2026-10-19T12:32:15+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
-| `tool_selftest_pass` | **45** | 2026-10-19T12:32:15+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
+| `docs_count` | **3** | 2026-10-21T09:52:11+0800 | `ls docs/*.md | wc -l` |
+| `llvm_bundle_bytes` | **34693729** | 2026-10-21T09:52:11+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz` |
+| `llvm_bundle_sha` | `cd6450fe7944875c…` | 2026-10-21T09:52:11+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz | cut -d' ' -f1` |
+| `port_docs_count` | **1** | 2026-10-21T09:52:11+0800 | `ls port/*.md | wc -l` |
+| `pyodide_core_bytes` | **6757104** | 2026-10-21T09:52:11+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
+| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-21T09:52:11+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
+| `recipes_count` | **2** | 2026-10-21T09:52:11+0800 | `ls recipes/*.md | wc -l` |
+| `shelf_needs_capability` | **1** | 2026-10-21T09:52:11+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
+| `shelf_oct_packs` | **0** | 2026-10-21T09:52:11+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
+| `shelf_packs` | **13** | 2026-10-21T09:52:11+0800 | `ls packages/*.json | wc -l` |
+| `shelf_verified` | **13** | 2026-10-21T09:52:11+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
+| `shelf_versions` | **52** | 2026-10-21T09:52:11+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
+| `tool_selftest_pass` | **47** | 2026-10-21T09:52:11+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
 
 13 条事实。
 <!-- /AUTO:FACTS -->

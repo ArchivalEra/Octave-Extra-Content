@@ -420,6 +420,10 @@ def cmd_emit(shelf, out, octave, allow_unverified):
             #   供 UI 面板"主页/新闻"链接。**可选字段**（schema 容忍缺省）。
             "description": (e.get("upstream") or {}).get("description", ""),
             "links": (e.get("upstream") or {}).get("links", []),
+            # ★ role（host mail/050 ③落地 schema，2026-10-20）：消费角色标注。
+            #   本仓 --emit 只产函数包 ⇒ 恒 "package"（显式自描述，消费端零推断）。
+            #   toolchain/language-bridge 的产地 = 宿主装配器（tree 条目归它）。
+            "role": "package",
             # ★ versions[]（宿主 schema `candidate`；裁决见 mail/018/019）：
             #   顶层标量与选中候选逐字同源（同一 dict 取的字段 ⇒ 不变量②天然成立）；
             #   staged/withheld 语义见 candidate_rows。
@@ -607,6 +611,10 @@ def _selftest():
        lambda: _emit_doc(["m"])["packs"][0]["deps"] == [])
     ck("★ 能力层边：emit 里不出现 needs 字段（§2：不加新字段）",
        lambda: "needs" not in _emit_with_dep()["packs"][0])
+    ck("★ role（host mail/050 schema 落地）：--emit 的包条目恒 role='package'",
+       lambda: all(p.get("role") == "package" for p in _emit_doc(["m"])["packs"]))
+    ck("★ role：optional_keys 不含 role（schema 已知键不走协商通道）",
+       lambda: "role" not in _emit_doc(["m"]).get("optional_keys", []))
 
     # ⑦ deps 部分闭合（host mail/012：指向表外的 typo 今天没人拦）
     ck("部分闭合：目标在货架里 ⇒ 不报",

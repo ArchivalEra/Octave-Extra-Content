@@ -31,6 +31,7 @@
     "sha256": "59fb…",                          // 必填，fail-closed
     "size": 422679,
     "form": "pkg",                              // 投送形态：pkg | tree | oct | octdir | file | js
+    "kind": "src",                              // 下载身份（可选；src|pre|engine——host mail/047 提单，050 落地）：engine 条目 arch=lane 值，逐件 sha 从产物自证（不造第二产地）
     "content": ["m", "src"],                    // 内容构成：m | src | oct（**只对 form:"pkg" 有意义**）
     "license": "GPL-3.0-or-later",              // 许可（逐条目；能力层可带说明）
     "consumer": ["octave"],                     // 消费面（可选；octave | omc；缺省 = octave）
