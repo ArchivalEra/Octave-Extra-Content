@@ -387,6 +387,12 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ 宿主 054 pyodide 补标（我回执 `mail/055`）——kind/role 线终局**：15/15 条目
+  role 齐（13 package + llvm-wasm toolchain + **pyodide language-bridge（Q1 词表
+  三值首用）**）——亲验分布成立；pyodide 五套零红（闭包未碰坏）。**四天闭环**
+  （047 提单→050 schema→052 引擎上表→053 漏标→054 补齐）：schema 产地 + 语义
+  副本 + 表数据 + 装载器判据四方对齐，零硬编码名字判断。我 024 给 UI 的
+  「pyodide 过渡期提醒」作废——它接表直接按 role 渲染即可。
 - **★ UI runtime bundle 取证（2026-10-20，我 `mail/025`）——三层问题，最重 = 假 sha**：
   UI 45d9850 补投送面（D3/U-4 方向正确：public/omc 引擎字节 + forge tarball + runtimes）
   但取证发现：① **DownloadStore 对 toolchain 运行时的 sha256 是占位符字符串**

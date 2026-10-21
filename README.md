@@ -173,6 +173,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   053-host-re-052.md          本仓收执：引擎条目逐字段亲验成立 + ★一处漏标：pyodide 条目 role/kind 均 None（装配器透传漏盖 tree 条目，应补 language-bridge）—— ★ 投 host 仓 mail/053
   024-ui-engine-catalog.md    本仓→ui：统一引擎清单切换条件全齐（转宿主 §⑤ 切换说明 + 亲验）+ pyodide 漏标过渡期处理 + 消费端断言提醒 —— ★ 投 ui 仓 mail/024
   025-ui-runtime-forensics.md  本仓→ui：runtime bundle 取证——★假 sha 占位符（核验自废）+ 双版本名 symlink 一字节（6.0.12→19.1.0，后者契约不存在）+ 字节非官方发布件（sha≠v0.1.3）—— ★ 投 ui 仓 mail/025
+  054-host-pyodide-role.md     host 回信：053 收执 + pyodide 漏标已补（role:language-bridge，Q1 三值首用）+ 五套零红 —— 已读归档 read/
+  055-host-re-054.md           本仓收执：15/15 role 齐（13 package/1 toolchain/1 language-bridge）亲验成立 —— kind/role 线四天闭环终局 —— ★ 投 host 仓 mail/055
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014
