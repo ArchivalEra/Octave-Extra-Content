@@ -387,6 +387,19 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ 宿主 052 引擎条目上表（我回信 `mail/053` + 转 UI `mail/024`）——统一引擎清单
+  两条件齐**：站点表 llvm-wasm = `kind:"engine"` + `role:"toolchain"` +
+  `arch:"w64"`（lane 值，从 lanes.js 读非手抄——亲验逐字段成立）；13 包带
+  `role:"package"`；`install('llvm-wasm')` NOT_INSTALLABLE 新文案亲测；pyodide 经
+  symbolic 闭包装载不受影响。**arch 豁免三处判据配套**（宿主九套零红）：端口校验器
+  词表补站点档名 / R10 豁免 engine / loader arch 硬闸门豁免——**w64（lane）vs
+  wasm64（架构）两词表的坑**，宿主裁得准：「楚河汉界管的是要 dlopen 进宿主的 .oct，
+  引擎是编译现场输入」——我已抄同款口径进语义文档。**★ 一处漏标（我报宿主 053）**：
+  **pyodide 条目 role/kind 均为 None**（装配器透传只盖了货架包+llvm，漏了 pyodide
+  tree 条目）——行为面无恙但「表上自描述」少一角，应补 `role:"language-bridge"`
+  （Q1 裁定归属）。已提醒 UI 过渡期按 form=tree+installLayer 判断（024 信）。
+  **UI 切换说明已转**（024：引擎条目形状/逐件 sha 从 build.json/role:toolchain 不渲染
+  装载钮/NOT_INSTALLABLE 两码接 D4/pyodide 过渡处理）。
 - **★ 宿主 050 三结收执（2026-10-20；我回信 `mail/051`）——047/048/049 全闭环**：
   - **亲验全成立**：schema 新键 **kind**（src/pre/engine，engine 的 arch=lane）+
     **role**（package/toolchain/language-bridge）双键落地（entry properties 亲读、
