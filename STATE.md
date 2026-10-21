@@ -387,6 +387,16 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI runtime bundle 取证（2026-10-20，我 `mail/025`）——三层问题，最重 = 假 sha**：
+  UI 45d9850 补投送面（D3/U-4 方向正确：public/omc 引擎字节 + forge tarball + runtimes）
+  但取证发现：① **DownloadStore 对 toolchain 运行时的 sha256 是占位符字符串**
+  （`${ref.name}-${ref.version}-sha`——下载核验在该路径被自废，字节换了也不红；
+  bytes 也是粗略常量 36700160 vs 实际 34,694,190 = D1 第三层）；② **双版本名 symlink
+  指向同一字节**（6.0.12 → 19.1.0——版本语义不可辨；19.1.0 是上游 LLVM 版本串，
+  现役契约不存在，其 048 引用失真的根源即此）；③ **字节非官方发布件**
+  （UI 仓 tar 实测 sha ≠ 官方 v0.1.3 [[llvm_bundle_sha]]；20 件 vs 18；manifest
+  generated 时间戳与宿主部署盘同——疑似重打包）。修法方向信里给了（真 sha 从
+  tar 内 manifest/文件实测；一个版本一个文件；字节对齐或定新号）。
 - **★ 宿主 052 引擎条目上表（我回信 `mail/053` + 转 UI `mail/024`）——统一引擎清单
   两条件齐**：站点表 llvm-wasm = `kind:"engine"` + `role:"toolchain"` +
   `arch:"w64"`（lane 值，从 lanes.js 读非手抄——亲验逐字段成立）；13 包带
