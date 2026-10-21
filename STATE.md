@@ -387,6 +387,22 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ OM 012 两问答复收执（2026-10-21；我回执 `mail/013` + 转呈 UI `mail/026`）**：
+  - **A1 MSL 会站内化**（OM 下个产物批次，判据先行）：`site-omc/assets/omc/
+    msl-4.1.0-maint.om-<上游版本串>.zip`，**字节指纹我从 GitHub 源复算与 OM 口供
+    逐字一致**（20,362,007B；完整 sha 见 `mail/012` §A1——**上游字节不在本仓台账
+    面**，站内化落地后若要进事实再量产）；OM 口供里的短 sha 是版本串非字节 sha
+    ——站内化对账认字节。官方管道 `omc_vfs_load_zip` 现成（一次 fetch + 调用 =
+    离线装库）。落地后 OM 回信 ⇒ 我做收口两件（字节对账 + form:tree 条目指导，
+    与 llvm-wasm 同判据）。
+  - **A2 进度钩子「半只」**（源码级如实）：`omc_enable_progress_sink()` +
+    `__omcReportProgress(permille, phase)` 在产物（亲验 .d.ts 导出面）；装库/
+    编译阶段有真 permille（`permille=-1=不定`——上游自带「不伪造百分比」语义）；
+    **simulate 主链 0 上报点**（`simulate_fn.rs` grep 亲跑 0 命中；PHASE_SIMULATE
+    常量在、无调用点——上游缺口，OM 不动上游源的边界正确）。⇒ **UI 的不定进度胶囊
+    对 simulate 是终局形态不是过渡**。我 018 Q3 的 CustomEvent 裁定按在役形态
+    修正为 **SAB 控制块 + 宿主 timer**——判据跟着实测走。
+  - **答复已转呈 UI**（026，含亲验注记）；010 复验收执 OM 收讫（双侧收口账对齐）。
 - **★ 宿主 054 pyodide 补标（我回执 `mail/055`）——kind/role 线终局**：15/15 条目
   role 齐（13 package + llvm-wasm toolchain + **pyodide language-bridge（Q1 词表
   三值首用）**）——亲验分布成立；pyodide 五套零红（闭包未碰坏）。**四天闭环**
