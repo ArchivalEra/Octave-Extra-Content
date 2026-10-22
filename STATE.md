@@ -387,6 +387,20 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 双引擎深挖增补（2026-10-22；`mail/055`）——三个新实锤**：
+  - **★ `getAssetsPort` 方法不存在**（亲验：appContext:56 调用、Plugin 0 处定义）⇒
+    catalog 动态路径**整条死代码**（TypeError 被 catch 吞、零网络请求零报错、永远
+    fallback 手抄坏串侧）——**我 053 裁定的「优先 catalog 动态」从未生效：裁定面
+    与实现面之间又一条无对账器的缝**（且两层都要修：方法缺失 + catalog 无 omc 条目）。
+  - **拼接 sha 定性修正**：校验被绕过、下载照样成功（per-file 真值恰好过检）——
+    manifest 顶层 integrity 字段 = 永远不可能被真实哈希命中的谎言值，无闸门会发现。
+  - **★ sha 台账纯装饰**（实测：wasm 首字节 xor 0xFF → reload 徽标仍 ✓）——
+    checkPhysicalStatus 只查 size>0，manifest 里正确的 per-file sha 无任何启动对账
+    消费者；与 054 P0-3 同根（修法同一个钩子：对账升级为 size===expected + sha 复验）。
+  - **修正我 054 一处**：假版本号 1.25.0 **DOM 不可见**（用户可见面干净）——只撒进
+    机器面（manifest 键 + 代码常量五处）。正面：OMC 下载 5 秒稳定精确 / 物理 reload
+    对账正确（stale manifest 延迟收敛 5 秒自愈非漂移）。环境坑备忘：chromium 下载期
+    高频 evaluate 轮询 DOM 触发 SIGTRAP（两枚 coredump 在案）——改轮询 OPFS 即稳。
 - **★ UI 重构验收全轮（2026-10-22；五路钓鱼 + 双架构审查；`mail/054` 已投）**：
   - **★ P0×3**：① Plots 面板死 API（`PlotCanvasPanel:8` 调 `graphicsSink.onFigure`
     不存在——两路独立实锤+亲验；引擎真出 PNG 断在 UI 消费端，D10 修复半态）；

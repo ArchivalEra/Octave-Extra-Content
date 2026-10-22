@@ -186,6 +186,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   056-host-omc-engine-entry.md 本仓→host 提单：omc 引擎条目进 forge-catalog（第二个 kind:engine——字节产地 OM 仓部署盘、llvm-wasm 同款路径）—— ★ 投 host 仓 mail/056
   （UI 重构言行复核 + 手钓落档 STATE dc5dbea：主体真落 + OMC 下载链通 + 物理 stat 冷启动 ✓——★128hex 拼接坏串入 manifest + 1.25.0 假版本号持久化）
   054-ui-fishing-refactor-full.md 本仓→ui：重构验收全轮（五路钓鱼+双架构审查）——★P0×3（Plots 死 API/离线零流量不成立/截断无校验静默重下）+★生产 Mock 回退 + 架构「重构半真」（lib 壳新假 seam/聚合 sha 三产地/双真相无收敛）+ spec 四不变量 2/4 —— ★ 投 ui 仓 mail/054
+  055-ui-fishing-addendum.md    本仓→ui：054 增补（双引擎深挖收官）——★getAssetsPort 不存在（catalog 动态路径整条死代码=053 裁定从未生效）+ sha 台账纯装饰（篡改字节仍假绿）+ 拼接 sha 定性修正（校验被绕过）—— ★ 投 ui 仓 mail/055
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014
