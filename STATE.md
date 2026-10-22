@@ -387,6 +387,25 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 重构言行复核 + 手钓（2026-10-21，四轮子代理模型侧连挂改前台亲钓）**：
+  - **言行一致性**：重构主体真落（EngineAssetResolver 接入 WasmEmbedAdapter:99 的
+    withLocalAssets / StorageService 物理删除 / browse() 合流 / 占位符清）；**两个尾巴**：
+    ① `KNOWN_RUNTIME_METADATA` 的 `omc@1.25.0` **顶层 sha256 = 两 sha 拼接的 128hex
+    坏串**（`DownloadStore.ts:57`——files 里 wasm/js 两 sha 是官方真值，wasm
+    `8287589e…` = OM 10-19 新产物亲验同源）；② **1.25.0 是编造版本号**（omc 真返回
+    "-rust"，D8 假历史同族）。
+  - **手钓行为面（真浏览器三连）**：**OMC 下载链真通**（选 OMC → Download → OPFS
+    `downloads/engine/omc/w32/` 两文件字节精确：wasm 74,579,404B + js 56,586B）；
+    **manifest 记账正常**（`engine:omc@1.25.0:wasm32` + files 明细）——但 ★★
+    **manifest 顶层 sha256 = 128hex 拼接坏串原样入库**（未来任何用 manifest.sha
+    对账/重验的面全踩坏串 = sha 语义污染，发信级）；★ **冷启动状态徽标 ✓ 来自
+    物理 stat 而非 manifest**（manifest 空时徽标已绿 = EngineAssetResolver 物理探针
+    真落 = spec 不变量③兑现，正面）；★ **假版本号 1.25.0 持久化进 manifest 键 +
+    UI 显示**（发信级）。
+  - **拼接坏串的触发路径精确化**：omc 下载走 downloadEngine（engine 路径）成功——
+    KNOWN_RUNTIME_METADATA 的 :586 兜底分支（omc 不在 catalog 时）未被主路径踩到，
+    但 manifest 记账取了 known 顶层坏串 ⇒ 污染入口是**记账**而非下载校验
+    （校验比对用 files 真值）。
 - **★ UI 051/052 合答（2026-10-21；我回信 `mail/053` + 宿主提单 `mail/056`）**：
   - **UI 051（OMC 线上 404 + 硬编码 sha 自首）**：404 根因 = gitignore `*.wasm` 漏杀 +
     部署流水线没拉 OM 产物；DownloadStore 两个手抄 sha（`8287589e…`/`56c399bd…`
