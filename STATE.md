@@ -387,6 +387,29 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 重构验收全轮（2026-10-22；五路钓鱼 + 双架构审查；`mail/054` 已投）**：
+  - **★ P0×3**：① Plots 面板死 API（`PlotCanvasPanel:8` 调 `graphicsSink.onFigure`
+    不存在——两路独立实锤+亲验；引擎真出 PNG 断在 UI 消费端，D10 修复半态）；
+    ② **spec②离线零流量不成立**（octave.js 先打网络再降级 / assets-manifest 永走
+    网络且吞错照常 idle——「引擎能起 ≠ 引擎完整」/ build.json 同状；页面级断网
+    本身开不了）③ **截断反钓失败**（1 字节 wasm 无校验静默重下覆盖，sha 记了
+    从不复验——半截契约）。
+  - **★ 架构审查「重构半真」**（两路独立）：删 StorageService 当场造 lib/ 两个
+    重导出壳（新假 seam，亲验）+ DownloadStore 40% 死接口（unit() 零消费者亲验）+
+    **聚合 sha 三产地**（128hex 坏串只是其一）+ 手抄表无对账（omc 缺席 catalog
+    ⇒ 手抄侧单边）+ 双真相无收敛器（removeEngine 双边暴力删自证分裂）；
+    **★ 生产静默 Mock 回退**（EngineSupervisor:235-238 亲验——bridge 失败生产
+    boot Mock 引擎永远 ans=42 无告警，吞 404 同类）；OMC 桥 90 行走私进
+    WasmEmbedAdapter + engine→ui 倒挂（toastService）；ProjectWorkspace 透传层
+    转世 + adapter.fs 穿透（亲验）；OmcShellPanel 读无主 `window.__omc`（D9 同构）。
+  - **PASS 面存档**：P1 下载校验链成立 / **P3 物理对账兑现（spec③）** / D6
+    browse() 合流闭环（13/13 描述真渲染）/ U-3 includes / role 渲染 / 三语主体 /
+    265 测试亲跑。**spec 四不变量对账：2/4 成立 + ④ 半成立**。
+  - P1 级：DX1 错误无 Toast 无机器码 / DX2 坏 catalog 永转 / DX3 dev lane 资产
+    三缺（双源不一致）/ R1 终端中文噪音旁路 i18n / 手钓两尾巴（128hex 入
+    manifest + 1.25.0 假版本号持久化显示）。
+  - Deepening 建议 Strong×5 已随信（删手抄表+intake 断言 / 聚合 sha 语义 /
+    删壳+死接口 / 删 Mock 回退 / OMC 桥抽离）。修好后复钓三钩子（离线/截断/Plots）。
 - **★ UI 重构言行复核 + 手钓（2026-10-21，四轮子代理模型侧连挂改前台亲钓）**：
   - **言行一致性**：重构主体真落（EngineAssetResolver 接入 WasmEmbedAdapter:99 的
     withLocalAssets / StorageService 物理删除 / browse() 合流 / 占位符清）；**两个尾巴**：
