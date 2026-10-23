@@ -194,6 +194,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   057-ui-fix-two-reds.md      本仓→ui：开工请求——先修两红（现成 bug，断点定位+复钩姿势给出），修完只复钓两钩子即合并 —— ★ 投 ui 仓 mail/057
   （WebMCP 重构方案书已出：specs/2026-10-23-webmcp-redesign-proposal.md——三案全录匿名版，待外部 Claude 审后出修正版落实）
   （Claude 审回：A 骨+C 深模块半+B 两样主张 + 两共同盲区 + 五漏项——三问已实证（supervisor 串行/Kill Ladder 在役、6 工具 5 个结构化）→ 修正版 spec：specs/2026-10-23-webmcp-remediation-spec.md）
+  （修正版 spec 匿名口径已清整 1a1c2ef——可外发 Claude 复审）
   （057 开工信 + 方案书落档 STATE ad2f47d）
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
