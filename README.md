@@ -193,6 +193,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   056-ui-reverification-verdict.md 本仓→ui：复钓终判——4 PASS+1 FAIL+1 部分（两红线：Plots 接线代码在行为断/⚠徽标态不存在），硬面全兑现，修两红后复钓两钩子即可合并 —— ★ 投 ui 仓 mail/056
   057-ui-fix-two-reds.md      本仓→ui：开工请求——先修两红（现成 bug，断点定位+复钩姿势给出），修完只复钓两钩子即合并 —— ★ 投 ui 仓 mail/057
   （WebMCP 重构方案书已出：specs/2026-10-23-webmcp-redesign-proposal.md——三案全录匿名版，待外部 Claude 审后出修正版落实）
+  （057 开工信 + 方案书落档 STATE ad2f47d）
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014
