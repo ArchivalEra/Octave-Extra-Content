@@ -387,6 +387,17 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ 复钓验收执行中 + MCP 重构方案排队（2026-10-23，用户点令）**：
+  - **复钓 spec 已获批执行**（specs/2026-10-23-ui-remediation-reverification.md，37a98ca）：
+    三子代理并行（A+F 终端面 / B+C 离线完整性 / D+E 防线面）——**D+E 已双 PASS**
+    （Mock 回退根除 Failed 态零 42 + getAssetsPort 复活 15 packs + 反向断言复刻死缝
+    验证分级吞错语义 + 裁量点 #6 踩中与留痕一致）；A/B 两路在跑。
+  - **MCP 重构方案（用户点令，两轮 design-it-twice）**：三路审计回归后用
+    codebase-design skill 出 MCP 重构方案——**第一轮**：三路复钓回来后一次；
+    **第二轮**：等那轮所有子代理回来后再一次（用户原话「很繁琐但 UI 的屎山
+    真的太多了，不好好设计永远是大便上堆砌大便」）。对象：webmcp 插件
+    （547 行——WebMcpPlugin 500 行单类塞双通道挂载/静默握手/工具调度/services
+    四概念）+ MCP 面（工具暴露/agent 桥/上下文 API）的 seam 设计。
 - **★ UI 双引擎深挖增补（2026-10-22；`mail/055`）——三个新实锤**：
   - **★ `getAssetsPort` 方法不存在**（亲验：appContext:56 调用、Plugin 0 处定义）⇒
     catalog 动态路径**整条死代码**（TypeError 被 catch 吞、零网络请求零报错、永远
