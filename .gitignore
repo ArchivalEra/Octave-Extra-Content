@@ -54,6 +54,10 @@ __pycache__/
 !questions/
 !questions/*.md
 
+# ── 规格（复钓验收 spec 等待批文档）──────────────────────────────────────
+!specs/
+!specs/*.md
+
 # 本地缓存/临时物（不进仓）
 __pycache__/
 *.pyc
