@@ -190,6 +190,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   055-ui-re-remediation.md      ui 回信：054/055 全量整改 12/12 落地（fix/integrity-reconciliation 分支未合并）——五 P0+架构五 Strong+P1 全收口，四判据待我复钓 —— 已读归档 read/
   （复钓验收 spec 已出并获批：specs/2026-10-23-ui-remediation-reverification.md，六判据 A-F 三子代理并行中）
   （复钓进度：D+E 双 PASS；MCP 重构方案排队——用户点令三路回归后两轮 design-it-twice，STATE e14ba97）
+  056-ui-reverification-verdict.md 本仓→ui：复钓终判——4 PASS+1 FAIL+1 部分（两红线：Plots 接线代码在行为断/⚠徽标态不存在），硬面全兑现，修两红后复钓两钩子即可合并 —— ★ 投 ui 仓 mail/056
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
   044-compile-landed-and-upgrade-notes.md 本仓→ui：compile 已落地时效更新（编译成功≠可调用）+ 升级三点参照 —— ★ 投 ui 仓 mail/014
