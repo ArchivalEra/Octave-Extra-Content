@@ -387,6 +387,21 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ 两红复钓全绿（2026-10-23；`mail/059` 已投）——UI 055 全量整改整体通过**：
+  - **红 1 Plots 接线 PASS**：主钩（终端真实通道 plot → 面板内 img 可见 + 零
+    TypeError）+ **反向铁证严格版**（先激活 tab 再画两张 → blob src 两次不同
+    `dff96c…`→`8dee50…`——事件真到面板非时序运气）。UI 058 根因修正采信（断点①
+    URL 读取时机/img 未挂 DOM 读空串；断点② `p5canvas.js` 重赋值 window.OctaveP5
+    致对象级标记失效——比我的候选更底层；页面级总线+函数级标记是正解）。
+  - **红 2 徽标 PASS（两姿势）**：截断→重开菜单 = ⚠ Corrupted（✓ 消失）；
+    XOR+reload 新会话 = ⚠ Corrupted + integrity 真值 `{corrupted, downloaded:true}`
+    ——「只看 integrity 不叠 downloaded」口径正确。
+  - **观察（#15 留痕）**：同会话 XOR 不 reload 仍 ✓（缓存指纹只含 size）——UI 已
+    留痕，跨会话兜住；本轮按 057 不要求修，方向（size,mtime 或抽样哈希）记档。
+  - **六判据终表：A/B/C/D/E/F 全 PASS ⇒ 建议合并 fix/integrity-reconciliation**。
+  - **工装教训**：后台长测试无输出（10 分钟无 stdout）→ 用户点令改前台直测，20 秒
+    出结果；前台脚本带步骤日志+硬上限。另：`getDirectoryHandle` 不接受多级路径
+    （逐级取）；astro-dev-toolbar 拦物理点击（走合成输入/force）。
 - **★ 修两红开工信 + WebMCP 方案书（2026-10-23，用户点令；294a1a1）**：
   - **mail/057 已投 UI**：先修两红（现成 bug，与 MCP 重构无关可立即动工）——
     红 1 断点定位（接线代码在/断点在源头不发事件，两候选：p5.show 钩子链断/
