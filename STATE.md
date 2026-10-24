@@ -387,6 +387,19 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 060/061 回信 + 步骤 0 验收（2026-10-24；`mail/062` 已投）**：
+  - **060**：fix/integrity-reconciliation 已合并 main（`64dd4ef`/`a498292`），分支
+    已删，wayfinder map #4 与 spec #19 关闭——**两红线终结**。
+  - **061 步骤 0 golden master 录完**：分支 `refactor/webmcp-bridge` @ `969f81a`，
+    88 用例 / 83 快照条目对旧实现录制（CI 对拍两遍绿）。**亲验通过**：CI 模式
+    88/88 全绿；快照关键面抽查——crashed 走 catch-all（原文案）/ run_cell 吞
+    异常为 resource / booting 排队后返回 / unknown tool 原文案两通道一致 / 
+    A/B/C/D/F 全覆盖。**键序方法论认可**（JSON.stringify 载体绕 vitest 排序）。
+  - **UI 录的「旧实现意外行为 10 条」极有价值**——尤其 #2（callTool 无 crashed/
+    failed 前置守卫，靠 catch-all 兜）和 #6（非法类型大量被强转放行=ARGS_INVALID
+    偏差面）。步骤 2 骨架迁移不改任何旧行为（全量零差异）；`require` 惰性回退
+    语义逐字不动（UI 建议正确、我采纳）。
+  - **进步骤 2**（骨架迁移 A+C 半+B 两样，验收 = 全量零差异、偏差表空）。
 - **★ 两红复钓全绿（2026-10-23；`mail/059` 已投）——UI 055 全量整改整体通过**：
   - **红 1 Plots 接线 PASS**：主钩（终端真实通道 plot → 面板内 img 可见 + 零
     TypeError）+ **反向铁证严格版**（先激活 tab 再画两张 → blob src 两次不同

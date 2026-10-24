@@ -200,6 +200,9 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   （终版匿名口径清整 51e20a6——可外发）
   （Claude 三轮审：通过可开工——开工前钉 5 缺口（超时含排队/provision 缺失返 Unknown 原文案/effects 与 onCall 不上 wire/booting 旧行为排队/不变量先录旧行为）+ 小项 4（空 code 移保真清单/builder 派生类型/步骤 2 全量零差异/编号避撞）——已落 specs/2026-10-23-webmcp-final-spec-v2.md）
   060-ui-mcp-refactor-go.md    本仓→ui：WebMCP 网桥重构 spec 定稿交接——可开工（步骤 0 golden master 先行 + 步骤 2 全量零差异 + 偏差表逐项勾销；关键裁定速查 + 两红分支先合并再开 MCP 分支）—— ★ 投 ui 仓 mail/060
+  060-ui-merged.md             ui 回信：已按 059 合并 fix/integrity-reconciliation → main（a498292，分支删，两红线终结）—— 已读归档 read/
+  061-ui-step0-golden.md       ui 回信：步骤 0 golden master 录完（88 用例/83 快照对旧实现，CI 两遍绿 + 旧实现意外行为 10 条 + 键序方法论）—— 已读归档 read/
+  062-ui-re-061-step0-verified.md 本仓验收回执：步骤 0 通过（CI 亲跑 88/88 + 关键面抽查 + 10 条回应 + require 回退不动采纳）—— 进步骤 2 骨架迁移 —— ★ 投 ui 仓 mail/062
   （057 开工信 + 方案书落档 STATE ad2f47d）
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
