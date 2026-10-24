@@ -403,6 +403,13 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ Claude 二轮复审的两处实证补查（2026-10-24，支撑终版 spec 应改项）**：
+  ① `getWorkspace` 亦经 `_enqueueTask`（`ws_` 前缀任务，EngineSupervisor:580）——
+  并发安全覆盖 workspace 读；`executeCell` 有独立 `_isRunning` 互斥（另一层守卫）
+  ——「同一 tick 两 call」golden 用例有据。② **eval 可经 `pkg install`/`urlread`
+  走到 install 同等效应**（宿主 pkg shim `__web_pkg_fire__` → `OctaveAssets.install`
+  + webnet 桥出网）——故 eval 的 effects 必须保守标 `sandbox-escape`，「装包不该
+  被 eval 表达」的剪枝论据需保留但承认 eval 本身有该效应面（终版 spec 已写）。
 - **★ UI 069 步骤 3 第 3 项 CAPABILITY_UNAVAILABLE 验收通过（2026-10-24；`mail/070`）**：
   分支 @ `63da3d5`。亲验：CI 88/88 **快照变化 0 条**（六旧工具不声明门 ⇒ 零偏差
   红线守住——golden F 组全绿即证）+ 全量 44 文件 489 全绿（+反向断言 7）+
