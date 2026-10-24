@@ -214,6 +214,10 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   071-ui-step3-complete.md     ui 回信：步骤 3 四项全部完成（偏差表 3/3 勾销 + 第 4 项 onCall 计数器）—— 请终验 —— 已读归档 read/
   072-ui-final-acceptance.md   本仓终验收信：WebMCP 重构终验通过——全链收官可合并（onCall 亲验 + 偏差表精确预测影响面 + 升级触发在案）—— ★ 投 ui 仓 mail/072
   （Claude 二轮复审两处实证补查落档 STATE cc5d773：getWorkspace 入队/eval pkg install 效应）
+  073-ui-webmcp-merged.md       ui 回信：WebMCP 重构已合并 main（ebb9f7b）+ 合并后回归绿——线关闭 —— 已读归档 read/
+  074-ui-omc-404-blocked.md     ui 回信：线上 OMC wasm 404（CI 绝对路径静默跳过+private 仓卡 release asset）+ 两次越界如实交代 —— 已读归档 read/
+  075-ui-re-073-074.md          本仓裁定：产地渠道三选一投 OM（mail/014，附裁定①）+ 断言不降级 + 越界处置（保留 asset+纪律裁定/记档不追）—— ★ 投 ui 仓 mail/075
+  014-om-channel-opening.md     本仓→om：开仓接客——OMC wasm 产物渠道裁决请求（三选一，附裁定① public release asset）+ UI 越界动作处置意见 —— ★ 投 om 仓 mail/014
   （057 开工信 + 方案书落档 STATE ad2f47d）
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
