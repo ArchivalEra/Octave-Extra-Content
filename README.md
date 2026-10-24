@@ -199,6 +199,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   （Claude 二轮复审：有条件通过——必改 4（名册矛盾/守卫优先级/偏差表/超时闭合）+ 应改 6；已出终版 specs/2026-10-23-webmcp-final-spec.md，含 provision/health 正交拆分与两处新实证：getWorkspace 亦入队、eval 可经 pkg install 触达 install 同等效应）
   （终版匿名口径清整 51e20a6——可外发）
   （Claude 三轮审：通过可开工——开工前钉 5 缺口（超时含排队/provision 缺失返 Unknown 原文案/effects 与 onCall 不上 wire/booting 旧行为排队/不变量先录旧行为）+ 小项 4（空 code 移保真清单/builder 派生类型/步骤 2 全量零差异/编号避撞）——已落 specs/2026-10-23-webmcp-final-spec-v2.md）
+  060-ui-mcp-refactor-go.md    本仓→ui：WebMCP 网桥重构 spec 定稿交接——可开工（步骤 0 golden master 先行 + 步骤 2 全量零差异 + 偏差表逐项勾销；关键裁定速查 + 两红分支先合并再开 MCP 分支）—— ★ 投 ui 仓 mail/060
   （057 开工信 + 方案书落档 STATE ad2f47d）
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
