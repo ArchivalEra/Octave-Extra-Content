@@ -403,6 +403,18 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ UI 077 最终复验（2026-10-24；`mail/078`）——sha 逐字一致 + 新发现线上弹窗不弹**：
+  - **通过面**：isui.ren 用户路径 omc wasm 200 + Content-Type: application/wasm ✓
+    + 74,579,404B 完整下载 ✓ + **sha 四者逐字一致**（线上字节 / KNOWN_ENGINE_METADATA / OM 产物 / CI
+    校验锚——完整指纹见 UI 仓 `077`/`078` 信，非本仓台账面）+ .gz 预压缩对上站 ✓。
+  - **★ 新发现（发信级）**：**线上 More Options 菜单弹窗不弹**——三组独立浏览器
+    测试一致（isui.ren + GitHub Pages 直链）：节点数不变/零 console error/零弹层
+    DOM / lane-choice-group 不存在 ⇒ **引擎架构选择和下载入口对线上用户不可达**。
+    排除面：同一 App.D7owsQ-e.js 产物本地 preview 弹窗正常 / dev main 正常 /
+    JS 产物有引擎菜单代码 / 无 404 chunk。诊断方向：CORS/CSP/COI 差异或
+    条件渲染分支。**比 OMC 200 更紧急**。
+  - 用户纠正两轮：最终用户走 isui.ren 反代（不是 GitHub Pages 直链）+ gzip——
+    sha 亲验按正确路径完成。
 - **★ UI 073/074 处理（2026-10-24；`mail/075` → ui + `mail/014` → om）**：
   - **073**：WebMCP 重构合并 main（ebb9f7b）+ 合并后回归绿（499/88/17 闸门）——
     **线正式关闭**。

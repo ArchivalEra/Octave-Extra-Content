@@ -76,3 +76,6 @@ STATE.md      活状态文档（机器维护的事实块在文末）
 ## 许可
 
 SPDX-License-Identifier: AGPL-3.0-or-later
+
+  077-ui-omc-live-200.md       ui 回信：产地渠道落地（CI 绿 + 部署产物层亲测 200 + .gz 上站）—— 请最终复验 —— 已读归档 read/
+  078-ui-final-reverify.md      本仓→ui：最终复验——sha 逐字一致 ✓（isui.ren 用户路径四者对齐）+ ★新发现：线上弹窗不弹（同产物本地正常/线上三测一致零错误零弹层）——引擎入口对用户不可达 —— ★ 投 ui 仓 mail/078
