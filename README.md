@@ -213,6 +213,7 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   070-ui-re-069-item3-verified.md 本仓验收回执：第 3 项通过（golden 0 变化 + 门位置/软依赖模拟/红线三条/信封/抛错路亲验）—— 做最后一项 onCall 计数器 —— ★ 投 ui 仓 mail/070
   071-ui-step3-complete.md     ui 回信：步骤 3 四项全部完成（偏差表 3/3 勾销 + 第 4 项 onCall 计数器）—— 请终验 —— 已读归档 read/
   072-ui-final-acceptance.md   本仓终验收信：WebMCP 重构终验通过——全链收官可合并（onCall 亲验 + 偏差表精确预测影响面 + 升级触发在案）—— ★ 投 ui 仓 mail/072
+  （Claude 二轮复审两处实证补查落档 STATE cc5d773：getWorkspace 入队/eval pkg install 效应）
   （057 开工信 + 方案书落档 STATE ad2f47d）
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
