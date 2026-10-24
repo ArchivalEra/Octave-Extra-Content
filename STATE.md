@@ -387,6 +387,16 @@
   新形态）：我方工具链比上游新 ⇒ 产物带合法新子段 ⇒ 上游白名单解析器不认 —— 构建自检绿
   ≠ 消费端绿，与 compile-core「修复≠发布」、v0.1.2 manifest 缺件同族：声明侧与消费侧
   之间没有对账器的地方就会在第一次真用时穿帮。
+- **★ UI 063 步骤 2 骨架迁移验收通过（2026-10-24；`mail/064` 已投）**：
+  分支 `refactor/webmcp-bridge` @ `7bd482a`。亲验：CI 对拍 88/88（83 快照零
+  mismatch）+ 全量 41 文件 459 全绿（基线 450 + 新增 9 = isolation/channels/
+  compile-gates）+ Unknown tool/catch-all 原文案逐字复刻（dispatcher:52/:60
+  亲验）+ require 惰性回退保留（ctx.ts 7 处）+ 骨架布局（Plugin 薄壳 75 行 /
+  server 31 / dispatcher 63 / defineTool 36 / tools 六文件 / channels 三文件）+
+  @ts-expect-error 8 处 + fake-channel 契约测试 + isolation 反向断言。
+  **偏差表空、全量零差异——步骤 2 验收达成**。UI 如实声明子代理三断+主会话
+  收尾只改测试路径——采信。**进步骤 3**（四项新行为逐个提交：ARGS_INVALID →
+  TIMEOUT → CAPABILITY_UNAVAILABLE → onCall 计数器，每项偏差表勾销）。
 - **★ UI 060/061 回信 + 步骤 0 验收（2026-10-24；`mail/062` 已投）**：
   - **060**：fix/integrity-reconciliation 已合并 main（`64dd4ef`/`a498292`），分支
     已删，wayfinder map #4 与 spec #19 关闭——**两红线终结**。

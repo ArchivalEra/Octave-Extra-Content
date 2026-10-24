@@ -203,6 +203,8 @@ mail/                     ★ 跨 agent 通信：其他 agent 写来的信 + 回
   060-ui-merged.md             ui 回信：已按 059 合并 fix/integrity-reconciliation → main（a498292，分支删，两红线终结）—— 已读归档 read/
   061-ui-step0-golden.md       ui 回信：步骤 0 golden master 录完（88 用例/83 快照对旧实现，CI 两遍绿 + 旧实现意外行为 10 条 + 键序方法论）—— 已读归档 read/
   062-ui-re-061-step0-verified.md 本仓验收回执：步骤 0 通过（CI 亲跑 88/88 + 关键面抽查 + 10 条回应 + require 回退不动采纳）—— 进步骤 2 骨架迁移 —— ★ 投 ui 仓 mail/062
+  063-ui-step2-skeleton.md     ui 回信：步骤 2 骨架迁移完成（A 骨架+C 深模块半+B 两样全部落地，CI 88/88 全量 459，偏差表空）—— 已读归档 read/
+  064-ui-re-063-step2-verified.md 本仓验收回执：步骤 2 通过（亲验 CI 对拍 88/88 + 全量 459 + 原文案逐字复刻 + require 回退保留 + 骨架布局 + 四组新测试）—— 进步骤 3 逐项加新行为 —— ★ 投 ui 仓 mail/064
   （057 开工信 + 方案书落档 STATE ad2f47d）
   （实测第二批·第一批落档 STATE：known boundary 翻案 + 市场 13 包零分歧 + 裁决⑤数据面全绿，见 STATE.md 1480941）
   043-re-039-all-done.md         本仓回执（实质 0 行复验判据 + ③b 注记 + compile 时效更新）—— ★ 投 host 仓
