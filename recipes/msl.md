@@ -61,7 +61,10 @@ note:   挂载语义一句话 + 配方指路（本文件）+ 版本锚 8df0769a
   size == 字节数，sanity 干净。
 - **★ 站点落位硬约束**：MSL zip **不许落进引擎条目的树目录**（UI 站 `omc/`——引擎
   `form:"tree"` 的 size = 该目录字节和；混入 MSL 会把 74.7MB 的引擎预算虚胀成
-  94MB+）。落**兄弟目录**（如 `msl/`）。
+  94MB+）。落**兄弟目录**——**落定值 = `assets/msl/`（宿主表 url 口径，宿主 `060`
+  并入后定，2026-10-25）**。★ 教训（UI `085-ui` §一）：**落位以表 `url` 为准，示例
+  不是规范**——本文件早先的示例「如 `msl/`」被读成路径规格，UI 首镜像到
+  `public/msl/` 与表 url 错位（表指 404、字节在 200）；已对齐 `assets/msl/`。
 - `versions[]` 省略（单版本能力层，与 llvm-wasm/pyodide 同形）；MSL 升级时再启用
   多候选。
 
@@ -94,10 +97,14 @@ unzip -p /mnt/hdd/openmodelica-wasm-build/site-omc/assets/omc/msl-4.1.0-maint.om
 - [x] OM：按上表形状出 content-list 一条（producer 态，name 用全称），过宿主校验器
       `--producer openmodelica-full-wasm` —— `mail/018` §2 完成；**我方亲跑宿主校验器
       双模式（producer/site）均 ok**（2026-10-25）。
-- [ ] 宿主：装配进 forge-catalog（`mail/057` 提单扩展 + `059` 复验/裁定）；站点落位
-      守兄弟目录约束（R14 已落，自证正反两例我方亲跑 40/0）。
-- [ ] UI：镜像刷新（其站 catalog 现仍 15 packs，omc/MSL 条目未到）→ #3 删硬编码 /
-      #4 MSL 供给面 + 下载入口 + WebMCP 工具族 / #5 装载按本配方（含 MODELICAPATH 反例）。
+- [x] 宿主：装配进 forge-catalog —— `mail/060` 完成（17 packs；R14 + 装配器落位
+      缺陷两修收编；三站 + isui.ren 线上表均 17，我方亲验）。
+- [x] UI：镜像刷新 + 落位对齐 `assets/msl/` —— `085-ui` 完成（表 17 packs /
+      `assets/msl/` 200，我方线上亲验）。
+- [ ] UI #3（删硬编码）：等 `files[]` 逐件 sha 链条（OM 台账补 JS 键 → 宿主 schema
+      + 装配投影 → 表出现 files[]）—— 裁定见 STATE 当日 ★ 条目与信 `090`/`091`/`092`。
+- [ ] UI #4/#5（MSL 供给面 + 装载按本配方）：**即刻解锁**（form:"file" 无 files[]
+      同类缺口——条目 sha 即文件 sha）。
 - [x] 字节对账（本机实测 bytes + sha 与 OM `mail/016` 逐字一致，2026-10-25）；
       迁移兄弟目录后**复测一致**；isui.ren 线上字节**六方一致**（OM 台账 / 盘前后
       两次 / GitHub digest / 线上下载）。
