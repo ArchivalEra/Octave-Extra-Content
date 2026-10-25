@@ -101,10 +101,12 @@ unzip -p /mnt/hdd/openmodelica-wasm-build/site-omc/assets/omc/msl-4.1.0-maint.om
       缺陷两修收编；三站 + isui.ren 线上表均 17，我方亲验）。
 - [x] UI：镜像刷新 + 落位对齐 `assets/msl/` —— `085-ui` 完成（表 17 packs /
       `assets/msl/` 200，我方线上亲验）。
-- [ ] UI #3（删硬编码）：等 `files[]` 逐件 sha 链条（OM 台账补 JS 键 → 宿主 schema
-      + 装配投影 → 表出现 files[]）—— 裁定见 STATE 当日 ★ 条目与信 `090`/`091`/`092`。
-- [ ] UI #4/#5（MSL 供给面 + 装载按本配方）：**即刻解锁**（form:"file" 无 files[]
-      同类缺口——条目 sha 即文件 sha）。
+- [ ] UI #3（删硬编码）：等 `files[]` 逐件 sha 链条（~~OM 台账补 JS 键~~ ✓ `021`
+      已上账、我亲跑其 30 条复跑闸门核过 → 宿主 schema + 装配投影〔我 `090` 在途〕
+      → 表出现 files[]）—— 裁定见 STATE 当日 ★ 条目与信 `090`/`091`/`092`。
+- [x] UI #4/#5（MSL 供给面 + 装载按本配方）：`086-ui` #4 下载侧 + 供给面落地
+      （form:file 分支 + 响亮拒；consumer 筛选两条正确筛出——我抽验）；
+      #5 工具体随 wire 面裁定（A，我 `093`）上线。
 - [x] 字节对账（本机实测 bytes + sha 与 OM `mail/016` 逐字一致，2026-10-25）；
       迁移兄弟目录后**复测一致**；isui.ren 线上字节**六方一致**（OM 台账 / 盘前后
       两次 / GitHub digest / 线上下载）。

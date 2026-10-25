@@ -26,7 +26,7 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 - `role` = 消费角色（package / toolchain / language-bridge——toolchain 不走装载，走下载管理）
 - `consumer` = 消费面（octave / omc）
 
-表的 schema 与校验器产地是宿主仓 `build/extra-content/`，本仓持有副本（`port/README.md`）。内容语义（四态含义、版本策略、许可台账）归本仓。
+表的 schema 与校验器产地是宿主仓 `build/extra-content/`，本仓持有副本（`port/README.md`）。内容语义（四态含义、版本策略、许可台账、`consumer` 车道轴、`files[]` 下发闭包键）归本仓。
 
 ## 供给配方（recipes/）
 
