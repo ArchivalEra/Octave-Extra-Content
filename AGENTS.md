@@ -54,6 +54,7 @@
 
 ```bash
 python3 build/facts.py --render-doc STATE.md --check     # 机器块新鲜（走壳：免旋钮，防裸跑写根）
+set -a; source reflect-hooks/Einfacht.env; set +a        # 闸门旋钮（registry 裸跑=全线误红，2026-10-25 实证）
 python3 zreflect/registry.py --run commit                  # ran/off/failed 三档
 sh gates-selftest.sh                                       # 平台闸门自证（每个闸门先证明自己会红）
 REFLECT_FACTS=build/FACTS.json python3 zreflect/check_facts_replay.py   # 每条 cmd 逐字复跑（台账在 build/，勿裸跑）

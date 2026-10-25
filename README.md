@@ -53,6 +53,7 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 ```bash
 # 复跑本仓事实系统健康
 python3 build/facts.py --render-doc STATE.md --check
+set -a; source reflect-hooks/Einfacht.env; set +a   # 闸门旋钮（registry 裸跑=误红）
 python3 zreflect/registry.py --run commit
 sh gates-selftest.sh
 REFLECT_FACTS=build/FACTS.json python3 zreflect/check_facts_replay.py
