@@ -34,6 +34,7 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 - `recipes/llvm-wasm.md` — 浏览器内 C++ 编译工具链（clang/lld/sysroot，73MB bundle）
 - `recipes/pyodide.md` — Python 运行时（SymPy 等给 symbolic 包用）
+- `recipes/msl.md` — Modelica 标准库（omc 车道能力层；含挂载语义权威配方）
 
 ## 与宿主的分工
 
