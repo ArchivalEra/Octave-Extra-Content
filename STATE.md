@@ -403,6 +403,20 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ UI 079/080 + 复钓（2026-10-25；`mail/081`）——边缘修好 + 新根因：URL 双重前缀**：
+  - **边缘修复确认有效**：curl HTML 15/15 全 200（前 2/15 挂起→零挂起）；浏览器菜单
+    第 1 次尝试即活（前 0/3）；长尾仍在（10.7s/22.4s 各 1 次——多节点缓存冷启差异，
+    EdgeOne Age 序列互异吻合）。
+  - **★ OMC 下载线上 404——根因 = base path 双重前缀**：浏览器实测请求 URL
+    `https://isui.ren/repo/Octave/repo/Octave/omc/OpenModelicaCompiler_bg.wasm`
+    （双重 `/repo/Octave/`）→ 404；正确路径亲验 200 + application/wasm。
+    根因方向：Astro base = `/repo/Octave/` + DownloadStore.resolveUrl 叠加了一层。
+    dev 没踩到因为 dev base = `/`。修法：resolveUrl 感知 BASE_URL 或读
+    `<meta name="site-base">`（UI 仓已有此 meta）。
+  - **.gz 传输面确认**（用户纠正口径）：用户路径走 gzip → Content-Encoding: gzip /
+    21,333,875B（≈20.3MB）✓；heart 083 的 .gz + Range 旁路上线（20,895,435B
+    预压缩件 206 Partial Content 格式亲验）——DownloadStore 将来可改分片下载。
+  - `mail/081` 已投 UI（紧急修复信）。
 - **★ UI 077 最终复验（2026-10-24；`mail/078`）——sha 逐字一致 + 新发现线上弹窗不弹**：
   - **通过面**：isui.ren 用户路径 omc wasm 200 + Content-Type: application/wasm ✓
     + 74,579,404B 完整下载 ✓ + **sha 四者逐字一致**（线上字节 / KNOWN_ENGINE_METADATA / OM 产物 / CI

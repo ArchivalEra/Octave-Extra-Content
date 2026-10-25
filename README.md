@@ -79,3 +79,5 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
   077-ui-omc-live-200.md       ui 回信：产地渠道落地（CI 绿 + 部署产物层亲测 200 + .gz 上站）—— 请最终复验 —— 已读归档 read/
   078-ui-final-reverify.md      本仓→ui：最终复验——sha 逐字一致 ✓（isui.ren 用户路径四者对齐）+ ★新发现：线上弹窗不弹（同产物本地正常/线上三测一致零错误零弹层）——引擎入口对用户不可达 —— ★ 投 ui 仓 mail/078
+  079-080-ui-edge-chain.md      ui/host 边缘修复链（079 死因=isui.ren 间歇挂起/080 immutable+bridge 缓存落地+浏览器 50% 残墨=12 bridge max-age=0 穿边缘）—— 已读归档 read/
+  081-ui-omc-url-double-prefix.md 本仓→ui：★紧急——OMC 下载 404 根因=base path 双重前缀（/repo/Octave/repo/Octave/omc/…实测 404；正确路径 200 ✓）+ 边缘修复确认生效（菜单活了）+ .gz 传输面确认 —— ★ 投 ui 仓 mail/081
