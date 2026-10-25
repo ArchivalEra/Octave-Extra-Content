@@ -403,6 +403,16 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 最终全链复钓 PASS + Einfacht 同步（2026-10-25；`mail/083` + knobs/registry 升级）**：
+  - **全链 PASS**（isui.ren 用户路径，单次浏览器会话）：菜单第 2 次尝试 ALIVE
+    （冷节点长尾=平台物理）/ URL 单前缀 ✓ / 200 + gzip 20.3MB 传输 /
+    OPFS 74,579,404B 精确 / **sha 五者逐字一致**（线上字节/METADATA/OM产物/
+    CI 锚/OPFS 落盘字节）/ manifest 在。**产地渠道线 056→083 完整闭环**。
+  - **Einfacht 更新同步**（用户点令）：上游 tip `1b753f3`（issue #21 相位旋钮）——
+    `knobs.py` 新增 REFLECT_PHASES + `registry.py` PHASES 焊死改为 BUILTIN_PHASES
+    + 可扩展 phases()/phases_problems()。两文件已拷贝同步，全套闸门 pre-commit
+    路径 ran 7/0/0 全绿。其余 7 个机制文件逐字节一致（无需同步）。
+    **本仓暂无自定义相位需求**（commit/start-of-work 够用），旋钮已可用但不启用。
 - **★ UI 079/080 + 复钓（2026-10-25；`mail/081`）——边缘修好 + 新根因：URL 双重前缀**：
   - **边缘修复确认有效**：curl HTML 15/15 全 200（前 2/15 挂起→零挂起）；浏览器菜单
     第 1 次尝试即活（前 0/3）；长尾仍在（10.7s/22.4s 各 1 次——多节点缓存冷启差异，
