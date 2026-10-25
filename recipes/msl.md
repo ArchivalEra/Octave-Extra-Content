@@ -43,13 +43,18 @@ sha256 = **站内 zip 自己的字节**（上表 sha256），不是上游源 sha
 ## 条目形状（出表指导，OM 为出表方；宿主装配后进 forge-catalog）
 
 ```
-name: "msl"            version: "4.1.0+maint.om"     form: "file"
+name: "modelica-standard-library"   version: "4.1.0+maint.om"     form: "file"
 content: []            consumer: ["omc"]             role: "package"
 sha256: <站内 zip 字节>  size: 19,482,938             arch: 省略（无 oct 内容）
 url: 站内同源相对（装配定）；upstream_url: 上游源 zip（记账）
 license: "BSD-3-Clause (Modelica Association); sublibrary licenses in Modelica/Resources/Licenses/"
 note:   挂载语义一句话 + 配方指路（本文件）+ 版本锚 8df0769a
 ```
+
+- **`name` = `modelica-standard-library`**（2026-10-25 裁定：采 OM `mail/018` §4 申辩。
+  判据：catalog 名携带上游身份是既有先例〔llvm-wasm / pyodide / octave-forge 包名〕；
+  表是公开机器产物，通用缩写 `msl` 不可检索；名字将成 deps 边目标与安装键，现在改
+  一个串、将来改不动）。
 
 - **`form:"file"` 不是 `form:"tree"`**（对 2026-10-21 在档推断的修正）：MSL 交付 =
   **单个 zip 文件**（解压发生在运行期 `omc_vfs_load_zip`，不在站点侧）；单文件形态
@@ -84,11 +89,15 @@ unzip -p /mnt/hdd/openmodelica-wasm-build/site-omc/assets/omc/msl-4.1.0-maint.om
 
 ## 待办（本仓视角）
 
-- [ ] OM：MSL zip 挂 release asset（引擎产地渠道线同模式；台账键已就位）——
-      `mail/017`（我方）已请求。
-- [ ] OM：按上表形状出 content-list 一条（producer 态，upstream_url 记账），
-      过宿主校验器 `--producer openmodelica-full-wasm`。
-- [ ] 宿主：装配进 forge-catalog（`mail/057` 提单扩展）；站点落位守兄弟目录约束。
-- [ ] UI：镜像 + 「下载 MSL」入口 + WebMCP `omc_load_msl` 类工具读供给面
-      （`consumer:"omc"` 筛选）——实现挂载语义按本配方（含 MODELICAPATH 反例）。
-- [x] 字节对账（本机实测 bytes + sha 与 OM `mail/016` 逐字一致，2026-10-25）。
+- [x] OM：MSL zip 挂 release asset（引擎产地渠道线同模式）—— `mail/018` §3 完成，
+      GitHub digest 与台账逐字一致（我方 gh api 亲核）。
+- [x] OM：按上表形状出 content-list 一条（producer 态，name 用全称），过宿主校验器
+      `--producer openmodelica-full-wasm` —— `mail/018` §2 完成；**我方亲跑宿主校验器
+      双模式（producer/site）均 ok**（2026-10-25）。
+- [ ] 宿主：装配进 forge-catalog（`mail/057` 提单扩展 + `059` 复验/裁定）；站点落位
+      守兄弟目录约束（R14 已落，自证正反两例我方亲跑 40/0）。
+- [ ] UI：镜像刷新（其站 catalog 现仍 15 packs，omc/MSL 条目未到）→ #3 删硬编码 /
+      #4 MSL 供给面 + 下载入口 + WebMCP 工具族 / #5 装载按本配方（含 MODELICAPATH 反例）。
+- [x] 字节对账（本机实测 bytes + sha 与 OM `mail/016` 逐字一致，2026-10-25）；
+      迁移兄弟目录后**复测一致**；isui.ren 线上字节**六方一致**（OM 台账 / 盘前后
+      两次 / GitHub digest / 线上下载）。
