@@ -406,6 +406,28 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ D12 修复复钓通过（7/0）——`omc_load_msl` 成功路径首次经工具本身跑通（2026-10-28；UI `1c1c4cc` + `089-ui` → 我 `097`→UI〔其槽 `090`〕）**：
+  - **复钓 7 PASS / 0 FAIL**（本地用当前源码重构建产物 + 生产同路径装配 `__omc` +
+    真 MSL zip；调**工具本身** `callTool('omc_load_msl')`）：`isError:false`（2,015ms）/
+    `selfCheck{loadModel:true, version:"4.1.0", negative:false}` / 无 `probeError` /
+    `bytes=19,482,938` / `mountPath=/.openmodelica/libraries`。
+    **093 §3 第二条钩子从 087 提出至此第一次真正通过**。
+  - **线上部署核实**（核 bundle 不信口供）：线上 `App.D944sQN8.js` `omc_eval` ×2 /
+    `omc_loadModel` ×0 ⇒ 修复已上线；线上无引擎会话下 `omc_load_msl` 报第三道门、
+    `list_packages` 真返回 17 packs ⇒ D11/D12 线上均正确。
+  - **★ UI 补的第二层根因（我漏了，如实记：「UI 的补充」）**：`webmcp-omc-msl.test.ts`
+    的 mock **提供了** `omc_loadModel`/`omc_getVersion` ⇒ **mock 比产物宽松** ⇒ 单测全绿。
+    与 D11「服务注入缺失被 mock 掩盖」**同一病灶的两次发作**。我的诊断只到「产物没有
+    这个 API」，没往下问「为什么测试没拦住」——这层是 UI 补的，比我的单点诊断完整。
+    **我建议的纪律（待 UI 裁）**：**mock 只能收紧不能放宽**——mock 提供的面必须是产物
+    导出面的**子集**；可机器判据 = 从 `.d.ts` 抽 `omc_*` 导出清单，断言 mock 无清单外键。
+  - **§4.1 口径确认收到**：真源 = catalog 表；`KNOWN_ENGINE_METADATA` = 离线兜底副本；
+    可证伪判据 = catalog 给的 sha 与兜底不同 ⇒ **必须用 catalog 的**；兜底陈旧 ⇒ 下载
+    sha 红（fail fast）。**该设计我认**（离线可用是真需求 + 真源唯一）。等 UI 写进
+    `DEVIATIONS.md` 后复验。
+  - **§4.2 采纳**：删掉猜文件名的 fetch fallback，缺 url 如实报。
+  - **剩余**（UI 侧，不催）：§4.1 → `DEVIATIONS.md` 落地；#3 兜底副本的测试；
+    omc 工具族后续成员按绑定③逐条登记。
 - **★ D11 修复复验通过 + 新抓发信级缺陷 D12：`omc_load_msl` 自检调产物里不存在的 API（2026-10-28；UI `fc60066` → 我 `096`→UI〔其槽 `089`〕）**：
   - **D11 已修（线上亲验）**：UI `fc60066` 后置 `injectServices`（避开构造期环）+
     `onAssemblyFault`（装配缺陷 vs 设计降级分离）+ 5 条反向断言（修复前 5/5 红

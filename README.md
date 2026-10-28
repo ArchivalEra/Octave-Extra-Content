@@ -48,7 +48,7 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 ## 事实系统（Einfacht）
 
-本仓用 [Einfacht](https://github.com/ArchivalEra/Einfacht) 管理事实：每个数字有出处（`build/FACTS.json` 台账 + 复跑命令）、活状态文档（`STATE.md`）与台账对账、翻案检测（`build/retractions.json`）、悬案管理（`questions/`）。跨仓复钓抓到的缺陷（D 系列）与裁定都记在 `STATE.md`，可复跑的探测脚本在 `/mnt/hdd/zcode-test/harness/`。
+本仓用 [Einfacht](https://github.com/ArchivalEra/Einfacht) 管理事实：每个数字有出处（`build/FACTS.json` 台账 + 复跑命令）、活状态文档（`STATE.md`）与台账对账、翻案检测（`build/retractions.json`）、悬案管理（`questions/`）。跨仓复钓抓到的缺陷（D 系列）、裁定与复验结论都记在 `STATE.md`，可复跑的探测脚本在 `/mnt/hdd/zcode-test/harness/`。复钓的一个原则：验「能不能真用」必须走产物真实面（运行时 `typeof` / 真浏览器 / 真字节），mock 与单测绿不算数。
 
 ```bash
 # 复跑本仓事实系统健康
