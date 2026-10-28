@@ -413,7 +413,35 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
-- **★ 全线无待办（2026-10-28 核实；四仓逐一亲验）**：
+- **★ D13（发信级，比 D11/D12 更急）：双引擎启动内存无界爬升——用户报「1 分钟吃 32GB 崩浏览器」（2026-10-28；我 `098`→UI〔其槽 `091`〕）**：
+  - **受控复现坐实**（本地 `astro preview` + Playwright，看门狗 9GB 未触发，
+    观察 152s）：勾 wasm32-final + OpenModelica → Start Computing → Boot，
+    **chromium 全进程树 RSS 单调爬升 1,571 → 2,897 MB，斜率约 +8.9 MB/秒**。
+  - **三个判据性事实**：①`usedJSHeapSize` 全程仅 **4–30MB** ⇒ 增长几乎全在
+    **wasm 线性内存**，不在 JS 堆（这正是它在 DevTools 内存面板上不易暴露的原因）；
+    ②`window.__omc` 恒 `undefined`、`__octaveHosts.length` 恒 0、`__octaveReady`
+    恒空 ⇒ **引擎整个观察窗内根本没启动成功，内存却一直在涨** ⇒ 泄漏在
+    **启动未完成的路径**（失败/重试/等待循环），不是跑起来后吃内存；
+    ③用户报「1 分钟 32GB」比我的斜率快约 60 倍 ⇒ 线上还有额外放大因素
+    （边缘重试 / 多 worker / 用户机 GPU-共享内存），但**泄漏本体已在本机坐实**。
+  - **★ 隔离对照把范围收窄到 UI 的 boot 编排，不是 omc 产物**：绕过 UI 手动按
+    `OmcBridge.setupOmcBridge` 序列逐步跑（import 胶水 → `default(wasmUrl)` →
+    `set_env` → `omc_init()`）⇒ **`omc_init` 返回 `true`（成功）**，74MB 编译后
+    RSS +248MB 且**随后平稳**（+10s 只 +21MB）。⇒ 产物侧无无界泄漏。
+  - **已排除**：Octave 侧内存**有界**（`lanes/wasm32-final/octave.wasm` 内存段
+    initial 2048 页=128MiB / **max 32768 页=2048MiB**，我解析 wasm memory section 实测）；
+    OMC 侧**无上限**（initial 231 页=14.4MiB / **max=None**——它能涨很大的前提，但单独
+    不构成泄漏）；`boot()` 无 retry、`recover()` 30s 内 3 次上限、`_bufferedStdout`
+    每 16ms 冲刷清空。
+  - **给 UI 的怀疑方向（线索不结论）**：`Promise.race([bootPromise, 30s timeout])`
+    超时后 `bootPromise` **不取消**、`OmcBridge` 的 OPFS blob 回退、`withLocalAssets`
+    包装失败重入、启动按钮重入。**建议判据**：在 boot 路径加**启动尝试计数**（次数/
+    每次 start-end/失败原因）——跑一次看是否为 1：>1 ⇒ 重入是根因；=1 ⇒ 在单次 boot
+    内部的 await 链。
+  - **诚实边界**：未修（用户点令只报不修）；**未在线上复现**（线上复现可能真吃掉
+    本机 32GB，选择本地受控取证）；未做 heap snapshot 归因（wasm 线性内存增长在 JS
+    heap snapshot 里不可见——正是本缺陷的隐蔽点），真归因需要 UI 在 boot 路径打点。
+- **★ 全线盘点（2026-10-28；**当时的「无待办」已被当日 D13 推翻**——见上条）**：
   - **UI 三项全落地，我亲验**：①`zreflect/check_mock_surface.py`（我在 `097` §3 建议的
     「mock 只能收紧不能放宽」被立成机器判据）——自证 **7/0**，实跑 OK（「测试引用 4 个
     名字全在产物面内；产物导出面 29 个 `omc_*` 函数」）；**首跑即红在它自己注释里残留的
@@ -425,7 +453,7 @@
     mirror、工作区干净。其自有线（工单 63 Rust 不变量、仪器腐烂修复）不欠本集群。
   - **OM**：干净；MSL 四件（站内化 / 出表 / release asset / JS 台账键）全办完，
     工作区唯一未提交 = 我投给它的 `022` 收执信。
-  - **本仓**：干净，闸门 7/0/0。
+  - **本仓**：干净，闸门 7/0/0。（**已被同日 D13 推翻**：双引擎内存泄漏待 UI 修。）
   - **在档等待项（等外部条件，非活）**：pack/registry 升级触发条件（spec 决策 11，
     休眠至出现「工具活在别处」的贡献者或引擎运行期自报能力）；omc 工具族后续成员按
     绑定③逐条登记（wire 面再变仍需确认）。

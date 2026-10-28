@@ -32,6 +32,8 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 三家消费面全部接通并线上可用：Octave Forge 13 包（`versions[]` 52 候选）、LLVM-wasm 工具链、Pyodide 运行时、OpenModelica 引擎与 MSL 标准库（`modelica-standard-library`，双方车道 `consumer` 轴区分）。MSL 线 2026-10-28 全链闭环——产地字节、宿主装配、UI 消费、装后自检（`omc_vfs_load_zip` 装入 4376 文件 + `loadModel`/`getVersion`/反向三条全绿）每段判据都可复跑。
 
+已知未决（复钓抓到的发信级缺陷，按严重度）：**D13 双引擎启动内存无界爬升**（勾 wasm32-final + OpenModelica 启动，wasm 线性内存约 +9MB/秒、约 1 分钟吃 32GB 崩浏览器；已确认非产物侧问题，在 UI 的 boot 编排路径）。其余 D 系列（D11 服务注入、D12 产物 API 名）已修复并复验。
+
 ## 供给配方（recipes/）
 
 每个能力层一份配方：从哪拉字节、用什么 sha 钉版本、部署到站点哪里。
