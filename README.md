@@ -28,6 +28,10 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 表的 schema 与校验器产地是宿主仓 `build/extra-content/`，本仓持有副本（`port/README.md`）。内容语义（四态含义、版本策略、许可台账、`consumer` 车道轴与包含语义、`files[]` 下载闭包键的五条绑定）归本仓。
 
+## 现在是什么状态
+
+三家消费面全部接通并线上可用：Octave Forge 13 包（`versions[]` 52 候选）、LLVM-wasm 工具链、Pyodide 运行时、OpenModelica 引擎与 MSL 标准库（`modelica-standard-library`，双方车道 `consumer` 轴区分）。MSL 线 2026-10-28 全链闭环——产地字节、宿主装配、UI 消费、装后自检（`omc_vfs_load_zip` 装入 4376 文件 + `loadModel`/`getVersion`/反向三条全绿）每段判据都可复跑。
+
 ## 供给配方（recipes/）
 
 每个能力层一份配方：从哪拉字节、用什么 sha 钉版本、部署到站点哪里。
