@@ -406,6 +406,49 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 停更三日后全线盘点 + 复钓抓出发信级缺陷 D11：WebMCP 三服务在产物里恒 undefined（2026-10-28；UI `087` → 我 `095`→UI〔其槽 `088`〕）**：
+  - **盘点（四仓实况，2026-10-28）**：OM 干净（JS 两键上账，无待办）；UI 干净（
+    `omc_load_msl` 已上线 `4311f62`，四条绑定逐条兑现）；**宿主有 16 项未提交改动**
+    （`files[]` 的 schema + 校验器 + R15 + 装配投影 + 站点表全写完，时间戳 10-26
+    早 08:31–08:49，自证我亲跑：校验器 63/0、check-forge-catalog 43/0、
+    forge-catalog 44/0）——功能完工但**没提交/没 rebake**，这是全线唯一瓶颈
+    （⇒ isui.ren 线上表仍 17 packs 无 `files[]`，UI #3 因此卡着）。本仓干净。
+  - **★ D11（发信级，我线上实测）**：WebMCP 七工具横扫——**五个依赖服务的全废**：
+    `octave_eval` ⇒ `EngineSupervisor service is not available.`、
+    `octave_run_cell` ⇒ `ProjectWorkspace service is not available.`、
+    `octave_list_packages` / `octave_install_package` ⇒ `PackageManagerPlugin
+    is not available.`、`omc_load_msl` ⇒ `CAPABILITY_UNAVAILABLE`。
+    只有不碰服务的 `octave_get_workspace` / `octave_get_system_state` 活。
+  - **根因三层（每层可复跑）**：①`plugins/index.ts:49` `new WebMcpPlugin()` **无参**，
+    全仓无任何 services 注入（`webMcpPlugin.options = ` 0 处）；②`ctx.ts` 三个 getter
+    的 `require('../../appContext')` 回退——**浏览器里 `require`/`module`/`exports`/
+    `process`/`global` 全 undefined**（我实测），try/catch **每次必落 catch** ⇒
+    三服务恒 undefined；③`PluginRegistry.initAll(ctx)` 那条注入路也没走（`index.ts`
+    直接 `webMcpPlugin.init()` 无参 + `init(): void` 签名不收参）。
+  - **非重构引入**：`git show c58ebb5:.../WebMcpPlugin.ts` 首版三个 getter 的
+    `require('../../appContext')` 逐字就在；`7bd482a` 重构只是**逐字搬进** `ctx.ts`
+    （搬对了，但它本来就是死分支）。
+  - **为什么测试没抓**：`tests/plugins/WebMcpPlugin.test.ts:80` **每个用例都注入
+    mock**，无一例验「无注入 + 真实产物」⇒ 测试全绿、产物全废。**「测试绿 ≠ 产物
+    能跑」**——「能编过 ≠ 能用了」的同族。
+  - **★ 最该记的一条（能力门的反噬）**：UI `087` 自验看到 `CAPABILITY_UNAVAILABLE`
+    就以为是「没启引擎」，把**装配缺陷伪装成了设计内的能力降级**。UI 自己 087 那句
+    「结果仍是你要求的形状」要纠：形状对、**原因错**——设计的是「服务在、运行期暂缺」，
+    实际是「服务根本没接上」。⇒ 反向断言要求：`capability` 的 reason 必须能区分
+    「服务未装配」（bug）与「服务存在但运行期不可得」（设计内降级）。
+  - **范围边界（已核，避免误报扩大）**：缺陷**只在 WebMCP 桥**；UI 界面路径走
+    `appContext` 直接 import（包管理器/市场/引擎下载都正常）⇒ 083 线的 OPFS 与
+    17 packs 不受影响。
+  - **`omc_load_msl` 代码本身合规**（我读码核过：挂载点/调用形状/反例注释逐条符合
+    `recipes/msl.md`，三道反向断言在，走 `form:"file"` 下载层）。**一个建议级瑕疵**：
+    `ok = loadModel===true && negative===false` 漏了 `version`（取了没判），
+    配方三条判据应三条都进 `ok`。
+  - **UI 087 的两分支结论**：无引擎分支 ✓ 复现一致；**有引擎分支不可达**——
+    被 D11 挡在第一道门，`omc_load_msl` 的成功路径**至今无人验证也无法验证**。
+  - **`port/README.md` 副本同步**：`files[]` 五条绑定 + `consumer` 车道语义澄清
+    （消费者=条目服务的引擎车道，与宿主 schema 对齐；宿主产地已写、我方副本跟进）。
+  - **如实边界**：宿主 `files[]` 工作区未提交 ⇒ 我 `port/README.md` 的同步是
+    **按裁定 + 我亲验的宿主工作区实况**写的，不是按它的提交（提交后需再对一次）。
 - **★ OM JS 键上账复验 + UI wire 面裁定 A（2026-10-25；OM `021` + UI `086-ui` → 我 `093`→UI〔其槽 `087`〕/ `094`→OM〔其槽 `022`〕）**：
   - **OM `021` 复验 ✓**：`omc_web_js_sha`/`omc_web_js_bytes` 在账（部署盘现役件
     路径——files[] = 下发闭包，取下发面正确）；**我亲跑其 30 条复跑闸门 OK**；

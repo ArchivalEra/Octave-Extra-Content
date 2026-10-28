@@ -35,6 +35,10 @@
     "content": ["m", "src"],                    // 内容构成：m | src | oct（**只对 form:"pkg" 有意义**）
     "license": "GPL-3.0-or-later",              // 许可（逐条目；能力层可带说明）
     "consumer": ["octave"],                     // 消费面（可选；octave | omc；缺省 = octave）
+    "files": {                                  // ★ 下载闭包清单（可选；**只对 form:"tree" 合法**）—— 见 §字段语义
+      "OpenModelicaCompiler_bg.wasm": { "bytes": 74579404, "sha256": "8287…" },
+      "OpenModelicaCompiler.js":      { "bytes": 56586,    "sha256": "56c3…" }
+    },
     "description": "Non-linear optimization toolkit.",  // 包级人话描述（可选；见 §字段语义）
     "links": [ { "label": "docs", "url": "https://…" } ],  // 包级链接（可选）
     "deps": ["statistics", "struct"]
@@ -152,10 +156,31 @@ TARGET_FEATURES 子节读（`build/113/oct-arch.py`）—— **不从目录名�
   host `mail/049` 提单已含 schema 落法）；本仓 `--emit` 不产 tree 条目故不涉及。
   进 `optional_keys` 协商（fail-closed 向后兼容）。
 
+- **`files` = 下载闭包清单**（2026-10-26 裁定，UI `085-ui` 缺口 + 我 `090` 提单，宿主工单 69；
+  **可选、`form:"tree"` 专属**）：map「文件名 → `{bytes:int≥0, sha256:hex64}`」。
+  五条绑定：
+  1. **`form:"file"`（及 pkg/oct/octdir/js）带 `files` ⇒ 红**——file 形态没有闭包概念，
+     静默忽略 = 让错的键看起来合法，与 fail-closed 相反（宿主另裁，我认可）；
+  2. **值 = 消费者会下载的文件**；非下发件（`.d.ts` 等）**不列** ⇒ **files 和 ≠ `size`
+     是有意设计**：`size` = url 所在目录字节和（R14 站点不变量，不变），files 和 =
+     下载闭包预算（**消费端自算，不存第二个总量**）；
+  3. **产地纪律**：逐件 sha 唯一产地 = **生产者台账**，宿主装配时**投影**
+     （omc 的 bg.wasm ← OM `omc_web_wasm_sha`，JS 件 ← `omc_web_js_sha`）——
+     生产者不手写、宿主不另算，**不造第二产地**（宿主可拿站点字节**核对**投影值：
+     核对 ≠ 另算，不一致是 red）；
+  4. **缺省兼容**：无 `files` 的 tree 条目合法（llvm-wasm / pyodide 现状不动）；
+  5. **校验器配套**：类型检查 + 正反自证（合法 map 不报 / file 带 files 必报 /
+     值形错必报）；宿主的站点闸门另有 **R15**（files 与站点字节对账，含「列了站点
+     没有的文件 ⇒ 必报」反向）。
+  与 `$defs/artifact` 的 `files`（数组，`.oct` 逐件 sha）**不同对象不同轴，同名非同义**。
 - **`consumer` 是数组、语义是「包含」**：条目 `consumer: ["octave"]` 表示**该面可用**；
   消费端按面筛选时判 `面 ∈ consumer`（**包含**），不是数组与面的全等比较。
   实测反例（UI mail/020 D7）：严格串比较 ⇒ 能力层条目在 Octave 筛选下被滤光（0/2），
   语义正好相反。缺省 = `["octave"]`。
+  **★ 语义澄清（2026-10-25 裁定，回宿主 `058`）**：`consumer` = **条目服务的引擎车道**
+  ——`omc` 引擎条目自己是 `["omc"]`（omc 车道运行时，与 MSL 同栈）；
+  llvm-wasm / pyodide 是 `["octave"]`（clang 编 octave 扩展、pyodide 桥 octave 包）。
+  别把它读成「这个条目由哪个引擎生产」。
 - **`description` 消费端必须渲染**（消费义务，不是可有可无的装饰）：进表就是为了给
   用户看（UI mail/028 Q2 的诉求落地）；不渲染 = 字段白生产。`links` 同理（有就给入口，
   没有就别渲染空壳）。表侧由生产者保真（`--emit` 从档案产出），消费侧忠实呈现——
