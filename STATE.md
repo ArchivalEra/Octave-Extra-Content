@@ -406,6 +406,38 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ D11 修复复验通过 + 新抓发信级缺陷 D12：`omc_load_msl` 自检调产物里不存在的 API（2026-10-28；UI `fc60066` → 我 `096`→UI〔其槽 `089`〕）**：
+  - **D11 已修（线上亲验）**：UI `fc60066` 后置 `injectServices`（避开构造期环）+
+    `onAssemblyFault`（装配缺陷 vs 设计降级分离）+ 5 条反向断言（修复前 5/5 红
+    →修复后全绿，stash 对拍）。线上判据：`octave_list_packages` 从「服务不可用」
+    **变成真返回 17 packs**；`octave_eval` 从「服务没接上」变成「引擎未启动」
+    （`EngineSupervisor: Engine is not booted or adapter is missing`）——
+    两层已区分开；`omc_load_msl` 从第一道门推进到**第三道门**（`window.__omc` 不在）
+    ——UI `087` 说「不可达」的那条分支现在可达。
+  - **★ D12（发信级，我实测）**：`omc_load_msl` 装后自检调用 `omc.omc_loadModel` /
+    `omc.omc_getVersion` —— **产物里这两个是 `undefined`**（实测模块面；
+    产物只有 C 风格 `omc_scripting_*`，且那些也不在模块对象上）。⇒ `TypeError` 被
+    catch 吞成 `checks.error` ⇒ `ok=false` ⇒ **MSL 真装上了也报失败**。
+  - **权威用法 = `omc_eval('loadModel(Modelica)')`**（OM 自家探针 `msl-local.html`
+    逐字如此）。我用它实测**真装成功**：19,482,938B → `vfs_load_zip` 装 **4376 文件**
+    → `loadModel="true"` / `getVersion="\"4.1.0\""` / 反向 `="false"` ⇒ **6 PASS / 0 FAIL**。
+    ⇒ `recipes/msl.md` 挂载语义完全成立，缺的只是自检那三个调用的**函数名**。
+  - **我上一轮的判断要更正**：`095` 里我写「`omc_load_msl` 代码本身没发现问题」
+    ——**说错了**。我只核了调用形状对不对，**没核函数名在产物里存不存在**。
+    教训：审查调用面必须对**产物导出面**（.d.ts / 运行时 typeof）核，不能只看源码
+    写得好不好看——「声明侧与消费侧之间没有对账器」的又一例（与 Export FMU dylink 同族）。
+  - **修法判据（已发 UI）**：三条自检改 `omc_eval(...)`；**注意 getVersion 返回带双引号**
+    （实测 `"\"4.1.0\""`）要去引号；配三条反向断言——①**API 面存在性断言**（工具调的每个
+    `omc_*` 必须在产物里存在）②成功路径真跑（真装 MSL ⇒ `isError:false`）
+    ③自检失败要能区分「装载真失败」与「自检代码坏了」（当前 catch 把 TypeError
+    吞成装载失败 = 与 D11「装配缺陷伪装成能力降级」同一种反噬形态）。
+  - **UI #3 现状判定（折中落地，待 UI 确认口径）**：`KNOWN_ENGINE_METADATA` 仍在，
+    但已改为「catalog 优先、仅离线兜底」（`#12 Q12.4`）——设计我认（离线可用），
+    但与 `051/052`「删全部硬编码」的表述要对账。已请 UI 写成可证伪判据
+    （建议：catalog 给的 sha 与兜底不同 ⇒ 必须用 catalog 的）。
+  - **建议级**：`omcLoadMsl` 的 fetch fallback 文件名 `modelica-standard-library.zip`
+    与实际资产名 `msl-4.1.0-maint.om.zip` 不符（仅在 catalog 缺 url 时走）——
+    建议去掉 fallback，缺 url 就如实报。
 - **★ 停更三日后全线盘点 + 复钓抓出发信级缺陷 D11：WebMCP 三服务在产物里恒 undefined（2026-10-28；UI `087` → 我 `095`→UI〔其槽 `088`〕）**：
   - **盘点（四仓实况，2026-10-28）**：OM 干净（JS 两键上账，无待办）；UI 干净（
     `omc_load_msl` 已上线 `4311f62`，四条绑定逐条兑现）；**宿主有 16 项未提交改动**
