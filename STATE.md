@@ -349,9 +349,22 @@
     装配态才见真章」又一例）。JS 侧 webaudio 桥本身是好的。
   - **全绿**：p5canvas（plot→drawnow→560x420 真图、单例替换、close all 生效）/ webnet
     （懒加载后 urlread 全链通、坏 URL 4ms 明确失败）/ worker 模式（eval、长算不冻主线程、
-    `while(1)` 可 interrupt、terminate 无僵尸 promise）/ **omc_* MATLAB 兼容桥**
+    `while(1)` 可 interrupt、terminate 无僵尸 promise）/ ~~**omc_* MATLAB 兼容桥**
     （并发 3 提交 seq 单调且应答不串、`\n` 转义命令 ok、collect 不存在 seq=99999
-    **明说 pending**、同 seq 幂等取回——协议自洽，E 线「为 Octave 服务」链成立）/
+    **明说 pending**、同 seq 幂等取回——协议自洽，E 线「为 Octave 服务」链成立）~~
+    → **★ 勘误（2026-10-29 实测推翻）**：上面那句「E 线链成立」**只在 OM 的测试
+    **运行时注入**夹具下成立，不是产品态**。OM `accept-omc-bridge.mjs:110` 是
+    `injectFile('/bridge/xxx.m')` + `addpath('/bridge')` 逐个喂进 Octave 的；
+    **宿主仓全树与宿主站一个 `omc_*.m` 都没有** ⇒ Octave 产品里
+    `omc_simulate`/`omc_mat_load`/`omc_collect` **全不存在**（我用带对照组的可证伪探针
+    实测：`sin`/`plot`=FOUND、必不存在项=NOT-FOUND、这三个=NOT-FOUND）。
+    这个错误记录被我写进了给 UI 的 `mail/016` 设计输入（「协议自洽，E 线成立」），
+    UI 据此写了终端 fallback ⇒ **用户勾 omc 未起时调 `omc_simulate` 报 `Error (rc=2)`**。
+    责任在我，不在 UI。**归属已裁**：文件产权 = OM（`bridge/` 11 件）；装配 = 宿主
+    （Octave 站点资产铺设）；**不是内容契约**（E 线是两家引擎之间的运行时契约，
+    不走 `form`/`consumer`/`files[]`）。用户点令：**由 OM 与宿主按 OM-MATLAB 契约
+    直接合作**，本仓只做事实通报与边界说明，不居间裁决（我 `107`→OM〔其槽 `023`〕/
+    `108`→宿主〔其槽 `062`〕）。
     资产车道（catalog 35 资产名与货架对得上）。
   - **环境澄清**：audioread 在无 COI 页 dlopen 必死（LinkError shared=1 vs imported=0）
     ——嵌入式浏览器首测撞的是这个；宿主同款 headless（COI=true）下 audioread 系 4 个
@@ -413,6 +426,29 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 用户问「Modelica 终端只能打 Modelica 语法吗，我们的桥呢」→ 实测两答案（2026-10-29；我 `107`→OM〔其槽 `023`〕/ `108`→宿主〔其槽 `062`〕）**：
+  - **答案一：终端不是只认 Modelica 语法**。`omc_eval` 的产物契约原文
+    「Evaluate one interactive command and return its reply — the same string the
+    `--interactive=zmq` server returns」⇒ 它是**完整的 OMC 交互脚本 shell**。
+    我实测（真 boot 后）：`1+1`→`2`（纯表达式）/ `getVersion()`→`"-rust"` /
+    `loadModel(Modelica)`→`false` / 模型定义→`{Foo}` / `simulate(Foo)`→完整
+    `record SimulationResult` / `list()`→已加载类清单 / `clear()`→`true`；
+    只有**既非 Modelica 也非 OMC 脚本**的文本才报 `Error occurred building AST / Syntax Error`。
+  - **答案二：所谓「我们的桥」在 Octave 侧不存在——且这是 OM+宿主的交付缺口，不是 UI 的**。
+    Octave 产品态实测（带对照组的可证伪探针：`sin`/`plot`=FOUND、必不存在项=NOT-FOUND）：
+    `omc_simulate`/`omc_mat_load`/`omc_collect` **全部 NOT-FOUND**。
+    根因：OM 的 11 件 `.m` + `omc_bridge.js` 只在**它仓**与**它站点**；**宿主仓全树
+    与宿主站一件都没有**；OM 的验收是靠**运行时 `injectFile` + `addpath`** 喂进去的
+    ——**测到了 ≠ 交付了**。
+    UI 终端 fallback 调这套 API 是照我 `016` 的设计输入写的（**那句是我的欠账**，
+    已在 `[本仓 §omc_* 桥]` 那段勘误并自首）。
+  - **归属裁定**：产权 = OM（E 线 / MATLAB 语义桥）；装配 = 宿主（Octave 站点资产铺设）；
+    消费 = UI；**不是内容契约**（E 线是两家引擎之间的运行时契约，与货架表的
+    `form`/`consumer`/`files[]` 无关）。**用户点令：由 OM 与宿主按 OM-MATLAB 契约
+    自行合作**，本仓不居间裁决——只列三问（交付形态 / `omc_bridge.js` 启动时序与 boot
+    的关系 / 产品态验收判据）与两条边界（若涉及资产身份再找我出表；不裁决接口细节）。
+  - **本仓做/不做**：做——事实通报、归属记录、STATE 勘误、探针脚本；
+    不做——不裁决接口、不转述协议细节、不在内容契约加字段。
 - **★ D 系列全收口：`105` 三项复验通过（含我独立变异验证）+ 探针纪律入本仓 AGENTS（2026-10-29；UI `105` → 我 `106`→UI〔其槽 `094`〕）**：
   - **① 静默早退 → 响亮失败：三层复验通过**。产品层：`OmcBridge.ts` 的
     `if (!FS) return` 改为抛 `FLAVOR_UNAVAILABLE`，错误信息点名三源；论证
