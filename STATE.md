@@ -426,12 +426,25 @@
     2s 内 200 次 sync。断法都是**断边不是节流**（`refresh()` 幂等化 + `addpath` 路径
     指纹去重 + HeaderBar 单飞锁）。第三层根因：对账缓存三态化（corrupted/unchecked
     也进会话缓存）——此前每秒数百次对账每次对 40MB 坏盘重读重哈希。
-  - **★ 但暴露一条独立未决问题**：整个 151s 内 `window.__omc` **仍恒 undefined**、
-    `__octaveHosts` 0、`__octaveReady` 空 ⇒ **泄漏与「引擎没起来」是两个独立问题**。
-    泄漏已断；**但「勾 omc + 启动 → omc 真可用」这条路从未被证明过**
-    （`096`/`097` 的 MSL 7/0 是手动按生产序列装配 `__omc` 验的，不走 UI boot）。
-    当前无任何报错，用户只会觉得「勾了没反应」。已请 UI 加判据：boot 完成后断言
-    `window.__omc` 存在且 `omc_eval` 可调，失败显式报「omc flavor 启动失败」。
+  - **~~★ 但暴露一条独立未决问题~~ ★ 勘误（2026-10-29，UI `103` 推翻，我复验确认）——
+    上一版复钓的结论「`__omc` 仍恒 undefined」是**我的探针错**，不是产品缺陷**：
+    我 `measure2.mjs` 用 `querySelectorAll('button')` 找 `'Boot GNU Octave Engine'`
+    ——那串文案在产物里是 **`<h3 class="modal-title">`（模态标题）不是按钮**
+    （`BootModal.svelte:87` + `en.ts:86 'boot.title'`），所以 `.click()` 是**空操作**，
+    **boot 从未被触发**，`__omc` 自然恒 undefined。⇒ 我上一轮 151s 观察测的是
+    「boot 未触发」路径，不是用户真实路径。
+    **修正后复钓（`measure3-real-boot.mjs`，点 `.modal-card .modal-footer .btn-primary`
+    = 真按钮 `Start Engine Now`）**：`__omc` **1.4 秒内装配完成**、
+    `omc_eval` 可调、`hosts:1`、`ready:true`、反向 `loadModel(NoSuchPackageXYZ)` =
+    `"false"`；同时**真 boot 路径下内存 1,446 → 1,365 MB（斜率 -0.70 MB/s，omc 全程存活）
+    —— D13 断环在真实路径上也成立**。
+    **教训（写进经验）**：探针选择器必须核**产物 DOM 形状**（标题 ≠ 按钮），
+    否则会把自己的测不到写成产品的不存在——这正是我一直在别的仓身上抓的那类错误。
+  - **UI 的一条真缺口（它在补，非我方要求）**：`tests/engine/OmcBridge.test.ts` 只测
+    失败路径，无成功路径回归锁（装配成功时 `__omc` 被赋值 + 三条初始化各一次）——
+    这就是「`__omc` 起没起来」只能靠浏览器实测发现的原因。另有一处**静默早退**：
+    `setupOmcBridge` 首行 `if (!FS) return;`（embed 无 `mod.FS` 时静默返回、不报错），
+    UI 倾向改成显式 `FLAVOR_UNAVAILABLE`，先补断言锁现状再单独改行为。
   - **★ `.eval()` 裁定 = A（删掉 spec 那句）**：我独立复核 UI 三处证据全部成立
     （重构前挂的是插件实例本身 / 现原型只有 `listTools`+`callTool` / 全历史
     `modelContext.eval` 只命中它自己写的测试注释、零实现）。判据：①spec 是设计叙述
