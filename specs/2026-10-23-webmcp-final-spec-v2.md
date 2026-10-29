@@ -30,7 +30,7 @@ A 骨架（工具表 + 分发机 + deps 能力门）+ C 深模块半（eval 深�
 ### A. 三轮审定的基础架构（不变，摘要重述）
 
 - **A 骨架**：数据表（name/description/params schema/deps/run）+ 纯函数分发机（零领域 import）+ 协议壳 + 插件壳工厂。`defineTool<D extends keyof Ctx>` 绑死 deps 与 ctx（`Pick<Ctx, D>`）。
-- **C 深模块半**：`octave_eval` 独立深实现文件（可用性守卫+输出规范化+工作区同步）但表里一行；`.eval()` 只挂全局直柄（legacy 门面）。
+- **C 深模块半**：`octave_eval` 独立深实现文件（可用性守卫+输出规范化+工作区同步）但表里一行。~~`.eval()` 只挂全局直柄（legacy 门面）~~ —— **★ 勘误（2026-10-29 裁定 A，删除本句）**：`.eval()` 快捷面**从未实现过**（旧实现挂的是插件实例本身，公开面只有 `listTools`/`callTool`；`git grep "modelContext.eval" -- src` 全历史零命中；运行期 `window.modelContext.eval === undefined`）。这句是**设计叙述里的遗留设想，不是已交付契约**——本 spec 步骤 0–4 的落实清单里也从未有这一项。裁定 A：**删掉它、不加这个面**（加新公开调用口 = wire 扩张，无真实需求驱动；旧调用方零使用）。恒等式测试按**实际存在的两条通道**（legacy 事件 vs 全局直柄）收口。判据与复核：本仓 `mail/102` §三 + UI `mail/101` §二。
 - **B 两样**：Disposable（仅通道 attach/卸载+插件生命周期）；三通道命名（legacy 事件/全局直柄/fake-channel 契约测试）。
 - **provision / health 正交**：provision 静态决定名册、health 动态只影响调用结果且不进 list wire。
 - **守卫优先级**：旧路径（6 个既有工具）遇 crashed/failed ⇒ supervisor 原文案逐字透传；`CAPABILITY_UNAVAILABLE` 只用于新路径（见 B.2）。
