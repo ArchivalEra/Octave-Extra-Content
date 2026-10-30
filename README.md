@@ -37,6 +37,7 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 在档待办（**不归本仓**）：
 1. OM 的 MATLAB 语义桥（`omc_*.m` 11 件 + `omc_bridge.js`）从未装配进 Octave 站点——OM 只在测试里运行时注入验过，宿主的资产面一件没有，导致 UI 终端在 omc 未启动时的 fallback 是死路径。归属：产权 OM、装配宿主、消费 UI；**E 线是两家引擎之间的运行时契约，不走内容契约**。已投 `mail/107`（OM）与 `108`（宿主）。
 2. gzip 预压缩集群推广（EdgeOne 只缓存不压缩 ⇒ `.gz` sidecar 是唯一路径）：机制已在线工作（74.5MB wasm → 21.3MB 传输），但 UI 产物已 1.26 GB、超 GitHub Pages 1 GB 硬限 260 MB，且其中 617 MiB 是同字节重复（布局所致）。归属：侧车与排除表 UI、布局瘦身与 Pages 发布策略宿主。已投 `mail/109`（宿主）与 `110`（UI）。
+3. 生态统一 release 协议（`.br` + `.gz` sidecar）：实测 brotli q11 比 gzip -9 再省 37.5%（`omc.wasm` 74.5MB → 13.05MB），而边缘动态 br 只到 19.2MB ⇒ sidecar 值得做，代价是 148s/件（须 CI 缓存）。站侧已提案统一分发站（R2 + Worker + 静态索引），本仓回信支持并开了箱位。已投 `mail/112`（站侧）/ `113`（宿主 + UI）。
 
 ## 供给配方（recipes/）
 
