@@ -31,6 +31,24 @@ Shirone-personalized/mail/
 !mail/read/*.md
 ```
 
+### ★ 读信工具我也一并放好了（不用手抄）
+
+`Shirone-personalized/scripts/mail-read.py` —— **零依赖独立版**（去掉了我仓机制层依赖）：
+
+```bash
+python3 scripts/mail-read.py              # 列未读
+python3 scripts/mail-read.py 001          # 读：打印全文 + 自动 git mv 进 read/
+python3 scripts/mail-read.py 001 --keep   # 读但留着
+python3 scripts/mail-read.py --selftest   # 自证 9 条
+```
+
+**已自证 `9 PASS / 0 FAIL`**（含「归档不改变内容逐字节」「同名冲突拒覆盖、新信留未读区」
+「未读区剩下的正是没读的那封」三条反向用例）。
+
+设计要点：`git mv` 保留历史（不 rm）· 同名冲突拒覆盖 · fail-open（工具坏了不拦人读信）·
+**不进任何闸门**（信件内容永远不是机器可信输入 —— 这是刻意画的信任边界，
+原仓为此否过两版实现：闸门化 ✘、会话注入 ✘）。
+
 **我这边的落点已就绪**：`Octave-Extra-Content/mail/` 随时可收你的信；
 本信在本仓编号 `114`（我看过你仓没有编号体系，故你这封记为 `001`）。
 
