@@ -119,16 +119,29 @@ gzip 变体：全程 522ms（零解码器）
 
 ---
 
-## 2. 目录形状
+## 2. 产物形状（**Release assets，扁平命名**）
+
+> ★ **硬约束（2026-10-30 实测）**：GitHub Release 的 asset 名**会被拍平**——
+> `gh release upload .../chunks/zstd/000.zst` 落成的 asset 名是 **`000.zst`**（路径丢失）。
+> 所以**不能**用 `chunks/zstd/NNN.zst` 这种带斜杠的路径作为 asset 名。
+> **分片身份改由「asset 名的命名约定」承载**（下表）。
 
 ```
-<repo>/<tag>/                         ← 不可变。新版本 = 新 tag = 新目录
-  manifest.json                       ← 唯一元数据入口
-  chunks/zstd/000.zst … NNN.zst       ← 预分片（每块一个普通 URL）
-  chunks/gzip/000.gz  … NNN.gz
+Release <repo>@<tag> 的 assets（全部扁平，同层）：
+  manifest.json                      ← 唯一元数据入口
+  <asset>.zstd.000 … <asset>.zstd.NNN   ← zstd 分片（命名约定：<资产名>.zstd.<序号>）
+  <asset>.gzip.000 … <asset>.gzip.NNN   ← gzip 分片
+  <asset>                            ← identity 原文件（兜底）
 ```
 
-**不提供 `latest` 别名**——那是「永续更新」的入口。「永不更新」的强制就在目录名含 tag。
+**为什么能这么命名**：asset 名允许 `[a-zA-Z0-9._-]`，点号是合法分隔符。
+`OpenModelicaCompiler_bg.wasm.zstd.000` 既扁平又可解析（`<name>.<codec>.<i>`）。
+
+**解析规则（消费端）**：manifest 里的 `chunks[].file` 就是**asset 名**（纯文件名，无路径），
+消费端把它拼到 base URL 后面即可。**base URL 由分发方（static 站/反代）提供，
+不是我们定义**——这样同一份 release 可以被任意反代挂到任意路径前缀下。
+
+**不提供 `latest` 别名**——那是「永续更新」的入口。「永不更新」的强制就在 tag 上。
 
 **sidecar 整文件形态（可选，给不并发的小件用）**：
 ```

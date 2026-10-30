@@ -46,17 +46,22 @@ def compress_blocks(blocks, codec):
 
 
 def build_variant(blocks, codec, chunk_size, outdir, asset_name):
-    """产一个变体：压缩 + 落盘 + 收集身份。"""
+    """产一个变体：压缩 + 落盘 + 收集身份。
+
+    ★ 命名约定（2026-10-30 实测硬约束）：GitHub Release 的 asset 名**会被拍平**
+      （`gh release upload .../chunks/zstd/000.zst` 落成 `000.zst`，路径丢失）。
+      所以分片用**扁平名 + 命名约定**：`<asset名>.<codec>.<序号>`，
+      点号是合法分隔符，消费端按 `<name>.<codec>.<i>` 解析。
+      `chunks[].file` 就是**纯 asset 名**（无路径）；base URL 由分发方提供。
+    """
     parts = compress_blocks(blocks, codec)
-    d = os.path.join(outdir, "chunks", codec)
-    os.makedirs(d, exist_ok=True)
-    ext = {"gzip": "gzip", "zstd": "zstd"}[codec]
+    os.makedirs(outdir, exist_ok=True)
     chunks = []
     for i, p in enumerate(parts):
-        name = f"{i:03d}.{ext}"
-        with open(os.path.join(d, name), "wb") as f:
+        name = f"{asset_name}.{codec}.{i:03d}"      # ← 扁平，无斜杠
+        with open(os.path.join(outdir, name), "wb") as f:
             f.write(p)
-        chunks.append({"i": i, "file": f"chunks/{codec}/{name}",
+        chunks.append({"i": i, "file": name,
                        "bytes": len(p), "sha256": sha256(p)})
     v = {"codec": codec, "totalBytes": sum(len(p) for p in parts),
          "chunked": True, "chunkSize": chunk_size, "chunks": chunks}
@@ -146,6 +151,9 @@ def selftest():
         c0 = man["variants"][0]["chunks"][0]
         p0 = os.path.join(out, c0["file"])
         t("I2：块 sha 与落盘实件一致", sha256(open(p0, "rb").read()) == c0["sha256"])
+        t("★ Release 兼容：asset 名扁平（无斜杠）", "/" not in c0["file"])
+        t("★ 命名约定可解析（<name>.<codec>.<i>）",
+          c0["file"].endswith(".zstd.000") and c0["file"].startswith("big.bin"))
         t("I2：块能解回原文（zstd）",
           (lambda: __import__("zstandard").ZstdDecompressor()
              .decompress(open(p0, "rb").read(),
