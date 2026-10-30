@@ -426,6 +426,51 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 发布契约 v2（初代）——预分片 + 普通 GET，PoC 全链路通过（2026-10-30；`specs/2026-10-30-release-contract-v2.md` + `tools/check-release-v2.py`）**：
+  - **用户三条纠正（全部采纳，v1 大幅砍）**：①**格式协商是 HTTP 的事**（`Accept-Encoding`），
+    我们不该自创协商协议；②**「最终用户拉的仅仅只是一个没多少头的标准请求」** ⇒
+    **Range/条件请求/seek table/`range.basis` 全族砍掉**（预分片让 Range 不必要）；
+    ③**初代只开 zstd + gzip + identity，不开 br**（不是不支持，是初代不开——留位，
+    不占初代复杂度）。
+  - **★ PoC 全链路通过（浏览器真环境）**：用户只 `fetch(manifest.json)` 一次 →
+    并发 `fetch(chunk)` → 逐块 sha → 解码 → 拼接 → 全局 sha。
+    实测 `15/15 块 / 74,579,404 B`，全局 sha 与 PoC manifest 顶层 `sha256` **逐字一致**
+    （复跑：`poc-multichunk2.mjs` 输出 `ok: true`，脚本内做 `ghex === man.sha256` 比较）。
+    **无 Range、无条件请求、无自定义头**——就是普通下载链接。
+  - **★ 前向兼容已实测**：往 manifest 链首插一个假想 `xz-future` 变体，
+    旧客户端遍历轨迹 = `xz-future:SKIP(unknown)` → `zstd:OK(74579404)` ⇒
+    **未知 codec 被跳过、后续变体成功**。**这是「加新格式不改协议」的硬证据**：
+    机制 = 消费端 `decoder === undefined ⇒ continue`。
+  - **★ 并发收益实测**（每连接 1.5MB/s + 80ms RTT 的限速服务器，自建 `slowserver.py`）：
+    `conc=1 11,519ms / conc=2 1.99× / conc=4 3.63× / **conc=8 4.89×** / conc=15 4.88×`
+    ⇒ **拐点 8**（15 块 ÷ 8 = 2 轮，第二轮吃不饱）。**默认并发 = 8**。
+    （附教训：先用 CDP 限速测出「并发无收益」是**假象**——CDP 是全局共享带宽；
+    换成每连接独立限速才见到真拐点。）
+  - **★ 浏览器解压能力实测**：`DecompressionStream` 只支持 `gzip`/`deflate`；
+    **`br` 与 `zstd` 都不支持** ⇒ 必须外挂解码器。`fzstd` 实测 **8,394B min / 3,860B gz**
+    （官方标 3.8kB，对上），加载 7ms。
+  - **★ fzstd 的一条安全边界（已写成不变量 I6）**：README 原文「backreference 上限
+    **2^25 (32MiB)**；若 level ≥ 20 且解压后 > 32MB 可能失败」。**对我场景不适用**
+    ——因为我们分片：单块 5,242,880B < 2^25，且分块压缩本就没有跨块 backreference。
+    ⇒ 契约要求 `chunkSize ≤ 2^25` 且块必须独立压缩（约束了「未来谁想调大 chunkSize」的自由）。
+  - **编码实测（74.5MB，5MiB×15 块）**：`zstd-19` **15,349,112**（压缩 3.7s 8核 / 解压
+    **0.07s = 1022MB/s**）vs `gzip-9` 20,908,462（5.0s / 0.21s）vs `br-q11` 14,332,389
+    （21.5s / 0.16s）。⇒ **zstd 比 gzip 小 26.6%、解压快 2.8×** ⇒ 第一顺位；
+    br 只小 6.6% 但解码器重 30 倍、解压慢 2.2× ⇒ 初代不开；gzip 体积最差但**零依赖** ⇒ 兜底。
+  - **manifest 形状（初代）**：顶层 `{schema,id,bytes,sha256,variants[]}`；
+    `variants` 是**有序数组**（回退链是数据不是代码）；每项 `{codec, decoder?, decoderBytes?,
+    totalBytes, chunked, chunkSize?, chunks[{i,file,bytes,sha256}]}` 或非分片的 `{file}`。
+    **七条不变量 I1–I7**（I4 要求**恰有一个 identity 在末位**——否则全压缩解不了就无路可走；
+    I6 = chunkSize ≤ 2^25）。
+  - **校验器已落地**：`tools/check-release-v2.py` `--selftest` **7/7**
+    （正常不报 / 无 identity 必报 I4 / chunkSize 超 2^25 必报 I6 / Σchunks≠totalBytes 必报 I3 /
+    块 sha 非 hex 必报 I2 / variants 空必报 I4 / 根非对象必报 I0）。
+    **对 PoC 真件 31 PASS / 0 FAIL**；中途正确抓出「PoC manifest 缺 identity 兜底」并修。
+  - **与既有契约的关系**：内容契约（版本语义）/ 引擎契约（构建事实）/ **发布契约（字节身份）**
+    / 部署契约（消费）四层正交。**fromSource 冲突的解法 = 分层不动版本语义**；
+    `acquisition` 字段**等 manifest 有实物 + 单仓试点后再加**（初代连它都不加）。
+  - **落地顺序（刹车不变）**：用户审定 v2 → manifest 生成器+校验器 → 单仓试点（OM）
+    → 站侧接入（`immutable` + 索引引用 manifest）→ 消费端 → 最后才动内容契约。
 - **★ 用户批评「没有 manifest 就推广 = 不负责」→ 发布契约 v1 设计与可机判探针（2026-10-30；`specs/2026-10-30-release-contract-v1.md` + `tools/check-release-contract.py`）**：
   - **批评成立，我先认**：`109`/`110`/`113` 在无 manifest 的情况下推广 sidecar 压缩。
     三个真问题：①没有单一身份对象（`.wasm`/`.wasm.gz`/`.wasm.br` 三份字节，`Content-Encoding`
