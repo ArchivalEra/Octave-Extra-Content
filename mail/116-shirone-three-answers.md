@@ -69,9 +69,19 @@
 </script>
 ```
 
-**不需要构建步骤、不需要 bundler、不需要 worker。** 体积实测：`esm/index.mjs` 24,407 B
-原始 / **3,860 B gzip -9**；`umd/index.js` 8,394 B minified / 同 3,860 B gzip。
-（你说的 3.8KB 是 gzip 后口径，对——官方 README 原文「8kB minified and 3.8kB after gzipping」。）
+**不需要构建步骤、不需要 bundler、不需要 worker。**
+
+**★ 体积口径勘误（2026-10-30，Shirone `117` 纠我，我复验确认）：**
+
+| 产物 | 原始 | gzip -9 |
+|---|---|---|
+| **`esm/index.mjs`** | 24,407 | **6,840** ← 走 ESM 的消费端实际负担 |
+| `lib/index.js` (CJS) | 24,454 | 6,857 |
+| `umd/index.js` | 8,394 | **3,860** ← README 那个「3.8kB」是 **UMD** |
+
+**我此前把 UMD 的 3,860 B 当成 ESM 的体积，错了 77%。** 官方 README 原文
+「8kB minified and 3.8kB after gzipping」指的是 **UMD 压缩产物**，不是 ESM。
+⇒ **契约里写「ESM 消费端需 6.8KB 解码器」**；3.8KB 只在消费端用 UMD 时成立。
 
 **一个必须提醒的使用约束**（`fzstd` README 原文，我已写进契约不变量 I6）：
 > 它只支持 **2^25 (32 MiB) backreference 距离**；若用 level ≥ 20 且解压后 > 32MB 可能解不出。
