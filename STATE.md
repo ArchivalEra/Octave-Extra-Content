@@ -426,6 +426,34 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 用户提出「全集群推广 gzip -9」→ 支持方向，但量到 Pages 硬限已破（2026-10-29；我 `109`→宿主〔其槽 `063`〕/ `110`→UI〔其槽 `095`〕）**：
+  - **★ 口径修正（用户当场纠正）**：我原先说「让 EdgeOne 动态压、不必放 sidecar」
+    ——**错**。**EdgeOne 只负责缓存、不压缩（硬规矩）** ⇒ `.gz` sidecar 是**唯一**路径。
+    我收回该说法；「推广预压缩」这个方向**支持**，`-9` 收益小（实测 0.52%–1.60%）
+    **不构成否决理由**（没有替代路径）。
+  - **★ 但量到前置硬门槛：GitHub Pages 硬限 1 GB，UI `dist/` 已 1,256,181,615 B
+    = 1.26 GB（超 260 MB）**。Pages 超限 = **不发布**（不是降级）。而 `pages.yml:128`
+    已在跑 `pnpm compress` ⇒ 每件多一份 `.gz`，总量只会更大 ⇒ **死结**：
+    要 gzip_static 必有 sidecar、有 sidecar 更超限。
+  - **617 MiB 是纯重复（内容哈希实测）**：`octave.wasm` 在 `w64/`、`bridge/w64/`、
+    `lanes/IllegalPerformance/w64/` 各一份（3 份 ×4 组：w64 / w64-base / 三档 lane /
+    threads，共浪费 ~229 MiB）；`octave.data` **6 份**（46 MiB）；`clang.wasm` 2 份
+    （46 MiB）；`llvm-wasm-6.0.12.tar.gz` 2 份（33 MiB）；`lld-wasm-only.wasm` 2 份
+    （32 MiB）；`.oct` 二进制每个 5 份。**来源 = `pages.yml` 的布局**
+    （三档 lane 各解一份 → `bridge/` 再铺 → 根级再放 `w64/`+`assets/`）⇒ **布局契约在宿主**。
+  - **UI 脚本两个可改点（我只报）**：①排除表只有 `*.gz` ⇒ `.zip`(23 MiB) /
+    `.whl`(13 MiB) / `.tar.gz`(79 MiB) **被重复压**，零收益且 sidecar 另增体积（纯亏）；
+    ②`-9` vs `-6`：实测 `omc.wasm` 20,895,415 vs 21,004,021（**省 0.52%**，多花 4.9s）、
+    `octave.wasm` 省 0.55%、json 省 1.60%——**-9 是大熵二进制上的白工，但用户点名要 -9 就 -9**，
+    决定权在 UI/用户。
+  - **好消息（线上实测）：gzip_static 这条路已经在工作**——
+    `…/omc/OpenModelicaCompiler_bg.wasm.gz` 200 / 20,895,435 B；带
+    `Accept-Encoding: gzip` 请求原件 ⇒ `Content-Encoding: gzip` / 21,333,875 B
+    （vs 原始 74.5MB，省 71%）。⇒ 机制对、方向对，问题只在**总量门槛**与**白工排除表**。
+  - **归属**：侧车生成/排除表/`-9`vs`-6` = UI；产物瘦身（lane/bridge/根级重复）+
+    Pages 限额与发布策略 = 宿主；内容契约与本问题无关。我列三问（先瘦还是先压 /
+    排除表 / 超大件是否走 release asset 供货——`omc wasm` 与 MSL 已有先例、能立刻
+    砍 ~150 MB），**由他们两家裁**。
 - **★ 用户问「Modelica 终端只能打 Modelica 语法吗，我们的桥呢」→ 实测两答案（2026-10-29；我 `107`→OM〔其槽 `023`〕/ `108`→宿主〔其槽 `062`〕）**：
   - **答案一：终端不是只认 Modelica 语法**。`omc_eval` 的产物契约原文
     「Evaluate one interactive command and return its reply — the same string the
