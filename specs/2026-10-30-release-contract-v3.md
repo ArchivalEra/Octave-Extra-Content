@@ -158,36 +158,43 @@ Release <repo>@<tag> 的 assets（全部扁平，同层）：
 {
   "schema": 1,
   "id": "OpenModelica-Full-Wasm/v0.1.0-wasm32",
-  "bytes": 74579404,
-  "sha256": "8287589e…b001",
-  "variants": [
-    {
-      "codec": "zstd",
-      "decoder": "fzstd@0.1.1",          // 可选：提示消费端要什么解码器
-      "decoderBytes": 3860,               // 可选：提示代价
-      "totalBytes": 15349112,
-      "chunked": true,
-      "chunkSize": 5242880,
-      "chunks": [
-        { "i": 0, "file": "chunks/zstd/000.zst", "bytes": 1275256, "sha256": "…" }
+  "assets": {
+    "OpenModelicaCompiler_bg.wasm": {
+      "role": "engine",
+      "contentType": "application/wasm",
+      "bytes": 74579404,
+      "sha256": "8287589e…b001",
+      "variants": [
+        { "codec": "zstd", "decoder": "fzstd@0.1.1", "decoderBytes": 6840,
+          "decoderForm": "esm", "totalBytes": 15349112,
+          "chunked": true, "chunkSize": 5242880,
+          "chunks": [ { "i": 0,
+                        "file": "OpenModelicaCompiler_bg.wasm.zstd.000",
+                        "bytes": 1275256, "sha256": "…" }, … ] },
+        { "codec": "gzip", "totalBytes": 20908462, "chunked": true, "chunkSize": 5242880,
+          "chunks": [ … ] },
+        { "codec": "identity", "totalBytes": 74579404, "chunked": false,
+          "file": "OpenModelicaCompiler_bg.wasm" }
       ]
     },
-    {
-      "codec": "gzip",
-      "totalBytes": 20908462,
-      "chunked": true,
-      "chunkSize": 5242880,
-      "chunks": [ { "i": 0, "file": "chunks/gzip/000.gz", "bytes": 1395000, "sha256": "…" } ]
-    },
-    {
-      "codec": "identity",                // 最后兜底：单文件
-      "totalBytes": 74579404,
-      "chunked": false,
-      "file": "OpenModelicaCompiler_bg.wasm"
+    "msl-4.1.0-maint.om.zip": {
+      "role": "package", "contentType": "application/zip",
+      "bytes": 19482938, "sha256": "a97d8d94…8535",
+      "variants": [ … ]
     }
-  ]
+  }
 }
 ```
+
+### ★ 多资产（2026-10-30 补：v3 初稿只能描述**一个**资产，而 OM 的 release 实测有 **2 个**）
+
+**`assets` 是 map（资产名 → 该资产的身份与变体）**，不是单个对象。
+理由（deletion test）：删掉这一层，一个含 2 个资产的 release 就只能描述一件 ⇒
+消费端要么拿不到另一件、要么得猜它的名字。**OM 的 `v0.1.0-wasm32` 现有 2 个 asset
+（wasm + MSL zip）、UI `dist` 有 21 个 wasm**——单资产形状覆盖不了现实。
+
+**资产名 = Release asset 的基线名**（分片 asset 名在此基础上加 `.<codec>.<i>` 后缀）。
+消费端先读 manifest 的 `assets`（知道有哪些资产），再按需取某个资产的 `variants`。
 
 ### 3.1 字段必要性（deletion test）
 
@@ -210,10 +217,10 @@ Release <repo>@<tag> 的 assets（全部扁平，同层）：
 
 | # | 不变量 | 反例 |
 |---|---|---|
-| **I1** | 顶层 `bytes`/`sha256` = **全部块解码拼接后**的字节与哈希 | 写成"某编码层"的 sha |
+| **I1** | **每个资产**的 `bytes`/`sha256` = 该资产**全部块解码拼接后**的字节与哈希 | 写成"某编码层"的 sha；或把两个资产混成一个 |
 | **I2** | `chunks[].sha256` 是**该编码块的字节** sha | 写原始 sha |
 | **I3** | 每个 `chunks[].bytes` 之和 == `variants[].totalBytes` | 声明与实际不符 |
-| **I4** | `variants` 非空，且**恰有一个** `codec:"identity"` 作为末位兜底 | 全是压缩格式（解不了就无路可走） |
+| **I4** | **每个资产**的 `variants` 非空，且**恰有一个** `codec:"identity"` 作为末位兜底 | 全是压缩格式（解不了就无路可走） |
 | **I5** | `chunked:true` ⇒ `chunkSize` 必填且 `chunks` 非空；`chunked:false` ⇒ 有 `file` 无 `chunks` | 半截状态 |
 | **I6** | ★`chunked:true` ⇒ `chunkSize ≤ 2^25`（fzstd 安全边界）**且建议 ≤ 10 MiB**（实测降速点在 10–20MB 之间；默认 5 MiB）+ 块必须**独立压缩** | 块 > 32MiB 且 level≥20 ⇒ fzstd 可能解不出；块 > 10MiB ⇒ 落进降速区 |
 | **I7** | `codec` 是**开放字符串**（不是枚举） | 加 br/xz/lz4 时要改 schema |

@@ -413,7 +413,10 @@ def cmd_emit(shelf, out, octave, allow_unverified):
             "upstream_url": v["url"],               # 重取入口（宿主装配时 url 被改写为同源）
             "deps": e.get("depends") or [],
             "form": form, "content": content,
-            "kinds": content,                       # 兼容视图（旧消费者照读）
+            # ★ `kinds` 已删（2026-10-30 用户点令 + 消费端实测）：它是 `content` 的旧名
+            #   兼容视图，UI 消费端 grep **0 个文件**读它，宿主 schema 里**非 required**。
+            #   两份同义数据 = 两处漂移风险（sha256 两处漂移打过官司）。
+            #   档案里 versions[].kinds 仍保留（那是 --probe 的探测真值，不是视图）。
             # ★ 包级静态描述（UI mail/028 Q2 裁决：方案 A 分两层 —— 包级进表；
             #   逐版不做，上游索引无逐版数据、不编）。数据源 = 档案 upstream.description
             #   （来自上游索引，包级一条）。links 同源（news/repository/文档链），
@@ -570,10 +573,9 @@ def _selftest():
        lambda: (lambda doc: doc["schema"] == 2 and doc["packs"][0]["form"] == "pkg"
                 and doc["packs"][0]["content"] == ["m", "src"])(
            _emit_doc(["m", "src"])))
-    ck("schema 2：kinds 保留为兼容视图（= content，旧消费者照读）",
-       lambda: (lambda p: p["kinds"] == p["content"] == ["m", "oct"])(
-           _emit_doc(["m", "oct"])["packs"][0]))
-    ck("★ schema 2：kinds 空 ⇒ content 也是空（不许把空说成有内容）",
+    ck("★ schema 2：`kinds` 不再产（2026-10-30 删兼容视图：消费端 0 读 + 非 required）",
+       lambda: "kinds" not in _emit_doc(["m", "oct"])["packs"][0])
+    ck("★ schema 2：content 空 ⇒ 也是空数组（不许把空说成有内容）",
        lambda: (lambda p: p["content"] == [] and p["form"] == "pkg")(
            _emit_doc([])["packs"][0]))
 

@@ -426,6 +426,55 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 用户两条批评：①「没做试点就做向后兼容」②「23 个字段该掂量哪些不需要」→ 采纳 + 两份审计（2026-10-30）**：
+  - **① 向后兼容层已删**：我给 `check-release-v2.py` 加了 v2 单资产形状的兼容路径
+    （`__single__` 兜底）。用户点破：**v2 从未发布、没有消费者，兼容层是纯负债**。
+    已删（判据：没有旧消费者 ⇒ 兼容层无收益、只有复杂度）。
+  - **② 内容契约 23 字段审计 → 只删 1 个（`kinds`）**：
+    `specs/2026-10-30-content-contract-slimming-audit.md`。
+    判据用**两个方向实测**：生产端（装配态 17 条各字段出现率）+ **消费端（UI 源码
+    grep 文件数）**。结论：**`kinds` / `note` / `license` 消费端 0 读**。
+  - **★ 我判错一条、用户当场纠正、我撤回**：初版说「`kind` 与 `role` 语义重叠、
+    建议合并删 `kind`」——**错**。错法是「从 17 条数据恰好同值反推语义相同」。
+    **三轴实际各答一个问题**（消费端源码有据）：
+    · **`kind`**（`src|pre|engine`）= **下载身份代数**：`src⇒arch=null` /
+      `pre⇒arch=wasm32|wasm64` / `engine⇒arch=lane`（UI `downloadTypes.ts:8-10` 逐条写明）
+    · **`role`**（`package|toolchain|language-bridge`）= **走不走 install**
+      （`PackageManagerPlugin.ts:308`：toolchain ⇒ NOT_INSTALLABLE）
+    · **`content`**（`m|src|oct`）= **装载路径**（`PackageManagerPlugin.ts:314`：
+      `includes('src')` ⇒ 需 LLVM 现场编译；`oct` ⇒ dlopen；只有 `m` ⇒ 直接装）
+    **用户原话**：「`kind` 肯定要啊，不然 UI 就不需要苦哈哈的做 m 只装、源码交 LLVM 编译、
+    oct 需要 dlopen 那样了，这很明确的属性」⇒ 这三层正是内容契约的核心价值之一。
+  - **`kinds` 删除已落地（第 1 步）**：`--emit` 不再产（**改前 13/13 带 → 改后 0/13**，
+    `content` 仍 13/13，**宿主校验器仍 `ok`**，diff 正好 13/13 条各少一字段、无新增）。
+    自证 46 PASS/1 fail（那条断言的正是"kinds 保留"）→ 改断言 → **47/0**。
+    **留存**：档案里 `versions[].kinds` **仍保留**——那是 `--probe` 的**探测真值**，
+    删的是**输出视图**不是**探测事实**。
+  - **其余处置**：`license` / `note` / `upstream_url` **保留**（人不读 ≠ 该删；
+    license 是合规义务、note 是写给人看的、upstream_url 是出处）；`artifacts` 待裁
+    （与 v3 release 概念重叠，等试点后定）。**⇒ 23 → 22。**
+- **★ 发布契约与两个既有契约的收纳审计（2026-10-30；`specs/2026-10-30-release-contract-v3-absorption-audit.md`）**：
+  - **结论：部分收纳，不能整体收纳**（这是对「草率发信」的补救——我 `119`/`120` 让 OM 按 v3
+    造 release 前**没先证明映射成立**）。
+  - **内容契约 23 字段三分**：**可被 v3 接管 5 个**（`sha256`/`url`→`chunks[].file`+base/
+    `size`→`bytes`/`files`→`variants[].chunks[]`/`upstream_url`）；**不该被接管 15 个**
+    （都是语义域：version/form/content/deps/consumer/license/description/versions[] 等）；
+    **待裁 3 个**（`artifacts` / `optional_keys` / `producer`）。
+  - **引擎契约 9 个顶层键完全不能被 v3 收纳**（`tool`/`build`/`declared`/`measured`/
+    `inputs`/`notes`/`verdict`/`mismatches`/`checked` 全是**构建过程事实**，v3 只管
+    **发布产物身份**）。唯一接触点：`measured.files` 的逐件 sha **就是** v3 的产地
+    （**v3 不得自己算 sha 当权威**——与「分发方只核对不另算」同一纪律）。
+  - **★ 审计中发现 v3 一个真缺口并已修**：v3 初稿 manifest 顶层是**单资产**
+    （`bytes`/`sha256`/`variants`），而 **OM 的 release 实测有 2 个 asset**
+    （wasm + MSL zip）、UI `dist` 有 21 个 wasm ⇒ 单资产形状覆盖不了现实。
+    **已改成多资产 `assets` map**（资产名 → `{bytes,sha256,variants[]}`）；
+    校验器 I1/I4 改成**按资产分别判**；两个工具自证都升级
+    （生成器 **15/15**、校验器 **7/7**）。
+  - **多资产真产物验证**：OM 两件（wasm 74.5MB + MSL zip 19.5MB）⇒ wasm 15 块 ×2 编码 +
+    MSL 4 块 ×2 编码 + 各自 identity，**校验 49 PASS / 0 FAIL**。
+    **顺带发现**：MSL zip 再压只省 4.6%（18.58M vs 19.48M，白花 20s CPU）⇒ 印证
+    「已压格式免压」那条；生成器已加 `PRECOMPRESSED_EXT` 处理（仍分片走 5MB 快通道，
+    但不重复压缩）。
 - **★ 用户纠正「那不是试点」→ 真试点链已启动 + 一处协议硬错误被实测修掉（2026-10-30；我 `119`→OM〔其槽 `032`〕/ `120`→Shirone〔其槽 `004`〕）**：
   - **★ 用户纠正（我认）**：我把**本地 PoC 当成了试点**——那不是试点，只是工具自证。
     **真试点链（用户定义，逐段验收）**：
