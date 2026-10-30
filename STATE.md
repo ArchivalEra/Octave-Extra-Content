@@ -426,6 +426,55 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 用户批评「没有 manifest 就推广 = 不负责」→ 发布契约 v1 设计与可机判探针（2026-10-30；`specs/2026-10-30-release-contract-v1.md` + `tools/check-release-contract.py`）**：
+  - **批评成立，我先认**：`109`/`110`/`113` 在无 manifest 的情况下推广 sidecar 压缩。
+    三个真问题：①没有单一身份对象（`.wasm`/`.wasm.gz`/`.wasm.br` 三份字节，`Content-Encoding`
+    该是什么无处声明）；②与「从源码构建契约」冲突（`STATE` Q3：`ways` 是派生不是记录、
+    不引入 `flavor`，sidecar 是第三种取得路径未纳入）；③与 Range 协议冲突（没说清 Range
+    打哪层、怎么切、怎么校验）。**已刹车：1–3 完成前不再推广任何压缩/分片策略。**
+  - **用户目标两条**：「**永远不需要更新**」+「**高度符合 HTTP 标准**」。v1 每条设计都对着
+    这两个词验，原则 = **能由 HTTP 头表达的绝不进 manifest**。
+  - **★ 本次关键实测（决定协议地基，全部可复跑）**：
+    · **Range 只在已压 sidecar 上工作**：原始 `.wasm` + Range ⇒ **200**（`Accept-Ranges: none`）；
+      `.wasm.gz` + Range ⇒ **206** + `Content-Range: bytes 0-1023/20895435`（真分片）；
+      后缀 `bytes=-1024` ✅、开放 `bytes=N-` ✅、越界 ⇒ **416** ✅、**多段
+      `bytes=0-99,200-299` ⇒ 200 不支持**。
+    · **★ 条件请求不可依赖**：`If-Range` 用**错误** ETag 仍返 **206**（RFC 9110 应 200 全体）；
+      `If-None-Match` 返 **200** 而非 304 ⇒ **两条都写进契约当"已知边界"**，否则消费端会写出
+      看似正确、实际无保护的重试逻辑。
+    · **ETag = `"<mtime-hex>-<size-hex>"`**（我实测后缀 hex 精确等于该 sidecar 的
+      `Content-Length`——对照命令：`curl -sI <url>.gz | grep -i etag` 与
+      `printf '%d' 0x<后缀>`）⇒ 是**弱校验器不是内容哈希**，只能诊断不能当 fail-closed。
+    · **无任何 Digest 头**（RFC 9530）⇒ **这是 manifest 存在的第一理由**（标准给不出 sha）。
+    · **zstd 不支持**（`Accept-Encoding: zstd` 返回原始件 74,579,404B）。
+    · **★ 乱序分片 + 还原全链路已验证**：`.gz` 按 5MiB 切 4 片**逆序**拉 → 按序拼
+      20,895,435B（= Content-Length）→ gunzip → sha `8287589e…` **逐字一致**。
+    · **★ 缓存现状与「永不更新」相反**：源站头是 `public, max-age=0, must-revalidate`；
+      且**跨节点 `Age` 互异**（565 / 0 / 566，LAX/HKG/BUR）⇒ 多节点独立缓存、命中率取决于
+      落点。⇒「永不更新」**不能靠"我们不改文件"实现，必须靠头**（`immutable`），
+      而这条不完全在生产者手里——**反代层必须覆盖**。另：同目录下 `.wasm`（`max-age=3600`）
+      与 `.gz`（`max-age=0`）**策略不一致**，这是契约要纠的第一件事。
+  - **v1 设计要点**（篇幅所限只列骨）：`<repo>/<tag>/` 目录**不可变**、**无 `latest` 别名**；
+    manifest 从 v0 的 14 字段砍到 **6 个**（删掉 URL/`contentEncoding`/`range.supported`/
+    `immutable`/`firstSeen`/`form`——**每一个都是"HTTP 已经说了"或"位置放错了"**）；
+    保留的 6 个都过 deletion test（`bytes`+`sha256` / `encodings.*.{bytes,sha256}` /
+    `range.basis` / `granularity` / `contentType` / `role`）；五条不变量 I1–I5
+    （I2 要求压缩层**可复算**：解码后必须等于原始 bytes+sha）；消费端算法**两道校验**
+    （编码层拼完核一次防错位、解码后核一次防解错）；分层解决 fromSource 冲突
+    （版本语义 / 取得路径 `acquisition` / 字节身份三层正交，**且 acquisition 必须等
+    manifest 有实物后再加**）。
+  - **★ 可机判探针已落地**：`tools/check-release-contract.py`（`--selftest` **4/4 三类用例
+    齐**：空输入必报 / 坏 sha+超界必报 I1+I4 / 合法不报 / 空 assets 必报零值守卫）。
+    **对线上真站跑出 6 PASS / 2 FAIL**，两个 fail 正是设计指出的问题：
+    `A6 Cache-Control` 不是 immutable（实测 `max-age=0, must-revalidate`）、
+    `A7 sidecar Content-Type` 是 `application/gzip`（会让消费端把压缩字节当 wasm）。
+    ⇒ **设计不是空谈，是能被红/绿判定的**。
+  - **落地顺序（不跳步，这是刹车）**：用户审定 → manifest 生成器+校验器 → 单仓试点
+    （建议 OM，已有 release+两 asset）→ 站侧接入（索引**引用** manifest 而非重抄 sha）→
+    UI/宿主消费端 → 最后才给内容契约加 `acquisition`。
+  - **未决 5 条**（U1 manifest 每仓 vs 聚合 / U2 granularity 固定 vs 可配 /
+    U3 acquisition 何时加 / U4 br 默认必出 vs 按需 / U5 站侧索引是否完全委托 manifest）
+    ——**我不擅定，等用户与两家裁**。
 - **★ 生态统一 release 协议（`.br` + `.gz` sidecar）：用户拍板 + br q11 实测 37.5%（2026-10-30；我 `112`→站侧 / `113`→宿主〔其槽 `065`〕+UI〔其槽 `096`〕；宿主 `066`/`111` 收执）**：
   - **★ 口径二次纠正（用户亲口）**：**EdgeOne 能动态压 br/gzip，是我们主动不让它压**
     ——它自家 Pages 产品崩过一天，集群共识 = EdgeOne 只当管道。⇒「必须出 sidecar」
