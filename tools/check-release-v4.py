@@ -72,6 +72,7 @@ def check(man, base_dir=None):
     if isinstance(codecs, list) and codecs:
         ok("V4 codecs 末位是 identity", repr(codecs[-1]), codecs[-1] == "identity",
            "没有零依赖兜底 ⇒ 解不开就无路可走")
+        ok("V9 codecs 无重复", repr(codecs), len(set(codecs)) == len(codecs))
 
     # ── products ──
     prods = man.get("products")
@@ -178,24 +179,60 @@ def check(man, base_dir=None):
         if counts:
             ok(f"V5 {tag} 所有 codec 块数一致", repr(counts), len(set(counts)) == 1)
 
+        # V6 语义：identity 块数必须 == ceil(bytes / chunkSize)，且除末块外每块 == chunkSize
+        idv0 = next((v for v in vs if isinstance(v, dict) and v.get("codec") == "identity"), None)
+        if idv0 and isinstance(idv0.get("chunks"), list) and idv0["chunks"] \
+                and isinstance(cs, int) and cs > 0 and isinstance(e.get("bytes"), int):
+            chs0 = idv0["chunks"]
+            import math
+            want = max(1, math.ceil(e["bytes"] / cs))
+            ok(f"V6 {tag} 块数 == ceil(bytes/chunkSize)", f"{len(chs0)} vs {want}",
+               len(chs0) == want, "chunkSize 声明与实际切块不一致（会撒谎）")
+            sizes = [c.get("bytes") for c in chs0]
+            full = sizes[:-1]
+            ok(f"V6 {tag} 除末块外每块 == chunkSize", f"{set(full)} vs {cs}",
+               all(x == cs for x in full), "块大小与声明的 chunkSize 不符")
+
         # V7 算术：Σ identity chunk bytes == entry.bytes
-        idv = next((v for v in vs if isinstance(v, dict) and v.get("codec") == "identity"), None)
+        idv = idv0
         if idv and isinstance(idv.get("chunks"), list):
             tot = sum(c.get("bytes", 0) for c in idv["chunks"] if isinstance(c, dict))
             ok(f"V7 {tag} Σ(identity.chunks.bytes) == bytes", f"{tot} vs {e.get('bytes')}",
                tot == e.get("bytes"))
 
-        # 对盘核对（可选）：identity 拼接后 sha == entry.sha256
-        if base_dir and idv and isinstance(idv.get("chunks"), list):
-            try:
-                buf = b"".join(open(os.path.join(base_dir, c["file"]), "rb").read()
-                               for c in idv["chunks"])
-                ok(f"V7 {tag} 盘上 identity 拼接 sha 一致",
-                   hashlib.sha256(buf).hexdigest()[:8],
-                   hashlib.sha256(buf).hexdigest() == e.get("sha256")
-                   and len(buf) == e.get("bytes"))
-            except OSError as ex:
-                P.append(f"V7 {tag} 盘上缺件: {ex}")
+        # 对盘核对（可选）：**每个 codec 的每一块**都核 bytes + sha（不止 identity）
+        if base_dir:
+            for v in vs:
+                if not isinstance(v, dict) or not isinstance(v.get("chunks"), list):
+                    continue
+                codec = v.get("codec")
+                bad = []
+                for c in v["chunks"]:
+                    if not isinstance(c, dict):
+                        continue
+                    fp = os.path.join(base_dir, c.get("file", ""))
+                    try:
+                        b = open(fp, "rb").read()
+                    except OSError as ex:
+                        bad.append(f"缺件 {c.get('file')}: {ex}"); continue
+                    if len(b) != c.get("bytes"):
+                        bad.append(f"{c.get('file')} 长度 {len(b)} != {c.get('bytes')}")
+                    elif hashlib.sha256(b).hexdigest() != c.get("sha256"):
+                        bad.append(f"{c.get('file')} sha 不符")
+                ok(f"V7 {tag}/{codec} 盘上逐块 bytes+sha 一致",
+                   f"{len(v['chunks'])} 块" + (f"，坏 {len(bad)}" if bad else ""),
+                   not bad, "; ".join(bad[:3]))
+            # identity 拼接后 == entry.sha256
+            if idv and isinstance(idv.get("chunks"), list):
+                try:
+                    buf = b"".join(open(os.path.join(base_dir, c["file"]), "rb").read()
+                                   for c in idv["chunks"])
+                    ok(f"V7 {tag} 盘上 identity 拼接 sha 一致",
+                       hashlib.sha256(buf).hexdigest()[:8],
+                       hashlib.sha256(buf).hexdigest() == e.get("sha256")
+                       and len(buf) == e.get("bytes"))
+                except OSError as ex:
+                    P.append(f"V7 {tag} 盘上缺件: {ex}")
 
     return R, P
 
@@ -275,6 +312,11 @@ def selftest():
         "codec 块数不一致", "V5")
     bad(lambda m: m["entries"][1]["variants"][0].update(codec="xz"),
         "codec 未在 codecs 声明", "V4")
+
+    # ★ V6 语义：chunkSize 撒谎（声明 1MiB 但 identity 块是 6B 单块 ⇒ 块数应为 1，改 chunkSize 制造不符）
+    def lie_chunk(m):
+        m["chunkSize"] = 1          # 声明 1 字节 ⇒ 期望 6 块，实际 1 块
+    bad(lie_chunk, "chunkSize 撒谎（块数与 ceil(bytes/cs) 不符）", "V6")
 
     # ── 空输入 ──
     _, P = check([])

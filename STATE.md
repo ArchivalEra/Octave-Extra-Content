@@ -449,12 +449,18 @@
     **文件名 5/5 完全相同、字节 5/5 全不同**（`numgradient.oct` 17,025 vs 17,519B，`cmp` NO）
     ⇒ **manifest 不能用载荷文件名当 key，必须有 product 分组**。
   - **代码审查后重写（2026-10-31，两轴审查揪出 5 硬违规 + 7 不满足）**：修了 6 个真 bug 并补校验器。
-  - **生成器自证 38/38**（`tools/make-manifest-v4.py`）：白名单 9 反 + 3 正 +
-    v4 结构 10（含**每条 entry.sha 与盘上 identity 拼接一致**）+ 反向 13
-    （含 chunkSize 参数真生效、递归目录、子目录扁平化、gzip 可复现、
-    两个无 arch 同名文件不塌陷）+ 空输入 2。
-  - **校验器 `tools/check-release-v4.py` 自证 24/24**（V1–V10 逐条反向），
-    **真数据 162 PASS / 0 FAIL**（含 `--base` 盘上核对）。
+  - **生成器自证 40/40**（`tools/make-manifest-v4.py`）：白名单 9 反 + 3 正 +
+    v4 结构 10（含**每条 entry.sha 与盘上 identity 拼接一致**）+ 反向与边界 16
+    （含 chunkSize 参数真生效 / 递归目录 / 子目录扁平化 / html+css 走全三编码 /
+    字体只 identity / gzip 可复现 / 两个无 arch 同名不塌陷）+ 空输入 2。
+  - **校验器 `tools/check-release-v4.py` 自证 25/25**（V1–V10 逐条反向 + 空输入），
+    **真数据 168 PASS / 0 FAIL**（含**逐块 bytes+sha 对盘核对**）。
+  - **★ 第二轮审查又揪出 4 件真的（已修）**：①selftest 里一条 `... or True` **恒真假闸门**
+    （html/css 那条永远绿 —— 正是我一直在别人身上抓的那类，自己犯了）；②长度预算
+    spec 写了 ≤64 但实现没做（现加警告，>255 仍硬拒）；③生成器失败**留半个 release 目录**
+    （现失败即清场）；④`--` 分隔符对含 `--` 的路径误切（现要求左侧含 ≥2 个 `:` 才当分隔符）。
+    校验器同步补：V6 块数语义（能抓 chunkSize 撒谎）+ **每个 codec 每块都核盘上 bytes+sha**
+    （原来只核 identity 拼接总 sha）。
   - **修掉的 6 个真 bug**：①`chunkSize` 撒谎（用全局 `CHUNK` 而非参数）；
     ②跨 product 同名撞车且**manifest 谎报 sha 不报错**；③src 悬空/自指不 fail-closed；
     ④gzip 随 mtime 变 ⇒ manifest 不可复现；⑤CLI 不递归 ⇒ 站点树不可用；

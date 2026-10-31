@@ -32,6 +32,7 @@ import tempfile
 DEFAULT_CHUNK = 5 * 1024 * 1024
 MAX_CHUNK_HARD = 2 ** 25          # fzstd backreference 上限
 MAX_NAME_LEN = 255                # GitHub asset 名硬上限（实测：256 报 422）
+NAME_BUDGET = 64                  # 本协议推荐预算（spec §1；超了只提示不拦）
 
 # ★ 实测得到的白名单（GitHub 逐字保留）：
 #   OK:      a.b_c-D9.zstd.000 / UPPER.Mixed.Case.000 / under_score / hy-phen / -leading
@@ -87,7 +88,7 @@ def compress_blocks(blocks, codec):
     raise ValueError(codec)
 
 
-def build_variants(raw, codecs, outdir, name_ctx, chunk):
+def build_variants(raw, codecs, outdir, name_ctx, chunk, written=None):
     """为一个载荷产出 variants[]（每块独立压缩，按 chunk 切）。
 
     name_ctx = 名字前缀（含 product 前缀，不含 codec/序号）
@@ -110,6 +111,8 @@ def build_variants(raw, codecs, outdir, name_ctx, chunk):
                 raise SystemExit(f"FATAL: 名字不合法 {fn!r}: {why}")
             with open(os.path.join(outdir, fn), "wb") as f:
                 f.write(p)
+            if written is not None:
+                written.append(fn)
             chunks.append({"part": i, "file": fn, "bytes": len(p), "sha256": sha256(p)})
         variants.append({"codec": codec, "chunks": chunks})
     return variants, len(blocks)
@@ -170,10 +173,37 @@ def make(spec, outdir, relid, codecs=("zstd", "gzip", "identity"), chunk=DEFAULT
 
     os.makedirs(outdir, exist_ok=True)
 
+    # 记已写文件，失败时清掉（不留半个 release 目录）
+    written = []
+
     products = {}
     entries = []
     seen_files = {}                      # file 名 → (product, name)，用于 V2 全局唯一
     seen_member = set()                  # (product, name)，用于 V3
+
+    try:
+        return _make_inner(spec, outdir, relid, codecs, chunk, written)
+    except BaseException:
+        for fn in written:                     # 失败即清理，不留半个 release
+            try:
+                os.remove(os.path.join(outdir, fn))
+            except OSError:
+                pass
+        mf = os.path.join(outdir, "manifest.json")
+        if os.path.exists(mf):
+            try:
+                os.remove(mf)
+            except OSError:
+                pass
+        raise
+
+
+def _make_inner(spec, outdir, relid, codecs, chunk, written):
+    """真正干活的部分；失败由外层清场。"""
+    products = {}
+    entries = []
+    seen_files = {}
+    seen_member = set()
 
     for p in spec:
         pid = p["product"]
@@ -191,12 +221,17 @@ def make(spec, outdir, relid, codecs=("zstd", "gzip", "identity"), chunk=DEFAULT
 
             # ★ 名字前缀含 product id —— 修「跨 product 同名撞车」
             name_ctx = f"{pid}__{base}"
-            ok, why = name_ok(f"{name_ctx}.x.000")
+            probe = f"{name_ctx}.x.000"
+            ok, why = name_ok(probe)
             if not ok:
                 raise SystemExit(f"FATAL: {pid}/{base} 派生名不合法: {why}"
                                  f"（载荷名太长或含禁用字符，请缩短）")
+            if len(probe) > NAME_BUDGET:
+                print(f"  ⚠️  名字 {probe!r} = {len(probe)} 字符 > 推荐预算 {NAME_BUDGET}"
+                      f"（不拦，但贴 255 上限时人已读不懂；建议缩短 {pid} 或载荷名）",
+                      file=sys.stderr)
 
-            variants, nchunks = build_variants(raw, use, outdir, name_ctx, chunk)
+            variants, nchunks = build_variants(raw, use, outdir, name_ctx, chunk, written)
 
             key = (pid, base)
             if key in seen_member:
@@ -390,16 +425,26 @@ def selftest():
         os.makedirs(os.path.join(tree, "a", "b"))
         open(os.path.join(tree, "index.html"), "wb").write(b"<html></html>")
         open(os.path.join(tree, "a", "b", "deep.css"), "wb").write(b"body{}")
+        # 用**默认三编码**（不是 identity-only）才验得出「html/css 不被误判成已压格式」
         m4 = make([{"product": "site", "form": "tree", "files": [tree]}],
-                  os.path.join(d, "o-tree"), "t/tree", codecs=("identity",))
+                  os.path.join(d, "o-tree"), "t/tree")
         names = {e["name"] for e in m4["entries"]}
         t("★ 递归收集子目录文件（2 条 entry）", len(m4["entries"]) == 2)
         t("★ 子目录路径被扁平化（含 __ 且无 /）",
           any("a__b__deep.css" in n for n in names) and not any("/" in n for n in names))
-        t("★ html/css 走全编码（未被误当已压格式）",
-          [v["codec"] for v in next(e for e in m4["entries"]
-                                    if e["name"] == "index.html")["variants"]]
-          == ["identity"] or True)  # 这里只验收集，编码面由 codecs 参数决定
+        # ★ 真断言（原为 `or True` 恒真 = 假闸门）：html/css 必须出 3 编码
+        idx = next(e for e in m4["entries"] if e["name"] == "index.html")
+        t("★ html 走全三编码（未被误当已压格式）",
+          [v["codec"] for v in idx["variants"]] == list(m4["codecs"]))
+        css = next(e for e in m4["entries"] if e["name"].endswith(".css"))
+        t("★ css 走全三编码", [v["codec"] for v in css["variants"]] == list(m4["codecs"]))
+        # ★ 已压格式（woff2/avif）必须只出 identity
+        woff = os.path.join(tree, "f.woff2")
+        open(woff, "wb").write(os.urandom(2000))
+        m5 = make([{"product": "f", "form": "file", "files": [woff]}],
+                  os.path.join(d, "o-font"), "t/f")
+        t("★ 字体 woff2 只出 identity（已压格式免压）",
+          [v["codec"] for v in m5["entries"][0]["variants"]] == ["identity"])
 
         # ── G. 可复现：同输入两次生成，字节逐字相同（gzip mtime=0）──
         try:
@@ -429,7 +474,9 @@ def selftest():
 
 def _parse_product(ps):
     """pid:form[:arch][:src]:path —— 冒号分隔；若 path 含 ':'，用 '--' 分隔。"""
-    if "--" in ps:
+    # `--` 作路径分隔符：仅当左侧像 meta（含 >=2 个 ':'）时才启用，
+    # 避免路径本身含 '--'（如 /tmp/a--b/c）被误切。
+    if "--" in ps and ps.split("--", 1)[0].count(":") >= 2:
         meta_s, path = ps.split("--", 1)
         meta = meta_s.rstrip(":").split(":")
     else:

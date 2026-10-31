@@ -1,6 +1,6 @@
 # 发布契约 v4 · 定稿
 
-> **状态**：本地实测通过。**生成器自证 38/38、校验器自证 24/24、真数据 162 PASS / 0 FAIL（含盘核对）**、
+> **状态**：本地实测通过。**生成器自证 40/40、校验器自证 25/25、真数据 168 PASS / 0 FAIL（含逐块盘核对）**、
 > 三编码端到端 sha 逐字一致。**数字是当次实测快照，复跑命令见 §9**（本仓纪律 2 的
 > `[[键名]]` 台账只覆盖 `STATE.md`，`specs/` 不在扫描面内 —— 这是写明的缺口，不是"查过"）。
 > **目标**：**apt 的稳健 + HTTP 的简洁**。静态站上所有内容（wasm / tar / zip / html / 字体 / 图片）都用这一套。
@@ -30,7 +30,7 @@
 | 项 | 值 | 判据 |
 |---|---|---|
 | 硬上限 | 255 | 实测 GitHub：255 传成功、256 报 `name is too long` |
-| **推荐预算** | **≤ 64** | 名字 = `<product>__<载荷名>.<codec>.<NNN>`；product 与载荷名各留 ~25 字符余量。<br>实测最大实例 `omc__OpenModelicaCompiler_bg.wasm.zstd.014` = 37 字符 |
+| **推荐预算** | **≤ 64** | 名字 = `<product>__<载荷名>.<codec>.<NNN>`；product 与载荷名各留 ~25 字符余量。<br>实测最大实例 `omc__OpenModelicaCompiler_bg.wasm.zstd.014` = 42 字符 |
 | 超预算处置 | **生成器报错并提示缩短** | 不许静默截断（截断 = 名字变了 = manifest 指向不存在的 asset） |
 
 **为什么推荐 64 而不是贴 255**：名字里三段都有实际含义（product / 载荷 / codec+序号），
@@ -188,32 +188,31 @@ i386 : 146 条 i386  + 143 条 all   ← 复制一遍
 
 ## 5. 实测结果（2026-10-31，本地）
 
-### 5.1 生成器自证 38/38（构成见下）
+### 5.1 生成器自证 40/40（构成与用例逐条对应）
 
 ```
-A. 白名单反向 9 条（含实测 GitHub 改写原样，必须全拒）：
-   dots...many.000（连续点折叠）/ .leading-dot（加 default.）/ trailing-dot.（加 default.）
-   sp ace.bin（→sp.ace）/ pct%41.bin（→pct.41）/ paren(1).bin（括号删）
-   a中b.bin（非 ASCII 删）/ a/b.bin（斜杠）/ 'a\n'（换行尾，fullmatch 才拦得住）
-B. 白名单正例 3 条（实测 GitHub 逐字保留）：
+A. 白名单反向 9 条（实测 GitHub 改写原样，必须全拒）
+   连续点 / 前导点 / 尾点 / 空格 / % / 括号 / 非 ASCII / 斜杠 / 换行尾
+B. 白名单正例 3 条（实测 GitHub 逐字保留）
    a.b_c-D9.zstd.000 / UPPER.Mixed.Case.000 / -leading-hyphen
-C. v4 结构 9 条：
-   products 数 / src 边 / ★跨 arch 同名不塌陷 / 两条 sha 不同 / 已压格式只 identity /
-   11MiB→3 块 / 全名过白名单 / 全名唯一 / ★每条 entry.sha 与盘上 identity 拼接一致
-   另有 1 条：块能独立解压（gzip，每块独立）
-D. 反向用例（该报必报）13 条：
-   chunkSize > 2^25 / = 0 / 负数 /
-   ★两个无 arch 的同名文件→2 条 entry 且 file 名不同 / 两条 sha 各自与盘上一致 /
+C. v4 结构 10 条
+   products 3 个 / src 边存在 / 跨 arch 同名不塌陷 / 两条 sha 不同 /
+   已压格式只 identity / 11MiB→3 块 / 全名过白名单 / 全名唯一 /
+   每条 entry.sha 与盘上 identity 拼接一致 / 块能独立解压
+D. 反向与边界 16 条（该报必报 / 参数真生效）
+   chunkSize>2^25 / =0 / 负数 /
+   两个无 arch 同名文件→2 条 entry 且 file 名不同 / 两条 sha 各自与盘上一致 /
    src 悬空 / src 自指 / 无 arch 带 src / product id 重复 /
-   ★chunkSize 参数真生效（1MiB→3 块）/
-   ★递归收集子目录 2 条 / ★子目录路径扁平化 /
-   ★gzip 可复现（两次同输入→同 sha 序列）
+   chunkSize 参数真生效（1MiB→3 块）/ 递归收集子目录 / 子目录扁平化 /
+   html 走全三编码 / css 走全三编码 / 字体 woff2 只 identity / gzip 可复现
 E. 空输入 2 条：无 product / 目录为空
 ```
 
-**校验器 `--selftest` 24/24**：1 条正常不报 + 21 条该报必报（V1–V10 逐条反向）+ 2 条空输入。
+**校验器 `--selftest` 25/25**：1 条正常不报 + 22 条该报必报（V1–V10 逐条反向，
+含「chunkSize 撒谎」这条专测）+ 2 条空输入。
 
-**真数据 162 PASS / 0 FAIL**（74.5MB wasm，15 块 × 3 编码，含**盘上 identity 拼接 sha 核对**）。
+**真数据 168 PASS / 0 FAIL**（74.5MB wasm，15 块 × 3 编码，含**每个 codec 每块
+bytes+sha 对盘核对** + identity 拼接总 sha）。
 
 ### 5.2 5MiB 分片机制（74.5MB wasm，真件）
 
@@ -309,7 +308,7 @@ UI 的 Astro 产物（`_astro/App.CUPGshJq.js` 这类自带内容哈希的文件
 ## 9. 复跑方式
 
 ```bash
-# 生成器自证（21 条）
+# 生成器自证（40 条）
 source /mnt/hdd/toolenv/bin/activate
 python3 tools/make-manifest-v4.py --selftest
 
