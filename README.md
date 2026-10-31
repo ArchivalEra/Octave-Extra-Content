@@ -67,6 +67,8 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 **向上游报缺陷走它自己的渠道，不走本仓的 `mail/`**。`mail/` 是 Octave 集群内部的通信体例；Einfacht 在集群之外，向它报告一律走 **GitHub issue**（其 #1–#21 都是「反哺（使用方…）」形状）。投递渠道由收信方定，不由发信方按集群惯例类推——这条是我 2026-10-31 投错渠道后立的规矩（详见 `mail/README.md` 第 2 条与 `STATE.md`）。本仓向上游报的三条闸门判据盲区：issue #23 / #24 / #25。
 
+**静态分发契约已移交**（2026-10-31）：协议定名 **v1**（此前内部代号 v4），维护权归 [Static-Contract](https://github.com/ArchivalEra/Static-Contract)，本仓退为上游需求方之一。本仓保留副本（`specs/2026-10-30-release-contract-v4.md`——文件名是历史代号，内容是 v1）但**权威不在本仓**。**v1 的第一次真试点已启动**：从 OpenModelica 开始，链条是「OM 造 release → 本仓核验 → Shirone 建站 → 本仓验收 → UI 改链接 → 本仓终验」。工具链 `tools/make-manifest-v4.py`（40 条自证）+ `tools/check-release-v4.py`（25 条自证，V1–V10 fail-closed）。
+
 ```bash
 # 复跑本仓事实系统健康
 python3 build/facts.py --render-doc STATE.md --check
