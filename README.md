@@ -94,6 +94,8 @@ specs/        设计规格（WebMCP 重构 spec 等）
 STATE.md      活状态文档（机器维护的事实块在文末）
 ```
 
+**货架实测状态**（`--probe` 逐版探的产物）：13 个包 / 52 个版本**全部有实测 `size`**，本地字节与台账 sha **52/52 逐字一致**。⚠️ `versions[].size == 0` 是**历史遗留的假值**（旧版 probe 不写 size），不是「很小」——2026-10-31 抓到 `cgi` 的 0（实际 9,960 B），已修正并把 12 个旧文契的包全部 re-probe。自查残留：`verified.how` 里没有「逐版探」三个字的就是还没过新版 probe。
+
 ## 许可
 
 SPDX-License-Identifier: AGPL-3.0-or-later

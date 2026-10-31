@@ -35,8 +35,9 @@
  },
  "verified": {
   "octave": "11.3.0",
-  "how": "detect_kinds（tar 内容判 m/oct）",
-  "tarball_sha": "4187eb2abec69c57"
+  "how": "detect_kinds 逐版探（tar 内容判 m/oct；sha 先行核对）",
+  "tarball_sha": "4187eb2abec69c57",
+  "probed_versions": 1
  },
  "note": "",
  "versions": [
@@ -44,7 +45,7 @@
    "version": "0.1.2",
    "url": "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/cgi-0.1.2.tar.gz",
    "sha256": "4187eb2abec69c5735527fe3d6a25b2010fccede199fe556e242677ed991cf43",
-   "size": 0,
+   "size": 9960,
    "requires": [
     "octave (>= 3.8.0)"
    ],

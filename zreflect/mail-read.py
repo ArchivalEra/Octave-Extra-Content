@@ -1,6 +1,18 @@
 #!/usr/bin/env python3
 # mail-read.py —— 读信入口（2026-10-17，用户点令「read 文件夹」第三版定稿）
 #
+# ## 这份代码被分发给所有带 `mail/` 的仓（2026-10-31）
+#
+# 它**自包含**：只用标准库（os / sys / subprocess / tempfile / shutil），
+# 不 import 任何仓内模块，不假设仓库结构 —— 唯一的前提是**存在 `mail/` 目录**
+# （未读 = `mail/*.md`，已读 = `mail/read/*.md`，位置即状态）。
+#
+# 所以：换任何仓都能直接 `python3 zreflect/mail-read.py` 跑；`--selftest`
+# 会在临时目录里造夹具、不碰真 `mail/`，9 条用例自证。
+#
+# 分发规矩（四仓已在用的同一套）：投递 = 落文件到收信方 `mail/`；
+# 提交 = 收信方自己做（每仓闸门不同，发信方不代提交）。
+#
 # 为什么是这个形状（前两版被否的教训）：
 #   v1 闸门化（凭据推断 + pre-commit --check）✘ —— 违反信任边界：mail 不进断言面
 #      （mail/README.md 明写"本目录不进任何闸门的断言面"；闲散往来不可信是刻意的）。
@@ -30,13 +42,35 @@ import re
 import subprocess
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gate import module_meta                            # noqa: E402
+# ⚠️ 真自包含（2026-10-31 修）：原来这里无条件 `from gate import module_meta`，
+# 于是这份脚本**离开 Einfacht 就跑不起来**（`gate.py` 是 Einfacht 的模块）。
+# 但这份代码要分发给所有带 `mail/` 的仓，其中有的仓没有 Einfacht —— 那种情形下
+# 一个 ImportError 就把「读信」这个最基本的动作废掉了，而读信本来只需要标准库。
+#
+# 形状：**先定义本地等价实现，再尝试用真的覆盖它**。
+# ⚠️ 别把 `MODULE = module_meta(...)` 写进 try 块里 —— `registry.py` 的名录对账是
+#     **AST 扫模块顶层**（`_declaration()` 只走 `tree.body`），写进 try 就扫不到，
+#     本仓会以「平台模块必须声明自己」红掉（2026-10-31 实测踩到）。
+#     所以声明必须在**顶层、无条件**出现；「有没有真 gate」是调用期的事。
+class _Meta:
+    """`gate.module_meta` 的最小等价物（无 Einfacht 时的退化）。"""
+    def __init__(self, name, summary, selftest=False):
+        self.name, self.summary, self.selftest = name, summary, selftest
 
-# ★ C5：平台模块必须声明自己。selftest=True（有 8 条自证，被自证台执行）；
-#   但它**不是闸门**（无 GATE 声明、不进 registry --run、无 rc 语义 —— 刻意的，
-#   见文件头"有意不做的事"）。
-MODULE = module_meta("mail 读信入口", "读 = 打印 + 自动归档 read/（纯工具，不进断言面）",
+
+def module_meta(name, summary, selftest=False):
+    return _Meta(name, summary, selftest)
+
+
+try:                                    # 有 Einfacht ⇒ 用真实现（同名字段同语义）
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from gate import module_meta
+except ImportError as _e:               # 没有 ⇒ 留在上面的本地实现，且**退化要可闻**
+    print("note: 本仓无 zreflect/gate.py（非 Einfacht 仓）—— mail-read 以自包含模式运行：%s"
+          % _e, file=sys.stderr)
+
+MODULE = module_meta("mail 读信入口",
+                     "读 = 打印 + 自动归档 read/（纯工具，不进断言面）",
                      selftest=True)
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -192,6 +226,10 @@ def _selftest():
         bad += 0 if ok else 1
     HERE, MAIL, READ = saved
     shutil.rmtree(t, True)
+    # ⚠️ 两行汇总都**不能删**（2026-10-31 实测踩到）：人读行 + 机器摘要行是
+    # Einfacht 的平台约定（issue #3 ③）。我一度以为第二行是"完全同义的冗余"删掉了，
+    # `gates-selftest.sh` 立刻报「自证缺机器摘要行」—— 它 grep 的就是 `=== N PASS / M FAIL ===`
+    # 这个与检查器名无关的固定格式，人读行它不认。
     print("=== mail-read 自证：%d PASS / %d fail ===" % (len(cases) - bad, bad))
     print("=== %d PASS / %d FAIL ===" % (len(cases) - bad, bad))
     return 1 if bad else 0

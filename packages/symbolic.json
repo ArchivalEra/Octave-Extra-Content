@@ -42,8 +42,9 @@
  },
  "verified": {
   "octave": "11.3.0",
-  "how": "detect_kinds（tar 内容判 m/oct）",
-  "tarball_sha": "8eb492408ec5aafe"
+  "how": "detect_kinds 逐版探（tar 内容判 m/oct；sha 先行核对）",
+  "tarball_sha": "8eb492408ec5aafe",
+  "probed_versions": 5
  },
  "note": "能力层需求（实测 2026-10-14）：DESCRIPTION 明写 SystemRequirements: python, sympy (>= 1.5.1), mpmath (>= 1.0)，而本构建 wasm 里没有 Python 运行时 ⇒ 装上跑不动。detect_kinds 探得 ['m']（与真·开箱即用的 cgi 同形）⇒ kinds 对这类包会说谎。size 为本地实测（上游索引未给）。**能力层需求的表达 = `depends: [\"pyodide\"]` 这条边**（接缝 §2 判决：能力层 = deps 图里 form:'tree' 的普通条目，**不加 needs 字段**）；目标 name 字面量由宿主确认（host mail/010）。判据：python3 tools/forge-shelf.py --emit /tmp/e.json ⇒ symbolic 条目 deps == ['pyodide']。见 questions/02（已结案）。",
  "versions": [

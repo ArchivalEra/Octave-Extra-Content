@@ -43,8 +43,9 @@
  },
  "verified": {
   "octave": "11.3.0",
-  "how": "detect_kinds（tar 内容判 m/oct）",
-  "tarball_sha": "59fb3771a2d2a231"
+  "how": "detect_kinds 逐版探（tar 内容判 m/oct；sha 先行核对）",
+  "tarball_sha": "59fb3771a2d2a231",
+  "probed_versions": 1
  },
  "note": "",
  "versions": [
