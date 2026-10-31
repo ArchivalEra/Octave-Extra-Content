@@ -81,7 +81,7 @@ packages/     包档案（每包一个 JSON：版本候选/依赖/许可/upstrea
 recipes/      能力层供给配方
 port/         content-list 端口规范副本（产地 = 宿主）
 tools/        出表工具（forge-shelf.py：--emit 出 content-list / --probe 探 tarball）
-docs/         经验集（管线 / 事实系统 / 内存架构）
+docs/         经验集（管线 / 事实系统 / 内存架构）+ 状态快照（SNAPSHOT-*.md，压缩上下文前的锚）
 zreflect/     Einfacht 机制层（vendored）
 build/        台账（FACTS.json / retractions.json）
 questions/    悬案（每个带可证伪的结算判据）
