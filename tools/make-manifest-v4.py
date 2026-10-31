@@ -34,6 +34,16 @@ MAX_CHUNK_HARD = 2 ** 25          # fzstd backreference 上限
 MAX_NAME_LEN = 255                # GitHub asset 名硬上限（实测：256 报 422）
 NAME_BUDGET = 64                  # 本协议推荐预算（spec §1；超了只提示不拦）
 
+# ★★ 实测（2026-10-31，真 GitHub 递增上传探到硬墙）：
+#   release 的 asset 数量上限 = **1000**。错误原文（HTTP 422）：
+#     {"errors":[{"resource":"ReleaseAsset","code":"custom","field":"file_count",
+#                 "message":"file_count limited to 1000 assets per release"}]}
+#   探针：899 成功 / 1000 成功 / 1001 起全部 422 ⇒ 墙在 1000，不是 999 或 1024。
+#   ⇒ 一个 release 的 **asset 总数 = Σ(每条 entry 的块数 × 该 entry 的 codec 数) + 1(manifest)**
+#   必须 ≤ 1000。**这是平台约束不是协议约束**，但生成器不提前算出来，生产者要发到一半才炸。
+MAX_ASSETS_PER_RELEASE = 1000
+ASSET_WARN_AT = 900               # 留 10% 余量（发布后可能要补资产/加变体）
+
 # ★ 实测得到的白名单（GitHub 逐字保留）：
 #   OK:      a.b_c-D9.zstd.000 / UPPER.Mixed.Case.000 / under_score / hy-phen / -leading
 #   CHANGED: dots...many.000 → dots.many.000（连续点折叠）
@@ -198,12 +208,51 @@ def make(spec, outdir, relid, codecs=("zstd", "gzip", "identity"), chunk=DEFAULT
         raise
 
 
+def _precheck_asset_budget(spec, codecs, chunk):
+    """在写任何文件之前算出 asset 总数；超平台上限 ⇒ 当场拒（不浪费 IO）。
+
+    块数只取决于**文件大小**（`ceil(size/chunk)`，下限 1），不需要压缩就知道。
+    已压格式（PRECOMPRESSED 后缀）只出 identity，所以要按同一规则算。
+    估出来和实际永远一致 —— 但 finish 后仍会再用真实结果核一次（防规则漂移）。
+    """
+    n = 1                                     # manifest.json 自己占 1 个 asset
+    n_entries = 0
+    for p in spec:
+        for rel, fp in _collect_many(p["files"]):
+            base = _flatten(rel)
+            is_pre = base.lower().endswith(PRECOMPRESSED)
+            n_codecs = 1 if is_pre else len(codecs)
+            size = os.path.getsize(fp)
+            nchunks = max(1, -(-size // chunk))   # ceil，与 build_variants 同口径
+            n += nchunks * n_codecs
+            n_entries += 1
+    if n > MAX_ASSETS_PER_RELEASE:
+        raise SystemExit(
+            f"FATAL: 本 release 需要 {n} 个 asset（{n_entries} 条 entry），超过 "
+            f"GitHub 平台上限 {MAX_ASSETS_PER_RELEASE}（实测硬墙，错误字段 file_count）。\n"
+            f"  ⇒ 已在写盘前拦下，没有产生任何文件。\n"
+            f"  处置（三选一）：\n"
+            f"    ① 拆成多个 release（最小改动：按 product 或按子目录分批）\n"
+            f"    ② 减少 codecs（每砍一个 codec 省 Σ块数 个 asset）\n"
+            f"    ③ 减少 entry 数（打包成 archive 再作为单条 entry）"
+        )
+    if n >= ASSET_WARN_AT:
+        print(f"  ⚠️  asset 总数 {n} 已接近 GitHub 上限 {MAX_ASSETS_PER_RELEASE}"
+              f"（余量 {MAX_ASSETS_PER_RELEASE - n}）—— 发布后无法再补资产",
+              file=sys.stderr)
+    return n
+
+
 def _make_inner(spec, outdir, relid, codecs, chunk, written):
     """真正干活的部分；失败由外层清场。"""
     products = {}
     entries = []
     seen_files = {}
     seen_member = set()
+
+    # ★ 先算账再动手：asset 总数可以在**读字节之前**算出来（块数只取决于文件大小）。
+    # 放在写盘前，所以超限时不会先写出几千个文件再删（那是纯浪费，且清理失败会留垃圾）。
+    _precheck_asset_budget(spec, codecs, chunk)
 
     for p in spec:
         pid = p["product"]
@@ -256,6 +305,26 @@ def _make_inner(spec, outdir, relid, codecs, chunk, written):
 
     if not entries:
         raise SystemExit("FATAL: 没有条目")
+
+    # ★ 平台额度闸：asset 总数必须 ≤ 1000（实测硬墙，见文件头注释）。
+    # 在这里拦而不是等 `gh release upload` 发到一半 —— 那时已经写了几百个资产，
+    # 清理比不开始难得多（且失败是 422 而不是"少传了几个"，很容易误判成偶发）。
+    n_assets = 1 + sum(len(v["chunks"]) for e in entries for v in e["variants"])
+    if n_assets > MAX_ASSETS_PER_RELEASE:
+        raise SystemExit(
+            f"FATAL: 本 release 需要 {n_assets} 个 asset，超过 GitHub 平台上限 "
+            f"{MAX_ASSETS_PER_RELEASE}（实测硬墙，错误字段 file_count）。\n"
+            f"  明细：{len(entries)} 条 entry，合计 "
+            f"{sum(len(v['chunks']) for e in entries for v in e['variants'])} 个分片 + 1 manifest\n"
+            f"  处置（三选一）：\n"
+            f"    ① 拆成多个 release（最小改动：按 product 或按子目录分批）\n"
+            f"    ② 减少 codecs（每砍一个 codec 省 Σ块数 个 asset）\n"
+            f"    ③ 减少 entry 数（打包成 archive 再作为单条 entry）"
+        )
+    if n_assets >= ASSET_WARN_AT:
+        print(f"  ⚠️  asset 总数 {n_assets} 已接近 GitHub 上限 {MAX_ASSETS_PER_RELEASE}"
+              f"（余量 {MAX_ASSETS_PER_RELEASE - n_assets}）—— 发布后无法再补资产",
+              file=sys.stderr)
 
     man = {"schema": 2, "id": relid, "chunkSize": chunk,
            "codecs": list(codecs),
@@ -467,6 +536,30 @@ def selftest():
                                  "files": [os.path.join(d, "emptydir")]}],
                                os.path.join(d, "b9"), "t/e")
                   if os.makedirs(os.path.join(d, "emptydir"), exist_ok=True) is None else None)
+
+        # ── I. 平台 asset 额度闸（实测硬墙 1000，见文件头）──
+        # 估算必须在**写盘前**拒：用大量小文件把 asset 数顶过上限，且断言输出目录为空。
+        many = os.path.join(d, "many"); os.makedirs(many, exist_ok=True)
+        for i in range(340):                       # 340 × 3 codec + 1 = 1021 > 1000
+            open(os.path.join(many, f"f{i:03d}.txt"), "wb").write(b"x" * 64)
+        over = os.path.join(d, "over")
+        must_fail("★ asset 总数超 1000 ⇒ 必拒（平台硬墙）",
+                  lambda: make([{"product": "m", "form": "tree", "files": [many]}],
+                               over, "t/over"))
+        t("★ 超限时**一个文件都没写**（写盘前拦下）",
+          not os.path.exists(over) or len(os.listdir(over)) == 0)
+
+        # 估算口径必须与真实产出一致（否则闸门会说谎：报了 N 实际产出 M）
+        ok_spec = [{"product": "m", "form": "tree",
+                    "files": [os.path.join(d, "small")]}]
+        os.makedirs(os.path.join(d, "small"), exist_ok=True)
+        for i in range(3):
+            open(os.path.join(d, "small", f"s{i}.txt"), "wb").write(b"y" * (2 * DEFAULT_CHUNK))
+        est = _precheck_asset_budget(ok_spec, ("zstd", "gzip", "identity"), DEFAULT_CHUNK)
+        man_ok = make(ok_spec, os.path.join(d, "ok"), "t/ok",
+                      codecs=("zstd", "gzip", "identity"))
+        real = 1 + sum(len(v["chunks"]) for e in man_ok["entries"] for v in e["variants"])
+        t(f"★ 预估 asset 数 == 实际（{est} vs {real}）", est == real)
 
     print(f"\n=== {n} PASS / {f} fail ===")
     return 0 if f == 0 else 1
