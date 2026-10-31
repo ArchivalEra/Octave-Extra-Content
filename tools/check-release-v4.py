@@ -17,12 +17,10 @@ import sys
 MAX_CHUNK_HARD = 2 ** 25
 MAX_NAME_LEN = 255
 
-# ★ 实测（2026-10-31，真 GitHub 递增上传）：release 的 asset 数量上限 = 1000。
-#   错误原文（HTTP 422）：{"resource":"ReleaseAsset","code":"custom","field":"file_count",
-#                         "message":"file_count limited to 1000 assets per release"}
-#   探针：899 成功 / 1000 成功 / 1001 起全部 422 ⇒ 墙在 1000（不是 999，也不是 1024）。
-#   生成器同款闸在写盘前拦（同一常量两处，见 make-manifest-v4.py 文件头）。
-MAX_ASSETS_PER_RELEASE = 1000
+# ★ 平台容量**不是协议的不变量**（2026-10-31 用户裁定：「gitcode 啥的就各不相同了，
+#   反正协议无限就对了」）。协议对 entries / asset 数**没有上限**；各托管平台的上限
+#   是分发方的事（GitHub 单 release 1000 个 asset，别家不同）。
+#   ⇒ 校验器**不设** asset 额度判据。这里只保留这条说明，防止将来又有人把平台数写回契约。
 NAME_RE = re.compile(r"[A-Za-z0-9_-][A-Za-z0-9._-]*")
 HEX = set("0123456789abcdef")
 EXIT_OK, EXIT_RED, EXIT_USAGE = 0, 1, 2
@@ -122,7 +120,7 @@ def check(man, base_dir=None):
 
     seen_member = {}
     all_files = {}
-    n_assets = 1                            # manifest.json 自己占 1 个 asset（V11）
+    n_assets = 1                            # manifest.json 自己占 1 个 asset（仅计数，不设限）
 
     for i, e in enumerate(entries):
         if not isinstance(e, dict):
@@ -243,14 +241,13 @@ def check(man, base_dir=None):
                 except OSError as ex:
                     P.append(f"V7 {tag} 盘上缺件: {ex}")
 
-    # ── V11 平台 asset 额度（实测硬墙，见 tools/make-manifest-v4.py 文件头）──
-    # 1000 不是协议约束而是 GitHub 的：超了就发不出去（422 file_count）。
-    # 放在校验器里是因为**生成器可能被别人绕过**——手写 manifest 也得过这一关。
-    ok("V11 asset 总数 ≤ 1000（GitHub 平台硬墙）",
-       f"{n_assets} 个（{n_assets - 1} 分片 + 1 manifest）",
-       n_assets <= MAX_ASSETS_PER_RELEASE,
-       "超限 ⇒ gh release upload 会在第 1001 个报 422 file_count，"
-       "须拆 release / 减 codec / 合并 entry")
+    # entries / asset 数**不判**：协议无限（2026-10-31 用户裁定）。
+    # 平台容量是分发方的事；把它写成判据 = 把「某个平台的上限」变成「协议形状」。
+    # 只在 stderr 报个数（信息，不是违规），让人知道这次会发多少个文件。
+    if n_assets > 1000:
+        print(f"提示（非违规）：本 release 共 {n_assets} 个 asset。若目标托管平台"
+              f"的单 release 上限更低，拆法由分发方决定 —— 不影响 manifest 合法性。",
+              file=sys.stderr)
 
     return R, P
 
@@ -336,33 +333,21 @@ def selftest():
         m["chunkSize"] = 1          # 声明 1 字节 ⇒ 期望 6 块，实际 1 块
     bad(lie_chunk, "chunkSize 撒谎（块数与 ceil(bytes/cs) 不符）", "V6")
 
-    # ★ V11：平台 asset 总额度（实测硬墙 1000）。构造块数刚好超限的 manifest。
-    def over_budget(m):
-        base = m["entries"][1]
-        chs = base["variants"][2]["chunks"]      # identity 那支
-        m["chunkSize"] = 1                       # 让 V6 的 ceil 校验自洽（bytes=1000 ⇒ 1000 块）
-        base["bytes"] = 1000
-        chs.clear()
-        for k in range(1000):
-            chs.append({"part": k, "file": f"w__b.oct.identity.{k:03d}",
-                        "bytes": 1, "sha256": "b" * 64})
-    # 1000 个 identity 块 + 1 manifest + 另两条 identity/zstd 各 1 = 已 > 1000
-    bad(over_budget, "asset 总数超过 1000 平台上限", "V11")
-
-    # 反向的正面：刚好 1000 以内不报（证明闸门不是"总是报"）
-    def at_budget(m):
-        base = m["entries"][1]
-        chs = base["variants"][2]["chunks"]
-        m["chunkSize"] = 1
-        base["bytes"] = 900
-        chs.clear()
-        for k in range(900):
-            chs.append({"part": k, "file": f"w__b.oct.identity.{k:03d}",
-                        "bytes": 1, "sha256": "b" * 64})
-    m_ok = good(); at_budget(m_ok)
-    _, P = check(m_ok)
-    t("asset 总数 903 ≤ 1000 ⇒ V11 不报（闸门不是总报）",
-      not any("V11" in x for x in P))
+    # ★ entry/asset 数**无上限**（2026-10-31 用户裁定「协议无限」）。
+    # 反证：条目数远超任何平台容量的 manifest 也必须**合法**（不因数量拒收）。
+    m_many = good()
+    tmpl = m_many["entries"][0]
+    for k in range(1200):
+        e = {"product": "src", "name": f"m{k:04d}.bin", "bytes": 6, "sha256": "a" * 64,
+             "variants": [{"codec": "identity", "chunks": [
+                 {"part": 0, "file": f"src__m{k:04d}.bin.identity.000",
+                  "bytes": 6, "sha256": "a" * 64}]}]}
+        m_many["entries"].append(e)
+    _, P = check(m_many)
+    t(f"{len(m_many['entries'])} 条 entry / 1202 个 asset ⇒ 仍合法"
+      "（协议不设上限）", not P)
+    if P:
+        print("      ", P[:3])
 
     # ── 空输入 ──
     _, P = check([])

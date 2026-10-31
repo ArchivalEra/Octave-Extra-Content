@@ -41,6 +41,8 @@ __pycache__/
 !mail/read/*.md
 !mail/sent/
 !mail/sent/*.md
+!mail/sent/withdrawn/
+!mail/sent/withdrawn/*.md
 
 # ── 事实系统（Einfacht 机制层 + 本仓数据层 + 台账）──────────────────────────
 !zreflect/
