@@ -426,6 +426,44 @@
     form:tree 进表 + 第二引擎工具族按 provision 自然生长（Q2 裁定形状）。
   - **全链轨迹**：一轮三案 → 二轮修正版 → 三轮钉 5 → 实施（0/2/3-1/3-2/3-3/3-4
     六次验收）→ 终验。全程偏差表精确预测影响面、零 golden 意外漂移、纪律零违例。
+- **★ 发布契约 v4 定稿 + 本地实测通过（2026-10-31；四轮 design-it-twice 收敛）**：
+  - **用户的决定性洞察（我没想到）**：「**只要强制会在 asset 后变化的名称不允许就行**」
+    ⇒ 我实测出 GitHub 的精确改写面，白名单由此得来（见下）。这条比我前几轮所有
+    slot/prefix/定宽设计都省——**因为 `file` 字段和 asset 名成了同一个字符串，不需要映射表**。
+  - **★ GitHub 名字改写实测（白名单存在的唯一理由）**：
+    **稳定**：`a.b_c-D9.zstd.000` / `UPPER.Mixed.Case.000` / `under_score` / `hy-phen` /
+    `-leading-hyphen` 全部**逐字保留**；
+    **被静默改写**：`sp ace.bin`→`sp.ace.bin`（空格→点）、`pct%41.bin`→`pct.41.bin`、
+    `paren(1).bin`→`paren.1.bin`（括号删）、`a中b.bin`→`a.b.bin`（**7 字符→5 字符**）、
+    `.hidden.bin`→`default.hidden.bin`（前导点加前缀）、`dots...many.000`→`dots.many.000`
+    （**连续点折叠**）、`trailing-dot.`→`default.trailing-dot`（尾点加前缀）。
+    **长度超限报 422，但改写不报错** ⇒ 白名单 = `^[A-Za-z0-9_-][A-Za-z0-9._-]*$`
+    + 无 `..` + 不以 `.` 结尾 + ≤255。
+  - **v4 结构（三层各答一问）**：`products{}`（逻辑产物：`form`/`arch`/`src`）/
+    `entries[]`（每条**自足**的字节身份，apt 稳健性）/ `variants[].chunks[]`（分片）。
+  - **★ 撤回 blob 去重（apt 判据）**：我曾采纳「内容身份层」去重（UI dist 21 路径/10 内容
+    省 48.9% 资产）。**实测 apt 明知冗余仍复制**——`amd64` 索引里 143 条
+    `Architecture: all`，`i386` 索引里**同样 143 条**（我数的）。**这不是懒，是「每条索引
+    自足」**；去重会引入「删一个 member 影响另一个」的耦合。⇒ **认下"同一内容多存几份"的代价**。
+  - **★ 跨 arch 同名撞车的铁证**：`optim` 的 wasm32 与 wasm64 的 `.oct`
+    **文件名 5/5 完全相同、字节 5/5 全不同**（`numgradient.oct` 17,025 vs 17,519B，`cmp` NO）
+    ⇒ **manifest 不能用载荷文件名当 key，必须有 product 分组**。
+  - **生成器自证 21/21**（`tools/make-manifest-v4.py`）：白名单 8 条反向（全是实测 GitHub
+    改写原样）+ 4 条正例 + v4 结构 9 条（含跨 arch 不塌陷、两条 sha 不同、11MiB→3 块、
+    全名白名单、全唯一、块能独立解回）+ 边界 2 条（chunkSize > 2^25 拒 / 空输入拒）。
+  - **★ 5MiB 分片机制实测生效**（74.5MB wasm 真件）：15 块 × 3 编码；
+    identity 最大块**精确 5,242,880 = 5×1024×1024**；三种编码块数一致；期望 ceil=15 ✅。
+  - **★ 浏览器端到端三种编码全通，全部普通 GET**：zstd / gzip / identity 各自
+    15 块并发 → 逐块 sha → 解码 → 拼接 ⇒ 74,579,404 B、全局 sha 逐字一致；
+    **带 Range/条件头的请求 = 0**（脚本实测请求头）。本地耗时 595/498/372ms
+    （本地无网络差 ⇒ identity 最快；**真实 EdgeOne 上 zstd 靠 26.6% 体积优势会赢，这条是推断**）。
+  - **真数据**：`optim 1.6.3` → products `['src','wasm32','wasm64']`、entries 11 条；
+    源码 tar.gz 已压格式**只出 identity**（实测再压只省 4.6%）。
+  - **覆盖性**：wasm/tar/zip/whl/oct 走 v4；HTML/CSS/JS（实测 css 共 0.16MiB）与
+    字体/图片小件走单块 identity；**UI 的 Astro 产物（`_astro/App.CUPGshJq.js` 自带内容哈希）
+    继续 Pages 直出——v4 管"发布产物分发"，不管"站点路由渲染"**。
+  - **诚实边界**：本地测的是 `python -m http.server`，**未在 EdgeOne 真链路验**
+    （zstd 胜 gzip 那条仍是推断）；**未落 CI**；生成器只做单 release 内切分，跨 release 复用未测。
 - **★ 用户两条批评：①「没做试点就做向后兼容」②「23 个字段该掂量哪些不需要」→ 采纳 + 两份审计（2026-10-30）**：
   - **① 向后兼容层已删**：我给 `check-release-v2.py` 加了 v2 单资产形状的兼容路径
     （`__single__` 兜底）。用户点破：**v2 从未发布、没有消费者，兼容层是纯负债**。
