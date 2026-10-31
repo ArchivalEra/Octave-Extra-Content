@@ -50,13 +50,23 @@ python3 zreflect/mail-read.py 031 --keep # 读但留在原处（要回头对照�
 ## ★ 投递落点规则（2026-10-15，采纳 host `mail/013` 的三条边界）
 
 1. **投递落点 = 收信方的 `mail/`** —— 写给**本仓**的信落进**本仓** `mail/`；
-   写给**任何别仓**的信落进**那家的 `mail/`**（`Octave-Full-Wasm`、`OpenModelica-Full-Wasm`、
-   `Octave-UI`、`Shirone-personalized`、`Static-Contract` …）。
+   写给**集群内别仓**的信落进**那家的 `mail/`**（`Octave-Full-Wasm`、`OpenModelica-Full-Wasm`、
+   `Octave-UI`、`Shirone-personalized`、`Static-Contract`）。
    ⇒ **本仓 `mail/` 只留"写给本仓"的信。发出去的信不在本仓留副本。**
 
    ★ **2026-10-31 修正（用户点令）**：这条规则本 README 早就写了，但本仓**实际违反了它很久**
    —— 历史上把 42 封发件副本堆在 `mail/` 根目录，**全集群只有本仓这样**。
    已全部移入 `mail/sent/`（留痕，不删）。**今后：发件不落 `mail/` 根目录。**
+
+   ★★ **渠道路由边界（2026-10-31 用户点令）**：上面这条**只对 Octave 集群内的仓成立**。
+   **集群外的上游不要建信箱** —— 它们有自己的收件约定，必须走近那套：
+   **Einfacht = GitHub issue**（其 #1–#21 全是「反哺（使用方…）」形状的 issue）。
+
+   **我犯过的错（同一天）**：把三条闸门缺陷投进 Einfacht 的 `mail/`，还给它建了
+   README + 空 `read/`。用户点令：「Einfacht 不是 octave mail 群的，我说 issue 就是指
+   gh issue，我们都这么报告给他的」。已撤掉误建目录（`rm -rf`，内容存于 GH #23/#24/#25
+   + 本仓 `mail/sent/122`），改开三张 issue。
+   **判据：投递渠道由收信方定，不由发信方按集群惯例类推** —— 先看对方向谁收、以什么形状收。
 
    ```
    mail/               只放"写给本仓、未读"的信

@@ -65,6 +65,8 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 本仓用 [Einfacht](https://github.com/ArchivalEra/Einfacht) 管理事实：每个数字有出处（`build/FACTS.json` 台账 + 复跑命令）、活状态文档（`STATE.md`）与台账对账、翻案检测（`build/retractions.json`）、悬案管理（`questions/`）。跨仓复钓抓到的缺陷（D 系列）、裁定与复验结论都记在 `STATE.md`，可复跑的探测脚本在 `/mnt/hdd/zcode-test/harness/`。复钓的一个原则：验「能不能真用」必须走产物真实面（运行时 `typeof` / 真浏览器 / 真字节），mock 与单测绿不算数。
 
+**向上游报缺陷走它自己的渠道，不走本仓的 `mail/`**。`mail/` 是 Octave 集群内部的通信体例；Einfacht 在集群之外，向它报告一律走 **GitHub issue**（其 #1–#21 都是「反哺（使用方…）」形状）。投递渠道由收信方定，不由发信方按集群惯例类推——这条是我 2026-10-31 投错渠道后立的规矩（详见 `mail/README.md` 第 2 条与 `STATE.md`）。本仓向上游报的三条闸门判据盲区：issue #23 / #24 / #25。
+
 ```bash
 # 复跑本仓事实系统健康
 python3 build/facts.py --render-doc STATE.md --check
