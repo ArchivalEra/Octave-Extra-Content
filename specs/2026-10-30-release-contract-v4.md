@@ -1,6 +1,8 @@
 # 发布契约 v4 · 定稿
 
-> **状态**：本地实测通过（21/21 生成器自证 + 三编码端到端 + 白名单反向断言）。
+> **状态**：本地实测通过。**生成器自证 38/38、校验器自证 24/24、真数据 162 PASS / 0 FAIL（含盘核对）**、
+> 三编码端到端 sha 逐字一致。**数字是当次实测快照，复跑命令见 §9**（本仓纪律 2 的
+> `[[键名]]` 台账只覆盖 `STATE.md`，`specs/` 不在扫描面内 —— 这是写明的缺口，不是"查过"）。
 > **目标**：**apt 的稳健 + HTTP 的简洁**。静态站上所有内容（wasm / tar / zip / html / 字体 / 图片）都用这一套。
 > **四轮 design-it-twice 的收敛结果**，被否方案的判据都留在 §8。
 
@@ -21,7 +23,19 @@
 ^[A-Za-z0-9_-][A-Za-z0-9._-]*$
 ```
 
-外加两条：**不含 `..`**、**不以 `.` 结尾**、**≤ 255 字符**。
+外加两条：**不含 `..`**、**不以 `.` 结尾**、**≤ 255 字符**（GitHub 硬限，实测 256 报 422）。
+
+**本协议自加的长度预算（比平台上限紧，有意为之）**：
+
+| 项 | 值 | 判据 |
+|---|---|---|
+| 硬上限 | 255 | 实测 GitHub：255 传成功、256 报 `name is too long` |
+| **推荐预算** | **≤ 64** | 名字 = `<product>__<载荷名>.<codec>.<NNN>`；product 与载荷名各留 ~25 字符余量。<br>实测最大实例 `omc__OpenModelicaCompiler_bg.wasm.zstd.014` = 37 字符 |
+| 超预算处置 | **生成器报错并提示缩短** | 不许静默截断（截断 = 名字变了 = manifest 指向不存在的 asset） |
+
+**为什么推荐 64 而不是贴 255**：名字里三段都有实际含义（product / 载荷 / codec+序号），
+真按 255 撑满时人已经读不懂；而且载荷名越长越可能含需要扁平化的字符。
+生成器对超 255 **硬拒**，对 64–255 之间不拦（只提示），因为那是生产者的判断空间。
 
 **为什么是这几条——实测（2026-10-31，真 GitHub 上传回读）**：
 
@@ -58,9 +72,7 @@
   "id": "Octave-Full-Wasm/optim-1.6.3",
   "chunkSize": 5242880,
   "codecs": [
-    {"codec": "zstd", "prefix": "z"},
-    {"codec": "gzip", "prefix": "g"},
-    {"codec": "identity", "prefix": "i"}
+    "zstd", "gzip", "identity"
   ],
   "products": {
     "src":    {"form": "pkg"},
@@ -142,13 +154,13 @@ i386 : 146 条 i386  + 143 条 all   ← 复制一遍
 |---|---|---|
 | **V1** | 每个 `chunks[].file` 匹配白名单（`^[A-Za-z0-9_-][A-Za-z0-9._-]*$`、无 `..`、不以 `.` 结尾、≤255） | `sp ace.bin` / `dots...many.000` / `.hidden` / `a中b.bin` 全拒 |
 | **V2** | 所有 `file` 在整个 release 内**全局唯一** | 两条 chunk 用同一 file |
-| **V3** | `entries[]` 内 `(product, name)` 唯一 | wasm32 和 wasm64 可以有同名 `numgradient.oct`（不同 product），但同一 product 内不许重名 |
+| **V3** | `entries[]` 内 `(product, name)` 唯一；`products{}` 的 id 也唯一（且 id 必须过白名单——它进文件名前缀） | wasm32 和 wasm64 可以有同名 `numgradient.oct`（不同 product）；同一 product 内重名 ⇒ 拒 |
 | **V4** | 每个 entry 的 `variants` 非空，且**恰有一个 `identity` 在末位** | 只有 zstd（解不了就无路可走） |
-| **V5** | 每个 variant 的 `chunks[].part` 恰是 `0..N-1` 连续，无重无缺 | 删中间一块 |
+| **V5** | 每个 variant 的 `chunks[].part` 恰是 `0..N-1` 连续无缺；**同一 entry 的所有 codec 块数必须相同**（切的是同一份原始字节） | 删中间一块 / 某 codec 少一块 |
 | **V6** | `0 < chunkSize ≤ 2^25`（fzstd backreference 上限） | `chunkSize = 2^26` |
-| **V7** | `Σ(identity.chunks.bytes) == entry.bytes` 且 identity 各块 `sha256` 与 `entry.sha256` 的拼接关系成立 | `bytes` 多写 1 |
+| **V7** | `Σ(identity.chunks.bytes) == entry.bytes`；**identity 各块拼接后的 sha 必须逐字等于 `entry.sha256`**（校验器带 `--base` 时对盘核对） | `bytes` 多写 1 / 盘上缺件 / 块被换 |
 | **V8** | `product.src` 若存在必须解析到同 release 内**无 `arch`** 的 product；无 `arch` 的 product 不许带 `src` | `src` 悬空 / 自指 |
-| **V9** | `codec` 是**开放字符串**（不是枚举） | 加 `br`/`xz` 不改 schema |
+| **V9** | `codecs[]` 是非空字符串数组，**开放词表**（不是枚举）；每个 entry 用到的 codec 必须已在 `codecs[]` 声明 | 加 `br`/`xz` 不改 schema；entry 用了未声明的 codec ⇒ 拒 |
 | **V10** | `schema` 是客户端认识的值，否则整体拒收 | 未来 `schema:3` 被旧客户端硬解 |
 
 ---
@@ -176,18 +188,32 @@ i386 : 146 条 i386  + 143 条 all   ← 复制一遍
 
 ## 5. 实测结果（2026-10-31，本地）
 
-### 5.1 生成器自证 21/21
+### 5.1 生成器自证 38/38（构成见下）
 
 ```
-白名单 8 条反向用例全拦住（含实测 GitHub 改写原样）：
-  sp ace.bin / pct%41.bin / paren(1).bin / a中b.bin
-  .hidden.bin / dots...many.000 / trailing-dot. / a/b.bin
-白名单 4 条正例全通过：
-  a.b_c-D9.zstd.000 / UPPER.Mixed.Case.000 / -leading-hyphen / omc__….zstd.014
-v4 结构 9 条：products 数 / src 边 / ★跨 arch 同名不同字节不塌陷 / 两条 sha 不同 /
-              已压格式只 identity / 11MiB→3 块 / 文件名全白名单 / 全唯一 / 块能独立解
-边界 2 条：chunkSize > 2^25 必拒 / 空输入必拒
+A. 白名单反向 9 条（含实测 GitHub 改写原样，必须全拒）：
+   dots...many.000（连续点折叠）/ .leading-dot（加 default.）/ trailing-dot.（加 default.）
+   sp ace.bin（→sp.ace）/ pct%41.bin（→pct.41）/ paren(1).bin（括号删）
+   a中b.bin（非 ASCII 删）/ a/b.bin（斜杠）/ 'a\n'（换行尾，fullmatch 才拦得住）
+B. 白名单正例 3 条（实测 GitHub 逐字保留）：
+   a.b_c-D9.zstd.000 / UPPER.Mixed.Case.000 / -leading-hyphen
+C. v4 结构 9 条：
+   products 数 / src 边 / ★跨 arch 同名不塌陷 / 两条 sha 不同 / 已压格式只 identity /
+   11MiB→3 块 / 全名过白名单 / 全名唯一 / ★每条 entry.sha 与盘上 identity 拼接一致
+   另有 1 条：块能独立解压（gzip，每块独立）
+D. 反向用例（该报必报）13 条：
+   chunkSize > 2^25 / = 0 / 负数 /
+   ★两个无 arch 的同名文件→2 条 entry 且 file 名不同 / 两条 sha 各自与盘上一致 /
+   src 悬空 / src 自指 / 无 arch 带 src / product id 重复 /
+   ★chunkSize 参数真生效（1MiB→3 块）/
+   ★递归收集子目录 2 条 / ★子目录路径扁平化 /
+   ★gzip 可复现（两次同输入→同 sha 序列）
+E. 空输入 2 条：无 product / 目录为空
 ```
+
+**校验器 `--selftest` 24/24**：1 条正常不报 + 21 条该报必报（V1–V10 逐条反向）+ 2 条空输入。
+
+**真数据 162 PASS / 0 FAIL**（74.5MB wasm，15 块 × 3 编码，含**盘上 identity 拼接 sha 核对**）。
 
 ### 5.2 5MiB 分片机制（74.5MB wasm，真件）
 
@@ -228,14 +254,24 @@ wasm64/（同名 5 件，字节全不同）
 
 ## 6. 覆盖性：静态站的所有内容
 
-| 内容类型 | 怎么走 v4 | 备注 |
+**全部实测**（不是推断；复跑见 §9 第 5 条）。
+
+| 内容类型 | v4 怎么走 | 实测 |
 |---|---|---|
-| **wasm**（引擎/工具链） | 分片 + 三编码 | 主战场，74.5MB 实测 |
-| **tar/zip/whl**（源码包） | **只出 identity**，仍分片（走 5MB 快车道） | 实测 zip 再压只省 4.6%，白工 |
-| **oct 二进制** | 分片 + 三编码 | `optim` 实测 |
-| **HTML/CSS/JS** | 体积小（实测 css 共 0.16MiB），可单块 identity | **也可以走现状的 Astro 哈希文件名 + 站侧直出**——v4 不取代站点，只取代"发布产物分发" |
-| **字体/图片** | 单块 identity（本身就是压缩格式） | `PRECOMPRESSED_EXT` 已覆盖 woff2/png/jpg/webp |
-| **超大图片** | 若 >5MiB，identity 分片 | 消费者拼回后照常用 |
+| **wasm**（引擎/工具链） | 分片 + 三编码 | 74,579,404 B → 15 块 × 3 编码，端到端 sha 逐字一致 |
+| **tar/zip/whl**（源码包） | **只出 identity**，仍分片 | `optim-1.6.3.tar.gz` 422,679 B → 1 块 × **identity only**（zip 再压只省 4.6%，白工） |
+| **oct 二进制** | 分片 + 三编码 | `optim` 的 10 个 `.oct` 全部 1 块 × 3 编码 |
+| **HTML** | 三编码（不是已压格式） | `index.html` 29 B → 1 块 × **3 编码** ✅ |
+| **CSS** | 三编码 | `css/app.css` 15 B → 1 块 × **3 编码** ✅ |
+| **字体**（woff2/woff/ttf/otf/eot） | **只出 identity** | `fonts/a.woff2` 30,000 B → 1 块 × **identity only** ✅ |
+| **图片**（png/jpg/webp/avif/gif） | **只出 identity** | `img/big.avif` 60,000 B → 1 块 × **identity only** ✅ |
+| **音视频**（mp4/webm/mp3/ogg） | **只出 identity** | 已进 `PRECOMPRESSED` 清单 |
+| **超大图片**（>5MiB） | identity **分片** | 走同一套 chunk 逻辑，消费者拼回 |
+| **嵌套站点树** | **递归收集 + 路径扁平化** | `site/{css,fonts,img}/x` → 名字 `site/css__app.css`（`/` → `__`）✅ |
+
+**v4 的边界（如实）**：它管**发布产物的字节分发**，不管**站点的路由与渲染**。
+UI 的 Astro 产物（`_astro/App.CUPGshJq.js` 这类自带内容哈希的文件）继续 Pages 直出——
+它们已经满足「永不更新」（名字含 hash），不需要再套一层 manifest。
 
 **v4 的边界（如实）**：它管**发布产物的字节分发**，不管**站点的路由与渲染**。
 UI 的 Astro 产物（`_astro/App.CUPGshJq.js` 这类自带内容哈希的文件）继续用 Pages 直出——

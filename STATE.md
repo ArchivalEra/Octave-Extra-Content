@@ -448,15 +448,26 @@
   - **★ 跨 arch 同名撞车的铁证**：`optim` 的 wasm32 与 wasm64 的 `.oct`
     **文件名 5/5 完全相同、字节 5/5 全不同**（`numgradient.oct` 17,025 vs 17,519B，`cmp` NO）
     ⇒ **manifest 不能用载荷文件名当 key，必须有 product 分组**。
-  - **生成器自证 21/21**（`tools/make-manifest-v4.py`）：白名单 8 条反向（全是实测 GitHub
-    改写原样）+ 4 条正例 + v4 结构 9 条（含跨 arch 不塌陷、两条 sha 不同、11MiB→3 块、
-    全名白名单、全唯一、块能独立解回）+ 边界 2 条（chunkSize > 2^25 拒 / 空输入拒）。
+  - **代码审查后重写（2026-10-31，两轴审查揪出 5 硬违规 + 7 不满足）**：修了 6 个真 bug 并补校验器。
+  - **生成器自证 38/38**（`tools/make-manifest-v4.py`）：白名单 9 反 + 3 正 +
+    v4 结构 10（含**每条 entry.sha 与盘上 identity 拼接一致**）+ 反向 13
+    （含 chunkSize 参数真生效、递归目录、子目录扁平化、gzip 可复现、
+    两个无 arch 同名文件不塌陷）+ 空输入 2。
+  - **校验器 `tools/check-release-v4.py` 自证 24/24**（V1–V10 逐条反向），
+    **真数据 162 PASS / 0 FAIL**（含 `--base` 盘上核对）。
+  - **修掉的 6 个真 bug**：①`chunkSize` 撒谎（用全局 `CHUNK` 而非参数）；
+    ②跨 product 同名撞车且**manifest 谎报 sha 不报错**；③src 悬空/自指不 fail-closed；
+    ④gzip 随 mtime 变 ⇒ manifest 不可复现；⑤CLI 不递归 ⇒ 站点树不可用；
+    ⑥`codecs[].prefix` 死字段。
   - **★ 5MiB 分片机制实测生效**（74.5MB wasm 真件）：15 块 × 3 编码；
     identity 最大块**精确 5,242,880 = 5×1024×1024**；三种编码块数一致；期望 ceil=15 ✅。
   - **★ 浏览器端到端三种编码全通，全部普通 GET**：zstd / gzip / identity 各自
     15 块并发 → 逐块 sha → 解码 → 拼接 ⇒ 74,579,404 B、全局 sha 逐字一致；
     **带 Range/条件头的请求 = 0**（脚本实测请求头）。本地耗时 595/498/372ms
-    （本地无网络差 ⇒ identity 最快；**真实 EdgeOne 上 zstd 靠 26.6% 体积优势会赢，这条是推断**）。
+    （本地无网络差 ⇒ identity 最快；**真实 EdgeOne 上 zstd 靠 26.6% 体积优势会赢，这条是推断**）
+    ⇒ **已挂悬案 `questions/05-zstd-vs-gzip-on-edgeone.md`**（纪律 5：推断必须挂在悬案上；
+    结算实验 = 真链路 zstd/gzip 各跑 5 次取中位数；**若 zstd 不赢则 codecs 顺序改
+    `[gzip, zstd, identity]`**）。
   - **真数据**：`optim 1.6.3` → products `['src','wasm32','wasm64']`、entries 11 条；
     源码 tar.gz 已压格式**只出 identity**（实测再压只省 4.6%）。
   - **覆盖性**：wasm/tar/zip/whl/oct 走 v4；HTML/CSS/JS（实测 css 共 0.16MiB）与

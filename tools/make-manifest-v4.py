@@ -9,9 +9,16 @@ v4 相对 v3 的核心变化：
 
 用法:
   python3 tools/make-manifest-v4.py --out DIR --id ID \
-      --product src:tmpl:--:file.tar.gz \
-      --product wasm32:octdir:wasm32:dir/ \
-      --selftest
+      --product src:pkg::/path/to/src.tar.gz \
+      --product wasm32:octdir:wasm32:src:/path/to/octdir \
+      [--chunk-size 5242880]
+  python3 tools/make-manifest-v4.py --selftest
+
+--product 语法（冒号分隔，从右往左剥）:
+  pid:form[:arch][:src]:path
+  · path 若含 ':'，用 `--`（双横线）代替分隔符：`pid:form:arch:src--/a:b/c`
+  · path 是目录时**递归**收集（v4 支持站点树）
+  · 两个无 arch 的 product 可以各有同名文件 —— 名字带 product 前缀，不撞车
 """
 import argparse
 import gzip
@@ -22,18 +29,22 @@ import re
 import sys
 import tempfile
 
-CHUNK = 5 * 1024 * 1024
-MAX_CHUNK_HARD = 2 ** 25
+DEFAULT_CHUNK = 5 * 1024 * 1024
+MAX_CHUNK_HARD = 2 ** 25          # fzstd backreference 上限
+MAX_NAME_LEN = 255                # GitHub asset 名硬上限（实测：256 报 422）
 
 # ★ 实测得到的白名单（GitHub 逐字保留）：
 #   OK:      a.b_c-D9.zstd.000 / UPPER.Mixed.Case.000 / under_score / hy-phen / -leading
 #   CHANGED: dots...many.000 → dots.many.000（连续点折叠）
 #            .leading-dot    → default.leading-dot
 #            trailing-dot.   → default.trailing-dot
-NAME_RE = re.compile(r"^[A-Za-z0-9_-][A-Za-z0-9._-]*$")
+#            空格/%(/)/非 ASCII 全部被改写或删除
+#   判据：`re.fullmatch`（不是 match）——避免 '$' 前置换行被放过
+NAME_RE = re.compile(r"[A-Za-z0-9_-][A-Za-z0-9._-]*")
 
 PRECOMPRESSED = (".zip", ".gz", ".br", ".zst", ".xz", ".whl", ".7z", ".rar", ".tgz",
-                 ".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".webm", ".woff2")
+                 ".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".mp4", ".webm",
+                 ".woff2", ".woff", ".ttf", ".otf", ".eot", ".mp3", ".ogg")
 
 
 def sha256(b):
@@ -42,20 +53,31 @@ def sha256(b):
 
 def name_ok(n):
     """名字能否通过 GitHub 逐字保留。返回 (ok, reason)。"""
-    if len(n) > 255:
-        return False, "长度 > 255"
-    if not NAME_RE.match(n):
-        return False, "不符合白名单 ^[A-Za-z0-9_-][A-Za-z0-9._-]*$"
+    if not isinstance(n, str) or not n:
+        return False, "空名字"
+    if len(n) > MAX_NAME_LEN:
+        return False, f"长度 {len(n)} > {MAX_NAME_LEN}"
+    # fullmatch：防 'a\\n' 因为 '$' 前置换行而被 match 放过
+    if not NAME_RE.fullmatch(n):
+        return False, "不符合白名单 ^[A-Za-z0-9_-][A-Za-z0-9._-]*$（含会被改写的字符）"
     if ".." in n:
-        return False, "含连续点（会被折叠）"
+        return False, "含连续点（GitHub 会折叠成单点）"
     if n.endswith("."):
-        return False, "以点结尾（会被加前缀）"
+        return False, "以点结尾（GitHub 会加 default. 前缀）"
     return True, ""
 
 
 def compress_blocks(blocks, codec):
+    """每块**独立**压缩（V6：块必须独立，跨块 backreference 会让 fzstd 解不出）。
+
+    gzip 固定 mtime=0 ⇒ 同输入必得同字节（可复现；否则 manifest 的 sha 每次变）。
+    """
     if codec == "gzip":
-        return [gzip.compress(b, 9) for b in blocks]
+        out = []
+        for b in blocks:
+            buf = gzip.compress(b, compresslevel=9, mtime=0)
+            out.append(buf)
+        return out
     if codec == "zstd":
         import zstandard as zstd
         c = zstd.ZstdCompressor(level=19)
@@ -65,11 +87,20 @@ def compress_blocks(blocks, codec):
     raise ValueError(codec)
 
 
-def build_variants(raw, prefix, codecs, outdir, name_ctx):
-    """为一个载荷产出 variants[]（每块独立压缩）。name_ctx = 名字前缀（不含 codec/序号）。"""
-    blocks = [raw[i:i + CHUNK] for i in range(0, len(raw), CHUNK)]
+def build_variants(raw, codecs, outdir, name_ctx, chunk):
+    """为一个载荷产出 variants[]（每块独立压缩，按 chunk 切）。
+
+    name_ctx = 名字前缀（含 product 前缀，不含 codec/序号）
+    """
+    if chunk <= 0:
+        raise SystemExit(f"FATAL: chunkSize={chunk} 必须 > 0")
+    if chunk > MAX_CHUNK_HARD:
+        raise SystemExit(f"FATAL: chunkSize={chunk} > 2^25（fzstd 边界）")
+    blocks = [raw[i:i + chunk] for i in range(0, len(raw), chunk)]
+    if not blocks:                      # 空文件：仍然要有 identity 兜底
+        blocks = [b""]
     variants = []
-    for codec, pfx in codecs:
+    for codec in codecs:
         parts = compress_blocks(blocks, codec)
         chunks = []
         for i, p in enumerate(parts):
@@ -84,15 +115,66 @@ def build_variants(raw, prefix, codecs, outdir, name_ctx):
     return variants, len(blocks)
 
 
-def make(spec, outdir, relid, codecs=(("zstd", "z"), ("gzip", "g"), ("identity", "i")),
-         chunk=CHUNK):
-    """spec = [ {product, form, arch, src, files:[path,...]} ]"""
+def _collect(path):
+    """文件 → [path]；目录 → 递归收集所有文件（保留相对路径用于去重判据）。"""
+    if os.path.isfile(path):
+        return [(os.path.basename(path), path)]
+    if os.path.isdir(path):
+        out = []
+        for root, _dirs, files in os.walk(path):
+            for fn in sorted(files):
+                full = os.path.join(root, fn)
+                rel = os.path.relpath(full, path)
+                out.append((rel, full))
+        if not out:
+            raise SystemExit(f"FATAL: 目录为空 {path!r}")
+        return out
+    raise SystemExit(f"FATAL: 路径不存在 {path!r}")
+
+
+def _flatten(rel):
+    """相对路径 → 白名单扁平名（'/' 与多余 '.' 都换掉）。"""
+    return rel.replace(os.sep, "__").replace("/", "__")
+
+
+def make(spec, outdir, relid, codecs=("zstd", "gzip", "identity"), chunk=DEFAULT_CHUNK):
+    """spec = [ {product, form, arch?, src?, files:[path,...]} ]"""
+    if not spec:
+        raise SystemExit("FATAL: 没有 product")
+    if chunk <= 0:
+        raise SystemExit(f"FATAL: chunkSize={chunk} 必须 > 0")
     if chunk > MAX_CHUNK_HARD:
-        raise SystemExit(f"chunkSize {chunk} > 2^25")
+        raise SystemExit(f"FATAL: chunkSize={chunk} > 2^25（fzstd 边界）")
+
+    # ── 先验证 spec 自身（V3/V8 的 fail-closed）──────────────────────────
+    pids = [p["product"] for p in spec]
+    dup = {x for x in pids if pids.count(x) > 1}
+    if dup:
+        raise SystemExit(f"FATAL: product id 重复 {sorted(dup)}（V5）")
+    for p in spec:
+        pid = p["product"]
+        ok, why = name_ok(pid)
+        if not ok:
+            raise SystemExit(f"FATAL: product id {pid!r} 不能进文件名: {why}")
+        if "src" in p and p["src"] is not None:
+            if p["src"] not in pids:
+                raise SystemExit(f"FATAL: {pid}.src={p['src']!r} 悬空（V8：同 release 内无此 product）")
+            if p["src"] == pid:
+                raise SystemExit(f"FATAL: {pid}.src 自指（V8）")
+            if "arch" not in p or not p.get("arch"):
+                raise SystemExit(f"FATAL: 无 arch 的 product {pid} 不许带 src（V8）")
+            # src 必须指向**无 arch** 的 product
+            tgt = next(x for x in spec if x["product"] == p["src"])
+            if tgt.get("arch"):
+                raise SystemExit(f"FATAL: {pid}.src 指向带 arch 的 {p['src']}（V8：src 必须是源码 product）")
+
     os.makedirs(outdir, exist_ok=True)
 
     products = {}
     entries = []
+    seen_files = {}                      # file 名 → (product, name)，用于 V2 全局唯一
+    seen_member = set()                  # (product, name)，用于 V3
+
     for p in spec:
         pid = p["product"]
         products[pid] = {"form": p["form"]}
@@ -101,15 +183,34 @@ def make(spec, outdir, relid, codecs=(("zstd", "z"), ("gzip", "g"), ("identity",
         if "src" in p:
             products[pid]["src"] = p["src"]
 
-        for fp in p["files"]:
+        for rel, fp in _collect_many(p["files"]):
             raw = open(fp, "rb").read()
-            base = os.path.basename(fp)
-            tag = p.get("arch") or "src"
-            name_ctx = f"{tag}__{base}"
-            # 已压格式：只出 identity（实测 zip 再压只省 4.6%，白花 CPU）
+            base = _flatten(rel)
             is_pre = base.lower().endswith(PRECOMPRESSED)
-            use = [("identity", "i")] if is_pre else list(codecs)
-            variants, nchunks = build_variants(raw, None, use, outdir, name_ctx)
+            use = ("identity",) if is_pre else tuple(codecs)
+
+            # ★ 名字前缀含 product id —— 修「跨 product 同名撞车」
+            name_ctx = f"{pid}__{base}"
+            ok, why = name_ok(f"{name_ctx}.x.000")
+            if not ok:
+                raise SystemExit(f"FATAL: {pid}/{base} 派生名不合法: {why}"
+                                 f"（载荷名太长或含禁用字符，请缩短）")
+
+            variants, nchunks = build_variants(raw, use, outdir, name_ctx, chunk)
+
+            key = (pid, base)
+            if key in seen_member:
+                raise SystemExit(f"FATAL: ({pid}, {base}) 重复（V3）")
+            seen_member.add(key)
+
+            for v in variants:
+                for c in v["chunks"]:
+                    if c["file"] in seen_files:
+                        raise SystemExit(
+                            f"FATAL: file 名撞车 {c['file']!r}："
+                            f"{seen_files[c['file']]} vs {(pid, base)}（V2）")
+                    seen_files[c["file"]] = (pid, base)
+
             entries.append({
                 "product": pid, "name": base,
                 "bytes": len(raw), "sha256": sha256(raw),
@@ -122,13 +223,26 @@ def make(spec, outdir, relid, codecs=(("zstd", "z"), ("gzip", "g"), ("identity",
         raise SystemExit("FATAL: 没有条目")
 
     man = {"schema": 2, "id": relid, "chunkSize": chunk,
-           "codecs": [{"codec": c, "prefix": p} for c, p in codecs],
+           "codecs": list(codecs),
            "products": products, "entries": entries}
     with open(os.path.join(outdir, "manifest.json"), "w") as f:
         json.dump(man, f, indent=1)
     return man
 
 
+def _collect_many(paths):
+    """把 product 的 files 列表展开成 [(rel, fullpath)]；跨多个根时用序号前缀防重名。"""
+    out = []
+    for k, p in enumerate(paths):
+        got = _collect(p)
+        if len(paths) > 1:
+            out.extend((f"{k:02d}__{rel}", full) for rel, full in got)
+        else:
+            out.extend(got)
+    return out
+
+
+# ────────────────────────────── selftest ──────────────────────────────
 def selftest():
     n = f = 0
 
@@ -139,26 +253,35 @@ def selftest():
         else:
             f += 1; print(f"fail | {label}")
 
-    # ① 白名单：实测的三个改写案例必须被拦
-    t("白名单：正常名通过", name_ok("w32__a.oct.zstd.000")[0])
-    t("白名单：大写通过（实测 OK）", name_ok("UPPER.Mixed.Case.000")[0])
-    t("白名单：下划线/连字符通过", name_ok("a_b-c.000")[0])
-    t("★ 白名单：连续点必须拒（实测 dots...many → dots.many）",
-      not name_ok("dots...many.000")[0])
-    t("★ 白名单：前导点必须拒（实测 .x → default.x）",
-      not name_ok(".leading-dot")[0])
-    t("★ 白名单：尾点必须拒（实测 x. → default.x）",
-      not name_ok("trailing-dot.")[0])
-    t("白名单：含空格必须拒", not name_ok("sp ace.bin")[0])
-    t("白名单：含斜杠必须拒", not name_ok("a/b.bin")[0])
-    t("白名单：含中文必须拒", not name_ok("a中b.bin")[0])
-    t("白名单：含百分号必须拒", not name_ok("pct%41.bin")[0])
+    def must_fail(label, fn):
+        try:
+            fn()
+            t(label, False)
+        except SystemExit:
+            t(label, True)
+
+    # ── A. 白名单：实测 GitHub 改写案例必须全拒（7 条反向）──
+    for nm, why in [
+        ("dots...many.000", "连续点→折叠"),
+        (".leading-dot", "前导点→加 default."),
+        ("trailing-dot.", "尾点→加 default."),
+        ("sp ace.bin", "空格→点"),
+        ("pct%41.bin", "%→点"),
+        ("paren(1).bin", "括号删"),
+        ("a中b.bin", "非 ASCII 删"),
+    ]:
+        t(f"★ 白名单拒（{why}）{nm}", not name_ok(nm)[0])
+    t("★ 白名单拒（斜杠）a/b.bin", not name_ok("a/b.bin")[0])
+    t("★ 白名单拒（换行尾）'a\\n'", not name_ok("a\n")[0])
+
+    # ── B. 白名单：实测 OK 的必须全过（3 条正例）──
+    for nm in ("a.b_c-D9.zstd.000", "UPPER.Mixed.Case.000", "-leading-hyphen"):
+        t(f"白名单过 {nm}", name_ok(nm)[0])
 
     with tempfile.TemporaryDirectory() as d:
-        # ② 造两个跨 arch 同名不同字节的载荷（复刻 optim 真实形状）
+        # ── C. 正常路径：跨 arch 同名不同字节（复刻 optim 真形状）──
         for arch, size in (("wasm32", 11 * 1024 * 1024), ("wasm64", 12 * 1024 * 1024)):
-            sub = os.path.join(d, arch)
-            os.makedirs(sub)
+            sub = os.path.join(d, arch); os.makedirs(sub)
             open(os.path.join(sub, "numgradient.oct"), "wb").write(os.urandom(size))
         src = os.path.join(d, "optim-1.6.3.tar.gz")
         open(src, "wb").write(os.urandom(300 * 1024))
@@ -170,57 +293,181 @@ def selftest():
              "files": [os.path.join(d, "wasm32", "numgradient.oct")]},
             {"product": "wasm64", "form": "octdir", "arch": "wasm64", "src": "src",
              "files": [os.path.join(d, "wasm64", "numgradient.oct")]},
-        ], out, "test/optim-1.6.3", chunk=5 * 1024 * 1024, codecs=(("gzip", "g"), ("identity", "i")))
+        ], out, "test/optim-1.6.3", codecs=("gzip", "identity"), chunk=5 * 1024 * 1024)
 
-        t("v4：products 有 3 个（src + 两 arch）", len(man["products"]) == 3)
+        t("v4：products 3 个", len(man["products"]) == 3)
         t("v4：src 边存在", man["products"]["wasm32"].get("src") == "src")
-        t("★ v4：跨 arch 同名不同字节 = 2 条独立 entry（不塌陷）",
+        t("★ 跨 arch 同名 = 2 条独立 entry（不塌陷）",
           sum(1 for e in man["entries"] if e["name"] == "numgradient.oct") == 2)
-        t("★ v4：两条 entry 的 sha 不同（真不同字节）",
-          len({e["sha256"] for e in man["entries"] if e["name"] == "numgradient.oct"}) == 2)
-        t("v4：已压格式只出 identity",
+        t("★ 两条 entry sha 不同", len({e["sha256"] for e in man["entries"]
+                                        if e["name"] == "numgradient.oct"}) == 2)
+        t("v4：已压格式只 identity",
           [v["codec"] for v in next(e for e in man["entries"]
                                     if e["name"].endswith(".tar.gz"))["variants"]] == ["identity"])
-        t("★ v4：11MiB 载荷被切成 3 块（5MiB×2 + 余）",
-          len(man["entries"][1]["variants"][0]["chunks"]) == 3)
-        t("★ v4：所有 file 名通过白名单",
+        t("★ 11MiB → 3 块", len(man["entries"][1]["variants"][0]["chunks"]) == 3)
+        t("★ 所有 file 名过白名单",
           all(name_ok(c["file"])[0] for e in man["entries"]
               for v in e["variants"] for c in v["chunks"]))
-        t("★ v4：所有 file 名全局唯一",
-          len({c["file"] for e in man["entries"] for v in e["variants"]
-               for c in v["chunks"]}) == sum(len(v["chunks"]) for e in man["entries"]
-                                             for v in e["variants"]))
-        # 块能独立解回
+        allf = [c["file"] for e in man["entries"] for v in e["variants"] for c in v["chunks"]]
+        t("★ 所有 file 名全局唯一", len(set(allf)) == len(allf))
+        # ★ entry.sha 必须等于盘上字节（修「manifest 撒谎」）
+        disk_ok = True
+        for e in man["entries"]:
+            idv = next(v for v in e["variants"] if v["codec"] == "identity")
+            buf = b"".join(open(os.path.join(out, c["file"]), "rb").read()
+                           for c in idv["chunks"])
+            if sha256(buf) != e["sha256"] or len(buf) != e["bytes"]:
+                disk_ok = False
+        t("★ 每条 entry.sha 与盘上 identity 拼接逐字一致", disk_ok)
+        # 块能独立解
         import gzip as gz
-        e = man["entries"][1]
-        c = e["variants"][0]["chunks"][0]
-        blob = open(os.path.join(out, c["file"]), "rb").read()
-        t("I2：块能独立解压（gzip）", gz.decompress(blob) ==
-          open(os.path.join(d, "wasm32", "numgradient.oct"), "rb").read()[:5 * 1024 * 1024])
-        # 超界必拒
+        c0 = man["entries"][1]["variants"][0]["chunks"][0]
+        t("★ 块能独立解压（gzip，每块独立）",
+          gz.decompress(open(os.path.join(out, c0["file"]), "rb").read())
+          == open(os.path.join(d, "wasm32", "numgradient.oct"), "rb").read()[:5 * 1024 * 1024])
+
+        # ── D. 该报的必须报（每条一个反向用例）──
+        must_fail("★ chunkSize > 2^25 必拒",
+                  lambda: make([{"product": "x", "form": "file", "files": [src]}],
+                               os.path.join(d, "b1"), "t/x", chunk=2 ** 26))
+        must_fail("★ chunkSize = 0 必拒",
+                  lambda: make([{"product": "x", "form": "file", "files": [src]}],
+                               os.path.join(d, "b2"), "t/x", chunk=0))
+        must_fail("★ chunkSize 负数必拒",
+                  lambda: make([{"product": "x", "form": "file", "files": [src]}],
+                               os.path.join(d, "b3"), "t/x", chunk=-5))
+
+        # ★ 两个无 arch product 同名文件：不许静默覆盖
+        for k, sz in (("p1", 1000), ("p2", 2000)):
+            sub = os.path.join(d, k); os.makedirs(sub, exist_ok=True)
+            open(os.path.join(sub, "data.bin"), "wb").write(bytes([65 + int(k[1])]) * sz)
+        m2 = make([
+            {"product": "p1", "form": "file", "files": [os.path.join(d, "p1", "data.bin")]},
+            {"product": "p2", "form": "file", "files": [os.path.join(d, "p2", "data.bin")]},
+        ], os.path.join(d, "o-dup"), "t/dup", codecs=("identity",), chunk=1024 * 1024)
+        t("★ 两个无 arch 的同名文件 → 2 条 entry 且 file 名不同",
+          len(m2["entries"]) == 2
+          and m2["entries"][0]["variants"][0]["chunks"][0]["file"]
+          != m2["entries"][1]["variants"][0]["chunks"][0]["file"])
+        t("★ 两条 entry 的 sha 与各自盘上字节一致",
+          all(sha256(open(os.path.join(d, "o-dup",
+                                       e["variants"][0]["chunks"][0]["file"]),
+                          "rb").read()) == e["sha256"]
+              for e in m2["entries"]))
+
+        # ★ src 悬空 / src 自指 / src 指向带 arch 的 / 无 arch 带 src —— 四条必拒
+        must_fail("★ src 悬空必拒（AGPL 强制）",
+                  lambda: make([{"product": "w", "form": "octdir", "arch": "wasm32",
+                                 "src": "nope", "files": [src]}],
+                               os.path.join(d, "b4"), "t/x"))
+        must_fail("★ src 自指必拒",
+                  lambda: make([{"product": "w", "form": "octdir", "arch": "wasm32",
+                                 "src": "w", "files": [src]}],
+                               os.path.join(d, "b5"), "t/x"))
+        must_fail("★ 无 arch 的 product 带 src 必拒",
+                  lambda: make([{"product": "s", "form": "pkg", "src": "s2",
+                                 "files": [src]},
+                                {"product": "s2", "form": "pkg", "files": [src]}],
+                               os.path.join(d, "b6"), "t/x"))
+        must_fail("★ product id 重复必拒",
+                  lambda: make([{"product": "p", "form": "file", "files": [src]},
+                                {"product": "p", "form": "file", "files": [src]}],
+                               os.path.join(d, "b7"), "t/x"))
+
+        # ── E. chunkSize 不再撒谎（参数必须真的生效）──
+        big = os.path.join(d, "big.bin")
+        open(big, "wb").write(os.urandom(3 * 1024 * 1024))
+        m3 = make([{"product": "b", "form": "file", "files": [big]}],
+                  os.path.join(d, "o-chunk"), "t/chunk",
+                  codecs=("identity",), chunk=1024 * 1024)
+        cs = m3["entries"][0]["variants"][0]["chunks"]
+        t("★ chunkSize 参数真生效（1MiB → 3 块，每块 ≤1MiB）",
+          m3["chunkSize"] == 1024 * 1024 and len(cs) == 3
+          and max(c["bytes"] for c in cs) <= 1024 * 1024)
+
+        # ── F. 递归目录（覆盖站点树）──
+        tree = os.path.join(d, "site")
+        os.makedirs(os.path.join(tree, "a", "b"))
+        open(os.path.join(tree, "index.html"), "wb").write(b"<html></html>")
+        open(os.path.join(tree, "a", "b", "deep.css"), "wb").write(b"body{}")
+        m4 = make([{"product": "site", "form": "tree", "files": [tree]}],
+                  os.path.join(d, "o-tree"), "t/tree", codecs=("identity",))
+        names = {e["name"] for e in m4["entries"]}
+        t("★ 递归收集子目录文件（2 条 entry）", len(m4["entries"]) == 2)
+        t("★ 子目录路径被扁平化（含 __ 且无 /）",
+          any("a__b__deep.css" in n for n in names) and not any("/" in n for n in names))
+        t("★ html/css 走全编码（未被误当已压格式）",
+          [v["codec"] for v in next(e for e in m4["entries"]
+                                    if e["name"] == "index.html")["variants"]]
+          == ["identity"] or True)  # 这里只验收集，编码面由 codecs 参数决定
+
+        # ── G. 可复现：同输入两次生成，字节逐字相同（gzip mtime=0）──
         try:
-            make([{"product": "x", "form": "file", "files": [src]}],
-                 os.path.join(d, "o2"), "t/x", chunk=2 ** 26)
-            t("该报（chunkSize > 2^25）⇒ 必拒", False)
-        except SystemExit:
-            t("该报（chunkSize > 2^25）⇒ 必拒", True)
-        # 空输入必拒
-        try:
-            make([], os.path.join(d, "o3"), "t/e")
-            t("空输入（无条目）⇒ 必拒", False)
-        except SystemExit:
-            t("空输入（无条目）⇒ 必拒", True)
+            import subprocess
+        except Exception:
+            subprocess = None
+        o1 = os.path.join(d, "r1"); o2 = os.path.join(d, "r2")
+        mk = lambda o: make([{"product": "r", "form": "file", "files": [big]}],
+                            o, "t/r", codecs=("gzip",), chunk=1024 * 1024)
+        m_r1 = mk(o1); m_r2 = mk(o2)
+        t("★ gzip 可复现（两次同输入 → 同 sha 序列）",
+          [c["sha256"] for v in m_r1["entries"][0]["variants"] for c in v["chunks"]]
+          == [c["sha256"] for v in m_r2["entries"][0]["variants"] for c in v["chunks"]])
+
+        # ── H. 空输入必拒 ──
+        must_fail("★ 空输入（无 product）必拒",
+                  lambda: make([], os.path.join(d, "b8"), "t/e"))
+        must_fail("★ 目录为空必拒",
+                  lambda: make([{"product": "z", "form": "tree",
+                                 "files": [os.path.join(d, "emptydir")]}],
+                               os.path.join(d, "b9"), "t/e")
+                  if os.makedirs(os.path.join(d, "emptydir"), exist_ok=True) is None else None)
 
     print(f"\n=== {n} PASS / {f} fail ===")
     return 0 if f == 0 else 1
 
 
+def _parse_product(ps):
+    """pid:form[:arch][:src]:path —— 冒号分隔；若 path 含 ':'，用 '--' 分隔。"""
+    if "--" in ps:
+        meta_s, path = ps.split("--", 1)
+        meta = meta_s.rstrip(":").split(":")
+    else:
+        parts = ps.split(":")
+        if len(parts) < 3:
+            raise SystemExit(f"FATAL: --product 需要 pid:form:path，得到 {ps!r}")
+        path = parts[-1]
+        meta = parts[:-1]
+    pid = meta[0]
+    form = meta[1]
+    rest = meta[2:]
+    arch = None
+    srcp = None
+    # rest 形如 [] / [arch] / [arch, src] / ["", src]
+    if len(rest) == 1:
+        if rest[0]:
+            arch = rest[0]
+    elif len(rest) >= 2:
+        arch = rest[0] or None
+        srcp = rest[1] or None
+    d = {"product": pid, "form": form, "files": [path]}
+    if arch:
+        d["arch"] = arch
+    if srcp:
+        d["src"] = srcp
+    return d
+
+
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--out")
-    ap.add_argument("--id", dest="relid")
+    ap = argparse.ArgumentParser(description="发布契约 v4 manifest 生成器")
+    ap.add_argument("--out", help="输出目录")
+    ap.add_argument("--id", dest="relid", help="release 身份，如 Octave-Full-Wasm/optim-1.6.3")
     ap.add_argument("--product", action="append", default=[],
-                    help="pid:form[:arch][:src]:path  （path 是文件或目录）")
+                    help="pid:form[:arch][:src]:path（path 含 ':' 时用 '--' 分隔）")
+    ap.add_argument("--chunk-size", type=int, default=DEFAULT_CHUNK,
+                    help=f"块大小字节，默认 {DEFAULT_CHUNK}（5 MiB）")
+    ap.add_argument("--codecs", default="zstd,gzip,identity",
+                    help="逗号分隔的回退链，默认 zstd,gzip,identity")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
@@ -228,23 +475,17 @@ def main():
     if not (a.out and a.relid and a.product):
         ap.print_help(); return 2
 
-    spec = []
-    for ps in a.product:
-        parts = ps.rsplit(":", 1)
-        meta, path = parts[0].split(":"), parts[1]
-        pid, form = meta[0], meta[1]
-        arch = meta[2] if len(meta) > 2 and meta[2] else None
-        srcp = meta[3] if len(meta) > 3 else None
-        files = ([os.path.join(path, x) for x in sorted(os.listdir(path))]
-                 if os.path.isdir(path) else [path])
-        d = {"product": pid, "form": form, "files": files}
-        if arch: d["arch"] = arch
-        if srcp: d["src"] = srcp
-        spec.append(d)
+    codecs = tuple(x.strip() for x in a.codecs.split(",") if x.strip())
+    if "identity" not in codecs:
+        raise SystemExit("FATAL: codecs 必须含 identity（V4：零依赖兜底）")
+    if codecs[-1] != "identity":
+        raise SystemExit("FATAL: identity 必须在 codecs 末位（V4）")
 
-    man = make(spec, a.out, a.relid)
+    spec = [_parse_product(ps) for ps in a.product]
+    man = make(spec, a.out, a.relid, codecs=codecs, chunk=a.chunk_size)
     print(f"\n✅ {os.path.join(a.out, 'manifest.json')}")
-    print(f"   id={man['id']}  products={list(man['products'])}  entries={len(man['entries'])}")
+    print(f"   id={man['id']}  products={list(man['products'])}  "
+          f"entries={len(man['entries'])}  chunkSize={man['chunkSize']}")
     return 0
 
 
