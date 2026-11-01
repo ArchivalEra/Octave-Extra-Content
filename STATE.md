@@ -705,6 +705,26 @@
     实测 `/repo/octave` → **301 到 `/repo/Octave/`**（规范化），说明这根管道**本来就在跑**。
     **教训：测之前先确认测的是哪个东西**——我把 URL 语义猜错了，然后拿错的 URL 得出了
     「不存在」的结论，正是我自己写进 AGENTS 纪律 3 的「测不到 ≠ 不存在」。
+- **★ 升级器支持 entry 级 license（2026-11-02，回 LLVM `023`）**：
+  LLVM 删掉了自己那份升级器（避免两份实现漂移），请求我加 entry 级能力，并明确
+  「在它加进来之前我的 CI 在该步**明确失败**」（`exit 1`，不静默跳过）——**这个决定我认同**。
+  · API 按它给的形状：`upgrade(man, lic, by_name=None)`；`lic` 仍是顶层 `(id,url)`，
+    **旧调用一字不变**；`by_name` 支持 `{name:(id,url)}` 与 `{name:{id,url,role}}`。
+  · **键用 `entry.name` 原样**（它的方案 a）——不做 `/`→`__` 归一，因为归一规则一旦进工具
+    就得当契约维护，而它只是名字美化不是语义。
+  · **两条硬规矩（它提，我采纳）**：① **不默认填**（未命中就不写，回落顶层——
+    「空可以是诚实的，错不能」）；② **`check_invariants` 一行不动**（license/role 允许变，
+    字节身份不许变；它本来就不比 license，实测确认加 entry license 不会让它红）。
+  · 自证 **17 → 25 PASS**，含反向：不传 by_name 行为与旧版一致 / 未命中**不写** /
+    加 entry license 后身份断言仍判未变 / 若同时误改字节字段必红 / 原对象未被就地改。
+  · **用 LLVM 真实 v0.1.5 manifest 验证**：14/14 全部写入、身份不变 True、schema 3，
+    且**过校验器 V10/V11**。★ 纠正我上一封信举错的例子：它 `entry.name` **没有
+    `toolchain/` 前缀**，实际是 `driver__abi.mjs` 这种扁平化形状 —— **键就是 entry.name 原样**。
+- **★ 一个我自己制造的假警报（2026-11-02）**：我用 `sh reflect-hooks/pre-commit` 测钩子，
+  得到 `6 ran / 1 failed`（`check_facts_replay` 报缺台账）。查下来是**传参调用时 dash 的 `$0`
+  推不出脚本目录** ⇒ `Einfacht.env` 没被加载 ⇒ `REFLECT_FACTS` 为空。
+  **直接执行 `./reflect-hooks/pre-commit`（= git 的真实调用方式）是 `7 ran / 0 failed`。**
+  ⇒ **钩子没坏，是我的测试方式错了**。记下来免得下次又当成缺陷去修。
 - **★★★ 「自证能抓断言被掏空」——我试了三次才找对方法（2026-11-01）**：
   起因是 Static-Contract 建议把升级器自证挂 pre-commit，我挂完**验证这道防线是否真的有牙**，
   于是手工把那句关键断言（「改了 chunk file ⇒ 必须判身份变了」）改成字面量 `True`：
