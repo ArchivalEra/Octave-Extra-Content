@@ -128,6 +128,41 @@ def check_invariants(old, new):
     return core(old) == core(new)
 
 
+def _audit_literal_asserts(path):
+    """静态审计：本文件里所有 `t(标签, 条件)` 调用的第二个参数，不许是字面量 bool。
+
+    为什么需要它（2026-11-01 实测三次才想清楚）：
+      · 运行时的「元自证」只能验 `t()` 这个**机制**还在判断；
+      · 变异测试只能验**被调用函数**（`check_invariants`）没被换掉；
+      · fail 计数器只能验计数**动了**（掏空别的断言时照样动）。
+    **三者都抓不到「某一条 `t(...)` 被改成 `True`」** —— 而那是掏空一条断言
+    的最短路径，也是我实际犯过的错（`... or True`，见 Einfacht issue #23）。
+
+    唯一有效的办法是**看源码**：字面量 bool 作为断言条件，要么是笔误、
+    要么是掏空。`SENTINEL` 里的行号是自检器自己的故意失败用例，放行。
+
+    返回 {"literal": [(行号, 值), ...], "sentinel": [...]}。
+    """
+    import ast
+    try:
+        tree = ast.parse(open(path, encoding="utf-8").read())
+    except (OSError, SyntaxError) as ex:
+        return {"literal": [("<不可解析>", repr(ex))], "sentinel": []}
+    SENTINEL = {"〔自检〕这条是故意失败的（用于验证 fail 计数真的会动）"}
+    out = []
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "t" and len(node.args) >= 2):
+            arg = node.args[1]
+            if isinstance(arg, ast.Constant) and isinstance(arg.value, bool):
+                lbl = node.args[0]
+                label = lbl.value if isinstance(lbl, ast.Constant) else ""
+                if label in SENTINEL:
+                    continue
+                out.append((node.lineno, arg.value))
+    return {"literal": out, "sentinel": sorted(SENTINEL)}
+
+
 def _selftest():
     n = f = 0
 
@@ -137,6 +172,35 @@ def _selftest():
             n += 1; print("PASS | " + label)
         else:
             f += 1; print("fail | " + label)
+
+    # ★ 元自证（2026-11-01 实测踩到）：本工具的**全部价值**是那条反向断言
+    #   「改了字节 ⇒ 必须判身份变了」。但如果有人（我）把它改成恒真（`True`
+    #   或 `... or True`），`--selftest` 照样 13 PASS、退出码 0、pre-commit 全绿
+    #   —— **假断言与真断言在「返回 0 + 打摘要行」这个面上完全同形**。
+    #   这正是 Einfacht issue #23（我自己报的那条）。
+    #
+    #   下面这道**元级**判据验的是「`t()` 这个机制还在不在判断」：
+    #   拿一个必然为假的条件喂进去，它必须计入 fail。
+    #
+    #   ⚠️ **诚实边界（实测确认，别把它当万能）**：这条**抓不到**「某一条业务断言
+    #   被单独改成 `True`」——那种情况下 `t()` 仍在正常判断，元自证照样通过。
+    #   我实测过：把「改了 chunk file ⇒ 必须判身份变了」改成 `True` 后，
+    #   自证仍是 13 PASS / 0 fail。要抓那一类，需要**变异测试**（给每条断言
+    #   注入一个必破输入，断言必须变红），代价是每条断言多写一个破坏器 ——
+    #   见 Einfacht issue #23 的三档建议。**这里只做到"机制没死"这一层，
+    #   不假装做到了"每条断言都有牙"。**
+    _f0 = f
+    t("〔元自证〕必然为假的条件必须计入 fail（否则 t() 已失效）", 1 == 2)
+    if f == _f0:
+        print("FATAL | 〔元自证〕t() 不做判断（假条件没被计入 fail）"
+              " —— 本自证整体不可信，全部 PASS 作废")
+        print("\n=== 0 PASS / 999 FAIL ===")
+        return 1
+    n -= 1                      # 这条元的本身不是业务通过，回滚计数
+    f -= 1
+    n += 1; print("PASS | 〔元自证〕t() 仍在真实判断（假条件已被计入 fail 并回滚）")
+    print("      ⚠️ 边界：本元自证只证「机制没死」，不证「每条断言都有牙」"
+          "（后者需变异测试，未做）")
 
     t("归一：and → AND", normalize_spdx("A and B") == "A AND B")
     t("归一：public domain → LicenseRef",
@@ -164,6 +228,60 @@ def _selftest():
     bad2 = upgrade(old, ("MIT", "https://x/COPYING"))
     bad2["entries"][0]["sha256"] = "b" * 64
     t("★ 改了 entry sha ⇒ 必须判为身份变了", not check_invariants(old, bad2))
+
+    # ★★ 变异测试（**诚实地讲：它验的是函数，不是断言**）
+    #
+    #   把 check_invariants 换成一概 True，然后确认「反向判据失去判断力」。
+    #   ⚠️ 我实测过：**这抓不到「那条 t(...) 被改成字面量 True」**——
+    #   因为掏空的是调用点，而这里验的是被调用者。两者不同。
+    #   要真抓到「某条断言被掏空」，唯一办法是让断言本身**不接受字面量**，
+    #   而是接受一个可执行的结果（见下面那条「自检器」）。
+    #   这一条留着，是因为它能抓「check_invariants 被改成永真」这种**函数级**劣化，
+    #   那种劣化同样会让身份保护失效。
+    _real = check_invariants
+    try:
+        globals()["check_invariants"] = lambda a, b: True
+        mutated = check_invariants(old, bad)
+    finally:
+        globals()["check_invariants"] = _real
+    t("★★ 变异：check_invariants 被换成一概 True ⇒ 它失去判断力（函数级）",
+      mutated is True)
+    t("★★ 变异：还原后恢复判断力", check_invariants(old, bad) is False)
+
+    # ★★★ 自检器（**这条才真的抓「断言被掏空」**）
+    #
+    #   思路：不放一条「结果为 True」的断言，而是放一个**必然失败的用例**，
+    #   然后断言「它确实失败了」。若有人把**这条**改成字面量 True，
+    #   他改的是"断言"——但它断言的对象是「另一个东西失败了」。
+    #   掏空它之后仍然是 15 PASS……**除非**我们检查「这条 FAIL 用例真的产生过 fail 记录」。
+    #
+    #   ⇒ 真正的判据在这里：**统计 fail 计数**。下面故意让一个用例失败，
+    #   它必须让 f 增加；若不增加，说明 t() 或被掏空、或统计被动过。
+    _f_before = f
+    t("〔自检〕这条是故意失败的（用于验证 fail 计数真的会动）", False)
+    if f != _f_before + 1:
+        print("FATAL | 〔自检〕fail 计数没有增加 —— 自证统计已失效，全部 PASS 作废")
+        print("\n=== 0 PASS / 999 FAIL ===")
+        return 1
+    f -= 1; n += 1          # 回滚：这条只用来验计数器
+    print("PASS | 〔自检〕fail 计数真的会动（故「改了字节 ⇒ 必须判身份变了」若失败，会被计入）")
+
+    # ★★★ 静态扫描（**这条才真的抓「断言被改成字面量」**）
+    #
+    #   前三道防线都试过、都不够（我实测确认）：
+    #   · 元自证验「t() 还在判断」→ 抓不到某条 t(...) 被掏空；
+    #   · 变异测试验「check_invariants 被换掉」→ 抓不到**调用点**被掏空（两者不同）；
+    #   · fail 计数验「计数器会动」→ 掏空的是别的断言，计数照样动。
+    #
+    #   **唯一真正有效的判据是看源码**：`t(标签, 条件)` 的第二个参数
+    #   不允许是字面量 bool（自检器自己那行 `False` 用哨兵白名单放行）。
+    #   掏空一条断言的最短路径就是写成 `True`，AST 一眼看得出。
+    #   ⇒ 这不是运行时验证，是**对自证本身的静态审计**。
+    _audit = _audit_literal_asserts(__file__)
+    t("★★★ 静态审计：自证里没有字面量 bool 断言（掏空的最短路径）",
+      _audit["literal"] == [], )
+    if _audit["literal"]:
+        print("      发现：%r" % (_audit["literal"],))
 
     pl = load_pack_licenses()
     t("包许可：13 个包全解析到", len(pl) == 13)

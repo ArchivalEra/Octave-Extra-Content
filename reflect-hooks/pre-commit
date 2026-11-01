@@ -31,3 +31,21 @@ fi
 #    只能靠「不叫 check_」表达频率）。执行面只认声明 —— 名字不再承重。
 #    off 态被单列（C2）：`ran N / off M / failed K`，off 不是通过。
 python3 zreflect/registry.py --run commit || exit 1
+
+# ③ 本仓自有的**纯工具**自证（不在 registry 面内 —— registry 只收 `zreflect/`
+#    下带 GATE 声明的闸门；这些是 `tools/` 里的生产者工具，靠这里挂住）。
+#
+#    ★ 为什么升级器的自证必须每次提交都跑（Static-Contract `120` §4 的建议）：
+#    `tools/upgrade-manifest-license.py` 存在的**全部理由**就是那条反向断言
+#    「改了字节 ⇒ 必须判身份变了」。那条断言失效 ⇒ 工具会静默改掉**已发布 release**
+#    的字节身份，而那正是它唯一要防的事。**没跑 = 没防。**
+echo "── tools/ 纯工具自证 ──"
+for t in make-manifest-v4 check-release-v4 upgrade-manifest-license; do
+  python3 "tools/$t.py" --selftest >/dev/null || {
+    echo "FATAL: tools/$t.py --selftest 失败"
+    echo "  ↑ 三者里 upgrade-manifest-license 的『改了字节 ⇒ 必须判身份变了』"
+    echo "    是它存在的全部理由；check-release 是集群共享件（LLVM CI 直接拉）"
+    exit 1
+  }
+done
+echo "OK（生成器 / 校验器 / 升级器）"
