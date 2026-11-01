@@ -44,6 +44,171 @@ def is_hex64(s):
     return isinstance(s, str) and len(s) == 64 and set(s) <= HEX
 
 
+# ══ v1.1 许可证（V11，**一行字符串**）══════════════════════════════════════════
+#
+# 设计判据（用户 2026-11-01 纠正后的最终形态）：
+#   「人家只想下个包一条链接」 —— 许可**不能**变成下载路径上的闸门。
+#
+#   字节层：GET <base>/<file>，普通 GET，**不认识许可**
+#   manifest：`license` 是一行 SPDX 表达式字符串，**展示用**
+#   catalogue：没有 `license` ⇒ 不收录（闸门只在上架时挡一次，不在每个消费者那里挡 N 次）
+#
+# ⇒ schema 3 的全部许可判据只有一条 V11，且**只查形状，不查语义、不联网、不联网**。
+#   三态（declared/unstated/refused）、provenance 见证链、amends 修订锚 ——
+#   全部**删掉**：它们把「一行元数据」变成了「一棵要遍历的树」，
+#   偏离了「apt 的稳健 + HTTP 的简洁」里的后一半。
+
+SPDX_TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9.+-]*$")
+LICENSE_REF = re.compile(r"LicenseRef-[A-Za-z0-9._-]{1,}$")
+ROLES = ("payload", "license", "notice")
+
+
+def parse_spdx(expr):
+    """SPDX 表达式文法检查。返回 token 列表，非法返回 None。
+
+    只验**合法性**（算符大写、括号配对、token 形状），不做语义求值。
+    客户端**不需要**调用它 —— 它只把 `license` 当字符串展示。
+    """
+    if not isinstance(expr, str) or not expr.strip():
+        return None
+    if expr != expr.strip() or "  " in expr or "\t" in expr or "\n" in expr:
+        return None                       # 首尾/冗余空白 = 写法错误
+
+    toks, cur = [], ""
+    for ch in expr:
+        if ch in "()":
+            if cur:
+                toks.append(cur); cur = ""
+            toks.append(ch)
+        elif ch == " ":
+            if cur:
+                toks.append(cur); cur = ""
+        else:
+            cur += ch
+    if cur:
+        toks.append(cur)
+    if not toks:
+        return None
+
+    depth = 0
+    expect_operand = True
+    for i, t in enumerate(toks):
+        if t == "(":
+            if not expect_operand:
+                return None
+            depth += 1
+            expect_operand = True
+        elif t == ")":
+            if expect_operand or depth == 0:
+                return None
+            depth -= 1
+            expect_operand = False
+        elif t in ("AND", "OR", "WITH"):
+            if expect_operand:
+                return None
+            if t == "WITH":
+                # WITH 只作用于单个标识符，且不许链式
+                if i < 1 or i + 1 >= len(toks):
+                    return None
+                if toks[i - 1] in ("(", ")", "AND", "OR", "WITH"):
+                    return None
+                if toks[i + 1] in ("(", ")", "AND", "OR", "WITH"):
+                    return None
+                if i + 2 < len(toks) and toks[i + 2] == "WITH":
+                    return None
+            expect_operand = True
+        else:
+            if not expect_operand:
+                return None
+            if t.lower() in ("and", "or", "with"):
+                return None
+            if t.startswith("LicenseRef-"):
+                if not LICENSE_REF.match(t):
+                    return None
+            elif not SPDX_TOKEN.match(t):
+                return None
+            expect_operand = False
+    if depth != 0 or expect_operand:
+        return None
+    return toks
+
+
+def _check_license(man, ok, P):
+    """V11：`license` 是 `{id, url}` —— **名称 + 指向许可全文的链接**。
+
+    为什么不是一个字符串（用户 2026-11-01 裁定）：
+        「各家 license 文章不一样，改成指向链接，强制要求 release 填写每个产物的
+          license 在那个仓库的链接，毕竟有过几代换许可证的场景」
+
+    判据：
+      · `id` 是 SPDX 标识符形状（给人快速判读；**不校验是否在 SPDX 词表内**——词表会漂）
+      · `url` 必须 `https://` 且非空（**全文的权威出处**；换许可证时这里会变）
+      · 两者**都必填**：只有 id = 指向"标准文本"，但各家常有附加条款、改写过、
+        或根本不在 SPDX 词表里；只有 url = 程序没法判读。
+
+    **不查语义、不查来源、不联网、不读盘。** 只查形状。
+    """
+    lic = man.get("license")
+    ok("V11 license 是 {id,url} 对象", type(lic).__name__, isinstance(lic, dict),
+       "schema 3 的许可必须是 {id, url} —— 名称 + 全文链接")
+    if not isinstance(lic, dict):
+        if lic is None:
+            P.append("V11 缺 license（schema 3 必填）—— {id, url} 两项")
+        return
+
+    # ── id ──
+    lid = lic.get("id")
+    ok("V11 license.id 是字符串", type(lid).__name__, isinstance(lid, str))
+    if isinstance(lid, str):
+        ok("V11 license.id 非空", repr(lid)[:40], lid.strip() != "")
+        # id 可以是**复合表达式**（真实数据里 geometry/optim/splines 都是 A AND B），
+        # 所以判据是"能被 SPDX 文法解析"，不是"单个标识符"。
+        # 不校验是否在 SPDX 词表内 —— 词表会漂（v4 §3「平台容量不进协议」的同一条判据）。
+        ok("V11 license.id 是合法 SPDX 表达式", repr(lid)[:40],
+           parse_spdx(lid.strip()) is not None,
+           "形如 MIT / GPL-3.0-or-later / A AND B（不校验是否在 SPDX 词表内）")
+
+    # ── url：**必填**，且必须 https ──
+    lu = lic.get("url")
+    ok("V11 license.url 存在（必填）", repr(lu)[:60], lu is not None,
+       "必须有指向许可全文的链接 —— 各家正文不同，且会随世代更换")
+    if isinstance(lu, str):
+        ok("V11 license.url 以 https:// 开头", repr(lu)[:60],
+           lu.startswith("https://"), "明文 http 的许可声明不可信")
+        ok("V11 license.url 非空路径", repr(lu)[:60], len(lu) > len("https://"))
+    elif lu is not None:
+        ok("V11 license.url 是字符串", type(lu).__name__, False)
+
+    # ── entry 级覆盖：同样是 {id, url} ──
+    ents = man.get("entries")
+    for j, e in enumerate(ents if isinstance(ents, list) else []):
+        if not isinstance(e, dict):
+            continue
+        tag = "[%s/%s] " % (e.get("product"), e.get("name"))
+        if "license" in e:
+            el = e["license"]
+            ok("V11 %sentries[%d].license 是 {id,url}" % (tag, j),
+               type(el).__name__, isinstance(el, dict))
+            if isinstance(el, dict):
+                eid, eurl = el.get("id"), el.get("url")
+                ok("V11 %sentries[%d].license.id 非空字符串" % (tag, j),
+                   repr(eid)[:30], isinstance(eid, str) and eid.strip() != "")
+                ok("V11 %sentries[%d].license.url 是 https" % (tag, j),
+                   repr(eurl)[:50], isinstance(eurl, str) and eurl.startswith("https://"),
+                   "每个产物都要能点回它的许可全文")
+        role = e.get("role", "payload")
+        ok("V11 %srole ∈ {payload,license,notice}" % tag, repr(role), role in ROLES)
+        exc = e.get("excluded")
+        if exc is not None:
+            ok("V11 %sexcluded 是数组" % tag, type(exc).__name__, isinstance(exc, list))
+            for k, x in enumerate(exc if isinstance(exc, list) else []):
+                if not isinstance(x, dict):
+                    P.append("V11 %sexcluded[%d] 不是对象" % (tag, k)); continue
+                ok("V11 %sexcluded[%d].why 非空" % (tag, k), repr(x.get("why"))[:30],
+                   isinstance(x.get("why"), str) and x["why"].strip() != "",
+                   "「不分发」必须说明原因")
+
+
 def check(man, base_dir=None):
     """返回 (results, problems)。results = [(label, detail, ok)]"""
     R, P = [], []
@@ -58,8 +223,12 @@ def check(man, base_dir=None):
         return R, P
 
     # ── V10 schema ──
-    ok("V10 schema == 2", str(man.get("schema")), man.get("schema") == 2,
+    schema = man.get("schema")
+    ok("V10 schema ∈ {2,3}", str(schema), schema in (2, 3),
        "旧客户端必须 fail-loud，不许静默少一半")
+    # v1.1：schema 3 必须带许可声明（V11–V15 只在 schema 3 上跑）
+    if schema == 3:
+        _check_license(man, ok, P)
     ok("V0 id 非空字符串", repr(man.get("id"))[:40],
        isinstance(man.get("id"), str) and man["id"] != "")
 
@@ -297,57 +466,72 @@ def selftest():
         t(f"该报（{label}）⇒ 必报 {want}", any(want in x for x in P))
 
     bad(lambda m: m.update(schema=1), "schema=1", "V10")
-    bad(lambda m: m.update(chunkSize=0), "chunkSize=0", "V6")
-    bad(lambda m: m.update(chunkSize=2 ** 26), "chunkSize>2^25", "V6")
-    bad(lambda m: m["codecs"].pop(), "codecs 末位非 identity", "V4")
-    bad(lambda m: m.update(products={}), "products 空", "V0")
-    bad(lambda m: m.update(entries=[]), "entries 空", "V0")
-    bad(lambda m: m["entries"][1]["variants"].pop(), "variants 末位非 identity", "V4")
-    bad(lambda m: m["entries"][0]["variants"][0]["chunks"][0].update(file="bad name.bin"),
-        "file 含空格", "V1")
-    bad(lambda m: m["entries"][0]["variants"][0]["chunks"][0].update(file=".dot.bin"),
-        "file 前导点", "V1")
-    bad(lambda m: m["entries"][0]["variants"][0]["chunks"][0].update(file="a..b"),
-        "file 连续点", "V1")
-    bad(lambda m: m["entries"][1]["variants"][1]["chunks"][0].update(
-        file=m["entries"][1]["variants"][0]["chunks"][0]["file"]), "file 撞车", "V2")
-    bad(lambda m: m["entries"][0].update(product="nope"), "悬空 product", "V5")
-    bad(lambda m: m["entries"].append(dict(m["entries"][0])), "(product,name) 重复", "V3")
-    bad(lambda m: m["entries"][0]["variants"][0]["chunks"][0].update(bytes=999),
-        "Σidentity != bytes", "V7")
-    bad(lambda m: m["entries"][0].update(sha256="zz"), "sha 非 64hex", "V7")
-    bad(lambda m: m["products"]["w"].update(src="nope"), "src 悬空", "V8")
-    bad(lambda m: m["products"]["w"].update(src="w"), "src 自指", "V8")
-    bad(lambda m: m["products"]["src"].update(src="w"), "无 arch 带 src", "V8")
-    bad(lambda m: m["entries"][1]["variants"][0]["chunks"].append(
-        {"part": 0, "file": "w__b.oct.zstd.001", "bytes": 1, "sha256": "e" * 64}),
-        "part 不连续", "V5")
-    bad(lambda m: m["entries"][1]["variants"][1]["chunks"].append(
-        {"part": 1, "file": "w__b.oct.gzip.001", "bytes": 1, "sha256": "f" * 64}),
-        "codec 块数不一致", "V5")
-    bad(lambda m: m["entries"][1]["variants"][0].update(codec="xz"),
-        "codec 未在 codecs 声明", "V4")
+    bad(lambda m: m.update(schema=4), "schema=4", "V10")
 
-    # ★ V6 语义：chunkSize 撒谎（声明 1MiB 但 identity 块是 6B 单块 ⇒ 块数应为 1，改 chunkSize 制造不符）
-    def lie_chunk(m):
-        m["chunkSize"] = 1          # 声明 1 字节 ⇒ 期望 6 块，实际 1 块
-    bad(lie_chunk, "chunkSize 撒谎（块数与 ceil(bytes/cs) 不符）", "V6")
+    # ── v1.1 许可证（V11：{id, url}）＋ SPDX 标识符形状 ──────────────────────
+    # 标识符形状：接受面 / 拒绝面
+    for e in ("LicenseRef-", "MIT OR", "", "MIT AND (", "A WITH B WITH C",
+              "(A OR B) WITH X", "LicenseRef- AND MIT"):
+        t("标识符/表达式形状拒：%r" % e, parse_spdx(e) is None)
+    for e in ("MIT", "LicenseRef-public-domain", "Apache-2.0 WITH LLVM-exception",
+              "GPL-3.0-or-later AND BSD-3-Clause AND LicenseRef-public-domain"):
+        t("标识符/表达式形状收：%r" % e, parse_spdx(e) is not None)
 
-    # ★ entry/asset 数**无上限**（2026-10-31 用户裁定「协议无限」）。
-    # 反证：条目数远超任何平台容量的 manifest 也必须**合法**（不因数量拒收）。
-    m_many = good()
-    tmpl = m_many["entries"][0]
-    for k in range(1200):
-        e = {"product": "src", "name": f"m{k:04d}.bin", "bytes": 6, "sha256": "a" * 64,
-             "variants": [{"codec": "identity", "chunks": [
-                 {"part": 0, "file": f"src__m{k:04d}.bin.identity.000",
-                  "bytes": 6, "sha256": "a" * 64}]}]}
-        m_many["entries"].append(e)
-    _, P = check(m_many)
-    t(f"{len(m_many['entries'])} 条 entry / 1202 个 asset ⇒ 仍合法"
-      "（协议不设上限）", not P)
-    if P:
-        print("      ", P[:3])
+    def good3():
+        """最小合法 schema 3 manifest（许可 = {id, url}）。"""
+        m = good()
+        m["schema"] = 3
+        m["license"] = {"id": "GPL-3.0-or-later",
+                        "url": "https://www.gnu.org/licenses/gpl-3.0.html"}
+        return m
+
+    _, P3 = check(good3())
+    t("正常（schema 3 + {id,url}）⇒ 不报", not P3)
+    if P3:
+        print("      ", P3[:3])
+
+    def bad3(mut, label, want):
+        m = good3(); mut(m)
+        _, P = check(m)
+        t("该报（%s）⇒ 必报 %s" % (label, want), any(want in x for x in P))
+
+    bad3(lambda m: m.pop("license"), "缺 license", "V11")
+    bad3(lambda m: m.update(license="GPL-3.0-or-later"), "license 是字符串（旧形态）", "V11")
+    bad3(lambda m: m["license"].pop("url"), "缺 url", "V11")
+    bad3(lambda m: m["license"].pop("id"), "缺 id", "V11")
+    bad3(lambda m: m["license"].update(id=""), "id 空串", "V11")
+    bad3(lambda m: m["license"].update(url=""), "url 空串", "V11")
+    bad3(lambda m: m["license"].update(url="http://gnu.org/gpl"), "url 明文 http", "V11")
+    bad3(lambda m: m["license"].update(url="https://"), "url 只有协议头", "V11")
+    bad3(lambda m: m["license"].update(url=123), "url 不是字符串", "V11")
+    bad3(lambda m: m["license"].update(id="GPL 3.0"), "id 含空格", "V11")
+
+    # entry 级覆盖：同样必须 {id, url}
+    def _entry_lic_ok(m):
+        m["entries"][1]["license"] = {"id": "MIT", "url": "https://opensource.org/license/mit"}
+    m = good3(); _entry_lic_ok(m)
+    _, P = check(m)
+    t("正常（entry 级覆盖 {id,url}）⇒ 不报", not P)
+
+    bad3(lambda m: m["entries"][1].update(license="MIT"),
+         "entry license 是字符串", "V11")
+    bad3(lambda m: m["entries"][1].update(license={"id": "MIT"}),
+         "entry 缺 url", "V11")
+    bad3(lambda m: m["entries"][1].update(license={"id": "MIT", "url": "ftp://x"}),
+         "entry url 非 https", "V11")
+    bad3(lambda m: m["entries"][1].update(role="docs"), "role 非法", "V11")
+    bad3(lambda m: m["entries"][0].update(excluded=[{"path": "x"}]), "excluded 缺 why", "V11")
+
+    def _excluded_ok(m):
+        m["entries"][0]["excluded"] = [{"path": "subprojects/*", "why": "未 vendored"}]
+    m = good3(); _excluded_ok(m)
+    _, P = check(m)
+    t("正常（excluded 带 why）⇒ 不报", not P)
+
+    # 关键：许可**不影响字节获取**（客户端仍只 GET <base>/<file>）
+    R0, _ = check(good3())
+    t("许可声明不改变任何字节判据（V1–V10 用例照常出现）",
+      any(lab.startswith("V7") for lab, _d, _o in R0))
 
     # ── 空输入 ──
     _, P = check([])

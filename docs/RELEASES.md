@@ -30,6 +30,33 @@ supply-msl-<MSL版本>           例：supply-msl-4.1.0
 **一个包一个 release**（用户 2026-11-01 裁定）。理由：增量最小——某个包更新只重发那一个，
 不牵动其它 12 个。
 
+### 2.1 manifest 版本：`schema: 3`（v1.1 契约，许可必填）
+
+2026-11-01 起，所有 manifest 是 **`schema: 3`**，带一项必填的许可声明：
+
+```jsonc
+{
+  "schema": 3,
+  "license": {
+    "id":  "GPL-3.0-or-later AND BSD-3-Clause AND LicenseRef-public-domain",
+    "url": "https://octave.sourceforge.io/optim/COPYING.html"
+  }
+}
+```
+
+- `id` = SPDX 表达式（给人快速判读，可复合）；`url` = **权威正文的当前位置**（必填，https）。
+- **为什么两项都要**：`url` 指向的正文会随换许可证而变，`id` 的字符串不会。
+- **合规缺口是真缺口**：包内的 `COPYING` 在 tarball 里，第三方拿元数据时看不到。
+
+**升级既有 release 不用重传字节**：asset 集合由 manifest 的 `file` 字段定义，
+只要 `bytes`/`sha256`/`file` 逐字不变，就只换 `manifest.json` 这一个 asset。
+本仓的做法是 `tools/upgrade-manifest-license.py`（自证 13/13）——它**强制断言升级不改字节身份**。
+
+⚠️ **归一化的坑**（本仓实测踩到，下游 13 个产物会一起中招）：把散文 `and`/`or` 转 SPDX 算符时，
+**不能用 `\bor\b`** ——`GPL-3.0-or-later` 里的 `or` 前后都是词边界，会被替成
+`GPL-3.0-OR-later`（非法 SPDX），而 `-only` 的包看不出来。**正确做法**：先切 token，
+只替换「整个 token 恰好是 and/or」的。
+
 ---
 
 ## 3. 当前发布面

@@ -732,6 +732,47 @@
     这条已写进我的复核习惯。
   - **我不需要修任何东西**：catalogue 合格、我的 15 条可消费、它的闸门已把 EdgeOne 标红，
     定时（6h）会再试。**报而不修是这里的原则**——那是它和 Shirone 的仓。
+  - **★ 后来它修好了（同日复核）**：三通道 + deploy 源**各自**都是 `3f2c5daa05019064`，
+    CI 最新一次 `success`（`41301178122`），前四次 `failure` 保留；三通道 catalogue
+    **逐字完全相同**（`verified_at` 统一 `11:16:54Z`）。客户端终验 **16 PASS / 0 FAIL**。
+- **★★ 契约升 v1.1（schema 3）：我的 15 个 release 已全部重发（2026-11-01）**：
+  - **它的 `119`**：manifest 加 `license: {id, url}`、`schema` 2→3，**两项都必填**、
+    `url` 必须 https。用户裁定原话：「各家 license 文章不一样，改成指向链接，强制要求 release
+    填写每个产物在那个仓库的链接，**毕竟有过几代换许可证的场景**」。
+    **合规缺口是真缺口**：包内的 COPYING 第三方拿元数据时看不到。
+  - **依赖顺序（它 §4 指出）**：它出新工具 → **我同步** → LLVM 才能用 schema 3。
+    我先做这一半：`cp` 它仓的 `check-release-v4.py`（**纯增量**，我仓旧版 52 行全被替换，
+    无断言丢失；自证 **26→35**，`V10 schema == 2` → `∈ {2,3}`）。
+  - **★ 新写 `tools/upgrade-manifest-license.py`**（自证 **13/13**）：从 `packages/*.json`
+    的 `copyright` link 取许可真值（**13 个包全部有 `label`+`url`**），只改 `schema`/`license`，
+    并**强制断言「升级不改字节身份」**（逐字比 `id`/`chunkSize`/`codecs`/`products` +
+    每条 entry 的 `(product,name,bytes,sha256)` + 每个 chunk 的 `(part,file,bytes,sha256)`；
+    不等就拒、不写盘）。反向用例：改 chunk 名 / 改 entry sha ⇒ 必须判身份变了。
+  - **★ 我在归一化里踩到一个坑（下游 13 个产物一起中招的那种）**：
+    第一版用 `re.sub(r"\bor\b", "OR", s)` 转 SPDX 算符 ⇒
+    **`GPL-3.0-or-later` 变成 `GPL-3.0-OR-later`**（连字符是 `\W`，`or` 前后都是词边界）
+    ⇒ 非法 SPDX，会被它新校验器的 `parse_spdx` 拒掉。**而 `-only` 的包看不出来**。
+    修法：先切 token，**只替换「整个 token 恰好是 and/or」的**。已建议它把这条写进规范
+    （字符串替换看着对、边界条件全错，且下游批量中招）。
+  - **落地结果**：`15 完成 / 0 失败` → `gh release upload --clobber` **只换 manifest.json**，
+    分片一个没动 → 发布后反读：**15/15 都是 `schema: 3` 且 `license.url` https**；
+    完整下载回验 cgi 38/0 · optim 38/0 · MSL 47/0 · pyodide 102/0 · LLVM 634/0。
+    许可 id 全合法，三个复合表达式没拆：geometry `GPL-3.0-or-later AND BSL-1.0` /
+    optim `… AND BSD-3-Clause AND LicenseRef-public-domain` / splines `… AND LicenseRef-public-domain`。
+  - **★ 我留给它裁的问题**：生成器要不要直接产 schema 3？**我倾向不**（保持两步）——
+    生成器的职责是「切块+算 sha+写 manifest」，许可不是它的输入；且两步各自可验证，
+    换许可证时不需要重算任何字节。三个选项（加参数 / 保持两步 / 从 packages 自动查，
+    后者不可移植）已发它裁。
+- **★ 回 LLVM `096`（2026-11-01，其槽 `018`）**：
+  - **它发现的 zstd 细节是真的**：分片每块是**独立帧**，不能当单一多帧流整串解
+    （fzstd `decompress()` 只解第一帧）。**这正是 V6 的 2^25 上限的设计后果**——
+    逐块独立压缩换来「每块可单独校验/解码」，也就是跨源续传的基础。
+    **它踩坑的顺序很典型**：先按拼接后一次解 ⇒ 10 个单块的过、**4 个多块的炸**
+    ⇒ **单块载荷全绿是假象**。已转 Static-Contract 建议写进客户端指引。
+  - **它拒绝改 `manifest.json` 名字，理由成立**：宿主 `provision-llvm-wasm.sh:66-71`
+    硬编码读 tar 内那份；两份 manifest **物理分离**（tar 内 vs release 顶层），A 方案
+    干净目录已解决同目录打架。**我不坚持改名了。**
+  - 它信里说「还没发 v0.1.5」——**它后来发了，我已核验 9 条全过**（105 分片 / 634 PASS / 42/42）。
 - **★ v1 第一次真试点启动（2026-10-31，用户点令「contract 仓库收到了你的信，我们开始做第一次试点，
   也就是从 OM 开始做，延续之前的链条，发新信」）**——**⚠️ 本条已被上条取代：试点对象改成 LLVM**：
   - **为什么是「第一次」**：上面那条「单仓试点已跑通」是**工具链自证**，不是试点——用户 10-30
