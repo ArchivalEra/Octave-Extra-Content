@@ -101,7 +101,7 @@ STATE.md      活状态文档（机器维护的事实块在文末）
 
 **已上架**（2026-11-01）：Static-Contract 的严格派生目录已收录 **16 条**（本仓 15 + LLVM v0.1.5；LLVM v0.1.0–v0.1.4 因 `schema=1` 被 G5 挡在目录外）。本仓独立复核：从 catalogue 的 `base` 真取字节拼回验 sha ⇒ **16 PASS / 0 FAIL**。⚠️ 复核判据是「**每条通道 == 本次构建指纹**」，不是「三通道互相一致」——都停在旧版时也一致（这个区别由 Static-Contract 的验收闸门指出，2026-11-01）。
 
-**manifest 已升 `schema: 3`**（契约 v1.1，许可必填 `{id, url}`）：15 个 release 全部重发完毕，**asset 一个没动、只换 `manifest.json`**，发布后反读 15/15 合规。升级工具 `tools/upgrade-manifest-license.py`（自证 13/13）**强制断言「升级不改字节身份」**。⚠️ 归一化陷阱：把散文 `and`/`or` 转 SPDX 时不能用 `\bor\b`——`GPL-3.0-or-later` 会被替成 `GPL-3.0-OR-later`（非法），而 `-only` 的包看不出来。
+**manifest 已升 `schema: 3`**（契约 v1.1，许可必填 `{id, url}`）：15 个 release 全部重发完毕，**asset 一个没动、只换 `manifest.json`**，发布后反读 15/15 合规。升级工具 `tools/upgrade-manifest-license.py`（自证 25/25）**强制断言「升级不改字节身份」**，并支持 **entry 级 license**（`upgrade(man, lic, by_name=None)`，键用 `entry.name` 原样、**不默认填**——空可以诚实，错不能）。⚠️ 归一化陷阱：把散文 `and`/`or` 转 SPDX 时不能用 `\bor\b`——`GPL-3.0-or-later` 会被替成 `GPL-3.0-OR-later`（非法），而 `-only` 的包看不出来。
 
 **本仓的 `tools/` 是集群共享的**：LLVM-wasm 的 CI 每跑一次就 `git clone` 本仓 main 取校验器。⇒ 改这两个工具等于**改别人的构建**，必须先在本地对真实产物验过再推。生成器仍只产 `schema: 2`（许可不是它的输入，升级是独立一步，两步各自可验证）——维护方已裁定**保持两步**（2026-11-01，理由：职责单一 / 失败隔离 / 时间分离，换许可证不重算字节）。
 

@@ -96,11 +96,38 @@ def license_for(tag, pack_licenses):
     return None
 
 
-def upgrade(man, lic):
-    """返回新 manifest（不改原对象）。只动 schema 与 license 两项。"""
+def upgrade(man, lic, by_name=None):
+    """返回新 manifest（不改原对象）。动 `schema` / 顶层 `license` / 可选的 entry 级 `license`。
+
+    `lic`     —— 顶层，`(id, url)`。**保持原有语义**，旧调用不受影响。
+    `by_name` —— 可选，`{entry.name: (id, url)}` 或 `{entry.name: {"id":…, "url":…, "role":…}}`。
+                 命中的 entry 写 `license`（`role` 若给则一并写）。
+
+    ★ 两条硬规矩（LLVM `023` 提，我采纳）：
+    1. **不默认填**。entry 不在 `by_name` 里 ⇒ **不写** `license`，回落到顶层。
+       不许给一个猜的默认值 —— **空可以是诚实的，错不能**。
+    2. **`check_invariants()` 不动**。license/role 是允许变的；字节身份不许变。
+       它本来就不比 license，所以这里加 entry license 不会让它红。
+
+    ★ 键用 **`entry.name` 原样**（LLVM 的方案 a）：`"toolchain/clang.wasm"`。
+    不做 `/`→`__` 之类的归一 —— 归一规则一旦进工具就得当契约维护，
+    而它只是名字美化，不是语义。调用方多写几个字符是更小的代价。
+    """
     new = json.loads(json.dumps(man))          # 深拷贝
     new["schema"] = 3
     new["license"] = {"id": lic[0], "url": lic[1]}
+    if not by_name:
+        return new
+    for e in new.get("entries") or []:
+        hit = by_name.get(e.get("name"))
+        if hit is None:
+            continue                            # 不默认填（规矩 1）
+        if isinstance(hit, dict):
+            e["license"] = {"id": hit["id"], "url": hit["url"]}
+            if "role" in hit:
+                e["role"] = hit["role"]
+        else:
+            e["license"] = {"id": hit[0], "url": hit[1]}
     return new
 
 
@@ -219,6 +246,51 @@ def _selftest():
     t("升级：license 写入", new["license"] == {"id": "MIT", "url": "https://x/COPYING"})
     t("★ 升级不改字节身份（core 逐字相同）", check_invariants(old, new))
     t("★ 原对象未被就地修改（深拷贝）", old["schema"] == 2 and "license" not in old)
+
+    # ── entry 级 license（LLVM `023` 请求，2026-11-01）──────────────────────
+    # 旧调用（两参数）必须一字不变 —— 加参数不许破坏它。
+    t("★ entry 级：不传 by_name ⇒ 行为与旧版完全一致（只有顶层 license）",
+      upgrade(old, ("MIT", "https://x/COPYING")) == new)
+
+    two = {"schema": 2, "id": "x/y", "chunkSize": 1, "codecs": ["identity"],
+           "products": {"p": {"form": "file"}},
+           "entries": [
+               {"product": "p", "name": "toolchain/clang.wasm", "bytes": 1,
+                "sha256": "a" * 64,
+                "variants": [{"codec": "identity",
+                              "chunks": [{"part": 0, "file": "a.000", "bytes": 1,
+                                          "sha256": "a" * 64}]}]},
+               {"product": "p", "name": "toolchain/driver__abi.mjs", "bytes": 2,
+                "sha256": "b" * 64,
+                "variants": [{"codec": "identity",
+                              "chunks": [{"part": 0, "file": "b.000", "bytes": 2,
+                                          "sha256": "b" * 64}]}]},
+               {"product": "p", "name": "toolchain/unmapped.txt", "bytes": 3,
+                "sha256": "c" * 64,
+                "variants": [{"codec": "identity",
+                              "chunks": [{"part": 0, "file": "c.000", "bytes": 3,
+                                          "sha256": "c" * 64}]}]}]}
+    E = two["entries"]
+    m2 = upgrade(two, ("MIT", "https://x/C"), by_name={
+        E[0]["name"]: ("Apache-2.0 WITH LLVM-exception", "https://llvm.org/LICENSE.txt"),
+        E[1]["name"]: {"id": "MIT OR NCSA", "url": "https://x/ncsa", "role": "license"},
+    })
+    t("★ entry 级：命中的 entry 写上 license（键 = entry.name 原样）",
+      m2["entries"][0]["license"]["id"] == "Apache-2.0 WITH LLVM-exception")
+    t("★ entry 级：dict 形状可带 role", m2["entries"][1].get("role") == "license")
+    t("★★ entry 级：未命中的 entry **不写** license（不默认填 —— 空可以诚实，错不能）",
+      "license" not in m2["entries"][2])
+    t("★ entry 级：顶层 license 仍然写（回落目标）", m2["license"]["id"] == "MIT")
+    t("★★ entry 级：加 entry license 后 check_invariants 仍判身份未变",
+      check_invariants(two, m2))
+    # 反向：entry 级 license 若**误改**了字节字段 ⇒ 必须红
+    bad3 = json.loads(json.dumps(m2))
+    bad3["entries"][0]["bytes"] = 999
+    t("★★ entry 级：若同时误改了字节字段 ⇒ 必须判身份变了",
+      not check_invariants(two, bad3))
+    # 反向：原对象不许被 by_name 路径就地改
+    t("★ entry 级：原对象未被就地修改",
+      "license" not in two["entries"][0] and two["schema"] == 2)
 
     # 反向：改了 file 名 ⇒ 身份断言必须红
     bad = upgrade(old, ("MIT", "https://x/COPYING"))
