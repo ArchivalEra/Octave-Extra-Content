@@ -97,6 +97,8 @@ STATE.md      活状态文档（机器维护的事实块在文末）
 
 **货架实测状态**（`--probe` 逐版探的产物）：13 个包 / 52 个版本**全部有实测 `size`**，本地字节与台账 sha **52/52 逐字一致**。⚠️ `versions[].size == 0` 是**历史遗留的假值**（旧版 probe 不写 size），不是「很小」——2026-10-31 抓到 `cgi` 的 0（实际 9,960 B），已修正并把 12 个旧文契的包全部 re-probe。自查残留：`verified.how` 里没有「逐版探」三个字的就是还没过新版 probe。
 
+**已发布的 release 就是货架的可取形态**（`docs/RELEASES.md`）：15 个 tag（13 Forge 包 + Pyodide + MSL），每个 release 内一份 `manifest.json` + 扁平分片。**接入分发目录时不要手抄条目——从 GitHub releases 派生**：catalogue 一旦手改就成了第二个产地（真实状态在 release 里，副本必然漂移）；订阅清单只该记「哪些仓」，不记 tag/sha。
+
 ## 许可
 
 SPDX-License-Identifier: AGPL-3.0-or-later
