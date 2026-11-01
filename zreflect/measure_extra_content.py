@@ -111,6 +111,21 @@ def measure():
                                            "tools/forge-shelf.py",
                                            "取包工具自证通过数（三类用例齐备）")
 
+    # ── 已发布的 release 数（产地状态；2026-11-01 本仓成为 Forge 包与能力层的产地）──
+    #   判据 = GitHub 上**非 draft** 的 release 数。⚠️ 这是**在线**事实（走 gh api），
+    #   不是仓库内容 —— 它量的是「发布面现在有什么」。
+    #   复跑实测：冷 ~5.7s / 热 ~0.7s（远低于 replay 默认 10s）。网络断时 `_one` 返回 None
+    #   ⇒ 这条事实**不写**（宁缺勿假，collect.py 原则 3）。
+    n_rel = _one("gh api 'repos/ArchivalEra/Octave-Extra-Content/releases?per_page=100' "
+                 "--jq '[.[]|select(.draft==false)]|length' 2>/dev/null")
+    if n_rel is not None and n_rel.strip().isdigit():
+        facts["releases_published"] = fact(
+            int(n_rel),
+            "gh api 'repos/ArchivalEra/Octave-Extra-Content/releases?per_page=100' "
+            "--jq '[.[]|select(.draft==false)]|length' 2>/dev/null",
+            "github releases",
+            "已发布（非 draft）的 release 数 —— 本仓作为产地的发布面规模")
+
     # ── 内容面规模（文档/配方/端口）────────────────────────────────────────────
     for key, d, what in (("recipes_count", "recipes", "供给配方数"),
                          ("docs_count", "docs", "经验集文档数"),

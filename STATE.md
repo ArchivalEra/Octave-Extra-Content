@@ -10,11 +10,20 @@
 
 ## 本仓在管线里的角色
 
-**生产适配器**：出**档案事实**（`packages/`）、**供给配方**（`recipes/`）、
-**端口规范副本**（`port/`）、**事实系统运维**（`zreflect/` + `build/` + `questions/`），
-并接**「内容契约」面向 UI 的那条边**（治理面：字段 / 四态语义 / 版本策略 / 许可台账）。
-**不含字节、不装配站点、不运行服务**。字节同源由宿主 `Octave-Full-Wasm` 装配
-（COEP 下同源是硬约束）。完整分工见 `docs/FORK-PIPELINE.md`。
+**生产适配器 + Forge 包与能力层的产地**：出**档案事实**（`packages/`）、**供给配方**
+（`recipes/`）、**端口规范副本**（`port/`）、**事实系统运维**（`zreflect/` + `build/` +
+`questions/`），并接**「内容契约」面向 UI 的那条边**（治理面：字段 / 四态语义 / 版本策略 /
+许可台账）。**自 2026-11-01 起，13 个 Forge 包与能力层资产由本仓发 GitHub Release**
+（用户裁定：「**你为产地吧，你维护的就是市场标准与所有可以直接拿来用的 forge 包**」）。
+**仍不含字节进 git、不装配站点、不运行服务**——字节在 release（发布面），不在仓库内容。
+字节同源由宿主 `Octave-Full-Wasm` 装配（COEP 下同源是硬约束）。完整分工见 `docs/FORK-PIPELINE.md`。
+
+- **★ 「不含字节」的精确边界（2026-11-01 重述）**：它防的是「本仓变成字节存储池 / 装配站」，
+  **不禁止 release asset**。原设计有个缺口：链条是「上游 SourceForge → 宿主装配 → 站点」，
+  **中间没有稳定产地**——上游挂过、改过 URL（`optim` 至今是 `download.php?package=` 重定向）。
+  上游一变，手里的 sha 就成了**无法验证的历史断言**。release 把字节钉到我们控制的不可变地址上。
+  红线仍成立的三条：**不许 `git add` 任何 tar/zip/wasm/whl 进本仓**；**不许提供运行期端点**；
+  **不许以产地为由改别人的产物归属**（OM 的 MSL 仍由 OM 发，我只给建议）。
 
 - **两条契约**（接缝 §8.1）：**引擎契约**（宿主 ↔ UI）本仓**不碰**；
   **内容契约**（本仓 ↔ UI）本仓**接**（**内容语义**：四态含义 / `content` 诚实 / 版本策略 / 许可台账）。
@@ -471,6 +480,22 @@
       `SyntaxError` 被 `except: return None` 吞掉 ⇒ **失明与「拿不到源码」共用返回值**。
       多行 lambda 能抓到、单行元组内抓不到（同一断言，形状依赖）。已在 `/tmp` 副本验证，
       **未改贵仓任何文件**。
+- **★ Shirone 自我翻案 R3 + 查证「它没进过权威契约」（2026-11-01）**：
+  - 它的 `118` 勘误：`115` §4 那条「**禁止**在 EdgeOne 中间件内对冲」是错的——
+    2026-10-31 复测 **20/20 有效**（最慢 4.75s；兜底上限 `8+1.5+8=17.5s` **一次未触发**）。
+    它自认方法问题：**「『禁止』比『建议』强，所以它该有比一次测量更强的依据。」**
+  - **★ 我查证：R3 从未进 v1。** `grep -c "对冲|hedge|R2|R3"` 现行契约
+    （`specs/…-v4.md`，即 v1）⇒ **0**。R1–R4 只在**已被取代的 v3** 里。
+    ⇒ 回信 `131`（其槽 `005`）：**你不用改任何东西，协议不动**。
+  - **★ 但 v3 会误导**：它写着「定稿候选 / 两仓共识已达成」，容易被当现行引用。
+    已加历史状态头：明写「已被 v1 取代、不是权威」+「R1–R4 未进入 v1」+ R3 翻案记录。
+    **v0/v1/v2 无需标注**（它们自写「未投递、未进 schema、未推广」）。
+  - **★ 我给它的一条技术解释**：它 115 的错误可能不是「测错了」，而是**把两件事混成一件**
+    ——测到的是「`AbortController` 不能中断**已发出**的 fetch」（Fetch 规范行为，
+    非 EdgeOne 特性），推出来的是「对冲无效」。「首个成功者胜」**不需要取消另一个**，
+    让它跑完即可 ⇒ **两者可以同时成立**。
+  - **判据强度**：它那组 20/20 之所以够用，不是因为「20 次都好」，而是因为**给了可证伪上限**
+    ——若第二发没接管就会看到 17.5s 附近的结果，20 次无一次接近，**排除得掉**。
 - **★ 发布契约 v4 定稿 + 本地实测通过（2026-10-31；四轮 design-it-twice 收敛）**：
   - **用户的决定性洞察（我没想到）**：「**只要强制会在 asset 后变化的名称不允许就行**」
     ⇒ 我实测出 GitHub 的精确改写面，白名单由此得来（见下）。这条比我前几轮所有
@@ -1738,21 +1763,22 @@
 
 | 键 | 值 | 测于 | 复跑命令 |
 |---|---|---|---|
-| `docs_count` | **5** | 2026-10-31T16:24:26+0800 | `ls docs/*.md | wc -l` |
-| `llvm_bundle_bytes` | **34693729** | 2026-10-31T16:24:26+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz` |
-| `llvm_bundle_sha` | `cd6450fe7944875c…` | 2026-10-31T16:24:26+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz | cut -d' ' -f1` |
-| `port_docs_count` | **1** | 2026-10-31T16:24:26+0800 | `ls port/*.md | wc -l` |
-| `pyodide_core_bytes` | **6757104** | 2026-10-31T16:24:26+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
-| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-10-31T16:24:26+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
-| `recipes_count` | **3** | 2026-10-31T16:24:26+0800 | `ls recipes/*.md | wc -l` |
-| `shelf_needs_capability` | **1** | 2026-10-31T16:24:25+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
-| `shelf_oct_packs` | **0** | 2026-10-31T16:24:25+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
-| `shelf_packs` | **13** | 2026-10-31T16:24:25+0800 | `ls packages/*.json | wc -l` |
-| `shelf_verified` | **13** | 2026-10-31T16:24:25+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
-| `shelf_versions` | **52** | 2026-10-31T16:24:25+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
-| `tool_selftest_pass` | **47** | 2026-10-31T16:24:26+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
+| `docs_count` | **6** | 2026-11-01T09:47:12+0800 | `ls docs/*.md | wc -l` |
+| `llvm_bundle_bytes` | **34693729** | 2026-11-01T09:47:12+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz` |
+| `llvm_bundle_sha` | `cd6450fe7944875c…` | 2026-11-01T09:47:12+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz | cut -d' ' -f1` |
+| `port_docs_count` | **1** | 2026-11-01T09:47:12+0800 | `ls port/*.md | wc -l` |
+| `pyodide_core_bytes` | **6757104** | 2026-11-01T09:47:12+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
+| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-11-01T09:47:12+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
+| `recipes_count` | **3** | 2026-11-01T09:47:12+0800 | `ls recipes/*.md | wc -l` |
+| `releases_published` | **15** | 2026-11-01T09:47:12+0800 | `gh api 'repos/ArchivalEra/Octave-Extra-Content/releases?per_page=100' --jq '[.[]|select(.draft==false)]|length' 2>/dev/null` |
+| `shelf_needs_capability` | **1** | 2026-11-01T09:47:11+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
+| `shelf_oct_packs` | **0** | 2026-11-01T09:47:11+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
+| `shelf_packs` | **13** | 2026-11-01T09:47:11+0800 | `ls packages/*.json | wc -l` |
+| `shelf_verified` | **13** | 2026-11-01T09:47:11+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
+| `shelf_versions` | **52** | 2026-11-01T09:47:11+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
+| `tool_selftest_pass` | **47** | 2026-11-01T09:47:11+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
 
-13 条事实。
+14 条事实。
 <!-- /AUTO:FACTS -->
 
 <!-- AUTO:GATES -->
