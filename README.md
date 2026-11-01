@@ -103,6 +103,8 @@ STATE.md      活状态文档（机器维护的事实块在文末）
 
 **manifest 已升 `schema: 3`**（契约 v1.1，许可必填 `{id, url}`）：15 个 release 全部重发完毕，**asset 一个没动、只换 `manifest.json`**，发布后反读 15/15 合规。升级工具 `tools/upgrade-manifest-license.py`（自证 13/13）**强制断言「升级不改字节身份」**。⚠️ 归一化陷阱：把散文 `and`/`or` 转 SPDX 时不能用 `\bor\b`——`GPL-3.0-or-later` 会被替成 `GPL-3.0-OR-later`（非法），而 `-only` 的包看不出来。
 
+**本仓的 `tools/` 是集群共享的**：LLVM-wasm 的 CI 每跑一次就 `git clone` 本仓 main 取校验器。⇒ 改这两个工具等于**改别人的构建**，必须先在本地对真实产物验过再推。生成器仍只产 `schema: 2`（许可不是它的输入，升级是独立一步，两步各自可验证）——「生成器要不要直接产 schema 3」留给维护方裁。
+
 ## 许可
 
 SPDX-License-Identifier: AGPL-3.0-or-later
