@@ -371,6 +371,20 @@ def _selftest():
 def main(argv):
     if "--selftest" in argv:
         return _selftest()
+    # ★ 零参数守卫（2026-11-02 实测踩到）：不带任何参数时，本脚本会**对全部 15 个
+    #   已发布 release 逐个下载并改写 manifest** —— 而它本来不该"顺手就干活"。
+    #   一个查询 `--help` 的动作差点变成一次批量操作。**危险默认值。**
+    #   ⇒ 必须显式给出 `--dry-run` 或 `--out`，否则只打印用法、什么都不做。
+    if not any(a in argv for a in ("--dry-run", "--out")):
+        print("用法:\n"
+              "  python3 tools/upgrade-manifest-license.py --dry-run        # 只打印计划\n"
+              "  python3 tools/upgrade-manifest-license.py --out <目录>     # 生成到目录（不改线上）\n"
+              "  python3 tools/upgrade-manifest-license.py --selftest       # 自证\n"
+              "\n"
+              "⚠️ 本脚本**不上传**。上传是单独一步（gh release upload --clobber）。\n"
+              "⚠️ 不带上述参数时不做任何事 —— 这是刻意：查询用法不该触发批量下载。",
+              file=sys.stderr)
+        return 2
     dry = "--dry-run" in argv
     outdir = None
     if "--out" in argv:
