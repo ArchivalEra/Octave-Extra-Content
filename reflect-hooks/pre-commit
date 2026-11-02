@@ -40,12 +40,26 @@ python3 zreflect/registry.py --run commit || exit 1
 #    「改了字节 ⇒ 必须判身份变了」。那条断言失效 ⇒ 工具会静默改掉**已发布 release**
 #    的字节身份，而那正是它唯一要防的事。**没跑 = 没防。**
 echo "── tools/ 纯工具自证 ──"
-for t in make-manifest-v4 check-release-v4 upgrade-manifest-license; do
+for t in make-manifest-v4 check-release-v4 upgrade-manifest-license check-contract-decoupling; do
   python3 "tools/$t.py" --selftest >/dev/null || {
     echo "FATAL: tools/$t.py --selftest 失败"
-    echo "  ↑ 三者里 upgrade-manifest-license 的『改了字节 ⇒ 必须判身份变了』"
-    echo "    是它存在的全部理由；check-release 是集群共享件（LLVM CI 直接拉）"
+    echo "  ↑ upgrade-manifest-license 的『改了字节 ⇒ 必须判身份变了』是它存在的全部理由；"
+    echo "    check-release 是集群共享件（LLVM CI 直接拉）；"
+    echo "    check-contract-decoupling 守「两种协议完全不相干」（2026-11-02 用户裁定）"
     exit 1
   }
 done
-echo "OK（生成器 / 校验器 / 升级器）"
+echo "OK（生成器 / 校验器 / 升级器 / 解耦闸门）"
+
+# ④ 解耦闸门的**真实数据**部分（自证只证判据有牙，这里证当前产物是解耦的）。
+#    市场表是宿主的产物（本仓不持有），取不到就明说未查，不假装查过。
+CATALOG=/mnt/hdd/zcode-projects/Octave-Full-Wasm/site/assets/forge-catalog.json
+if [ -f "$CATALOG" ]; then
+  python3 tools/check-contract-decoupling.py --market "$CATALOG" >/dev/null || {
+    echo "FATAL: 市场表与分发侧耦合了（见 tools/check-contract-decoupling.py --market $CATALOG）"
+    exit 1
+  }
+  echo "解耦闸门：市场表 OK（宿主 forge-catalog.json）"
+else
+  echo "解耦闸门：市场表不在本机（$CATALOG）⇒ 本次未查，不假装查过" >&2
+fi

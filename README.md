@@ -67,7 +67,18 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 **向上游报缺陷走它自己的渠道，不走本仓的 `mail/`**。`mail/` 是 Octave 集群内部的通信体例；Einfacht 在集群之外，向它报告一律走 **GitHub issue**（其 #1–#21 都是「反哺（使用方…）」形状）。投递渠道由收信方定，不由发信方按集群惯例类推——这条是我 2026-10-31 投错渠道后立的规矩（详见 `mail/README.md` 第 2 条与 `STATE.md`）。本仓向上游报的三条闸门判据盲区：issue #23 / #24 / #25。
 
-**静态分发契约已移交**（2026-10-31）：协议定名 **v1**（此前内部代号 v4），维护权归 [Static-Contract](https://github.com/ArchivalEra/Static-Contract)，本仓退为上游需求方之一。本仓保留副本（`specs/2026-10-30-release-contract-v4.md`——文件名是历史代号，内容是 v1）但**权威不在本仓**。**v1 的第一次真试点 = LLVM-wasm**（2026-11-01 起；链条是「生产者发 release → 本仓核验 → Shirone 建站 → 本仓验收 → UI 改链接 → 本仓终验」）：它的 v0.1.4 是单文件 34.7MB 整包、落在 EdgeOne 降速区；**v0.1.5 已改成分片并核验通过**——107 个 asset / 校验器 **634 PASS / 0 FAIL** / 浏览器端到端 **42/42**（三编码 × 14 entry），分片 zstd 合计 26.7MB（比整包 tar.gz 省 8.0MB）。**跨源无感续传实测成立且不需要改协议**：V5/V6 要求每块独立压缩解码 ⇒ 每块可单独校验 ⇒ 第 N 块换个 base 即可；实测 A 源取前半 + B 源取后半 **14/14 PASS**、已校验块零重取（`tools/multi-source.mjs` 可复跑）。工具链 `tools/make-manifest-v4.py`（43 条自证）+ `tools/check-release-v4.py`（26 条自证，V1–V10 fail-closed；entry/asset 数**无上限**——平台容量是分发方的事）。
+**两种协议完全不相干**（2026-11-02 用户裁定「一种管分发，一种管市场聚合」）：
+
+| | **分发协议**（Static-Contract 维护） | **市场协议**（本仓维护内容语义） |
+|---|---|---|
+| 管什么 | 字节**怎么发、怎么取** | 市场里**有什么、能不能用、给谁用** |
+| 数据 | `manifest.json` + 分片 + `catalogue.json` 的 `base` | `content-list` 的 `entries[]`（`name`/`version`/`deps`/`content`/`consumer`/`role`/`form`） |
+| 身份 | 发布物 `manifest_sha256` / 载荷 `entry.sha256` | 包自己的 `sha256`/`size` |
+| 取址 | `base`（release 直链）+ manifest 裸文件名 | `url`（**站内同源相对路径**）+ 站点 base |
+
+**判据：市场表的任何字段都不许取自分发侧唯一标识（`tag`/`base`/`manifest_sha256`），分发契约也不许引用 `name`/`version`/`deps`/`consumer`。** 曾经计划的「内容契约加 `acquisition.releaseRef` 引用 release」是**错误方向，已作废**——那会让市场表依赖分发方，换分发方（GitHub → CF → 对象存储）市场就得跟着改。实测宿 schema 与 17 条 content-list 里从来没有该字段：**解耦在实现层早已成立，只是计划文本挂着个不该做的待办**。
+
+**静态分发契约已移交**（2026-10-31）：协议定名 **v1**（此前内部代号 v4），维护权归 [Static-Contract](https://github.com/ArchivalEra/Static-Contract)，本仓退为上游需求方之一。本仓保留副本（`specs/2026-10-30-release-contract-v4.md`——文件名是历史代号，内容是 v1）但**权威不在本仓**。**v1 的第一次真试点 = LLVM-wasm**（2026-11-01 起）：它的 v0.1.4 是单文件 34.7MB 整包、落在 EdgeOne 降速区；**v0.1.5 已改成分片并核验通过**——107 个 asset / 校验器 **634 PASS / 0 FAIL** / 浏览器端到端 **42/42**（三编码 × 14 entry），分片 zstd 合计 26.7MB（比整包 tar.gz 省 8.0MB）。**v0.1.6 是第一个真 schema 3 发布**（14/14 entry license + `role` + 顶层复合表达式），反读校验 **697 PASS / 0 FAIL**（106 个 asset 逐块对盘）。**跨源无感续传实测成立且不需要改协议**：V5/V6 要求每块独立压缩解码 ⇒ 每块可单独校验 ⇒ 第 N 块换个 base 即可；实测 A 源取前半 + B 源取后半 **14/14 PASS**、已校验块零重取（`tools/multi-source.mjs` 可复跑）。工具链 `tools/make-manifest-v4.py`（43 条自证）+ `tools/check-release-v4.py`（37 条自证）+ `tools/upgrade-manifest-license.py`（25 条自证，支持 entry 级 license）。
 
 ```bash
 # 复跑本仓事实系统健康
