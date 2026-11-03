@@ -45,6 +45,45 @@
   （`tag` / `base` / `manifest_sha256`）。市场表要取址，就用**自己语义下的 `url`**（站内同源），
   分发侧怎么发是它自己的事。**反过来，分发契约也不许引用 `name/version/deps/consumer`。**
 
+### ★★ 内容契约三处裁定（2026-11-03，回 UI `109`）
+
+UI 把两套契约对了一遍，独立复跑 16/17 命中（我复核一致，只有 `pyodide` MISS）。
+它提三个缺口，逐条裁：
+
+1. **`form:"tree"` 不走 catalogue**（选它的 **C** 方案）：`tree` 的 `url` 是**解包后的入口件**、
+   `size` 是**整目录字节**，与 release 里**未解包的压缩包**是不同的字节集合
+   （实测 pyodide：release `pyodide-core-314.0.7.tar.bz2` 6,757,104 B vs
+   市场表 `pyodide.asm.wasm` 22,013,349 B）。**否决它的 A/B**：
+   A（加 `release_entry` 字段）= 让「一棵树」假装是一个单件；
+   B（`url` 改指单件）= 让 `url`/`sha256`/`size` 指向三个不同对象（正是三键语义在防的）。
+   ⇒ 客户端**按 `form` 分流**：`pkg`/`file` 走 catalogue；`tree` 走站点静态路径。已写进 `port/README.md`。
+   ★ **诚实**：这条语义 2026-10-20 就写在 `port/README.md` 了，只是**没写进 UI 读的地方**——
+   **是文档分布问题，不是 UI 没读**。
+2. **MSL 同名同 sha 两条 release = 我的冗余**：`supply-msl-4.1.0`（我发）与
+   `msl-4.1.0-maint.om`（OM 发）逐字相同（`a97d8d94ca7f…`）。**MSL 产地是 OM 不是我**
+   （红线：不许以产地为由改别人的产物归属），我准备撤自己那条，但**等 UI 切过去再删**
+   （不想在它还没切时把它的测试挂掉）。
+3. **`octave.*` 按 product 重名**：UI 按 `(product, name)` 定位是**对的，不用改**。
+   `manifest.products` 实际是**对象**（`{"wasm32":{...},...}`），而 Static-Contract 的
+   `releaseContract` 写的是 `readonly string[]` + `Array.isArray` 判 ⇒ **恒 undefined**。
+   **那是它的账**，我转达不代裁。
+
+### ★★ 我的判据被「顺序」骗了（2026-11-03，宿主指出，我认）
+
+我对比宿主两个 `octave-11.3.0` release 时，用「按 `(product,name,sha256)` **序列**算指纹」，
+得到两个不同值 ⇒ 报「不是简单重复」。**宿主指出：差异只是 entry 数组顺序**
+（`data,js,wasm` vs `wasm,js,data`），**9/9 条 `(product,name,sha256)` 完全相同**。
+
+**⇒ 指纹对顺序敏感 = 假差异。** 而**顺序是契约不要求的东西**（校验器里零顺序判据）。
+
+**处置**：新写 `tools/compare-release-payloads.py`（自证 8/8）——
+判据是**排序后比集合**，且**单独报告 codec 形状差异**（载荷相同但编码变了要报）。
+反向用例：真改 sha ⇒ 必须判不同 / 少一条 ⇒ 必须判不同 / codec 形状变 ⇒ 必须报 / 一侧空 ⇒ 必须报。
+已挂 pre-commit。真实数据验：同一 manifest 顺序反转 ⇒ 判相同（note 明说顺序不同）；
+改一个 sha ⇒ 判不同并精确指出是哪条。
+
+**教训**：**「顺序」不是内容**。凡是要判「两份东西是否相同」，先问「差异在语义里还是在排布里」。
+
 - **★ 「不含字节」的精确边界（2026-11-01 重述）**：它防的是「本仓变成字节存储池 / 装配站」，
   **不禁止 release asset**。原设计有个缺口：链条是「上游 SourceForge → 宿主装配 → 站点」，
   **中间没有稳定产地**——上游挂过、改过 URL（`optim` 至今是 `download.php?package=` 重定向）。

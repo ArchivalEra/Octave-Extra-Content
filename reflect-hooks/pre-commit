@@ -40,7 +40,7 @@ python3 zreflect/registry.py --run commit || exit 1
 #    「改了字节 ⇒ 必须判身份变了」。那条断言失效 ⇒ 工具会静默改掉**已发布 release**
 #    的字节身份，而那正是它唯一要防的事。**没跑 = 没防。**
 echo "── tools/ 纯工具自证 ──"
-for t in make-manifest-v4 check-release-v4 upgrade-manifest-license check-contract-decoupling; do
+for t in make-manifest-v4 check-release-v4 upgrade-manifest-license check-contract-decoupling compare-release-payloads; do
   python3 "tools/$t.py" --selftest >/dev/null || {
     echo "FATAL: tools/$t.py --selftest 失败"
     echo "  ↑ upgrade-manifest-license 的『改了字节 ⇒ 必须判身份变了』是它存在的全部理由；"

@@ -60,6 +60,31 @@ catalog 的 `kinds` 是内容构成）：
 就是消费端各自踩**）。UI 问的 Q3「路径与 SHA 偏差」根因即此：以现役表为准 + 这条
 语义钉死后偏差消失。
 
+**★★ `form:"tree"` 与分发契约（catalogue / release）的关系 —— 明确不走**
+（2026-11-03 UI `109` 缺口 1 裁定；用户点令「内容契约仍接受更改」）：
+
+| 形态 | `url` 指向 | 能否按「产物名 + sha」命中 release |
+|---|---|---|
+| `form:"pkg"` / `"file"` | **一个完整发布单件**（如 `optim-1.6.3.tar.gz`） | ✅ 能（`url` basename == `entry.name`） |
+| **`form:"tree"`** | **解包后的入口件**（如 `pyodide.asm.wasm`） | ❌ **绝不能**，且**不该强求** |
+
+**判据（实测）**：pyodide 的 release 发**未解包原始字节**（`pyodide-core-314.0.7.tar.bz2`
+6,757,104 B），而市场表 `url` 指向**解包后的入口文件**（`pyodide.asm.wasm` 22,013,349 B）
+——**两者是不同的字节集合，不是命名问题**。LLVM 同形：`clang.wasm` 在 tar 内，
+release 发的是 `llvm-wasm-bundle-*.tar.gz`。
+
+**⇒ 客户端按 `form` 分流**：
+- `pkg` / `file` → 走 catalogue（`url` basename 匹配 `entry.name`，sha 双确认）；
+- **`tree` → 走站点静态路径**（不进 catalogue、不做 release 匹配，**零猜测**）。
+
+**为什么否决 UI 提的 A/B 方案**：
+- **A（给 tree 加 `release_entry` 字段）**：要新字段，而 `tree` 的语义是「一棵目录树」，
+  硬指一个单件等于让它撒谎；
+- **B（`url` 改成指向发布单件）**：会让 `url` 与 `sha256`/`size` 指向**三个不同对象**
+  （见上「三键语义」），消费端必然再踩一次。
+
+**`tree` 与 `release` 是两种不同粒度，不该被同一套匹配规则套住。**
+
 ### ★ 宿主三裁决（2026-10-14，回应本仓 `mail/007`；已落产地 `build/extra-content/`）
 
 | # | 缺口 | 裁决 | 落地 |
