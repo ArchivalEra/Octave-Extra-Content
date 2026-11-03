@@ -122,7 +122,9 @@ STATE.md      活状态文档（机器维护的事实块在文末）
 
 **catalogue 的死链窗口是必然的，客户端必须容忍**（2026-11-02 实测）：派生是 6 小时定时（`cron: 17 */6 * * *`），**上游删旧 tag + 发新 tag 之后，窗口内 catalogue 必然指向已删除的 tag**。实测此刻主仓两条 base 全 404（`octave-11.3.0` / `octave-11.3.0-r2`，而新 tag `octave-full-wasm-v0.1.0` 还没进目录）。⇒ 消费者必须**取 manifest 失败就换下一条**，不许"取第一条就开工"。已报告 Static-Contract（其槽 `026`）与 UI（其槽 `098`）。
 
-**内容契约：`form:"tree"` 不走 catalogue**（2026-11-03 裁定，回 UI `109`）：`tree` 的 `url` 是**解包后的入口件**、`size` 是**整目录字节**，与 release 里**未解包的压缩包**是不同的字节集合（pyodide 实测：release `pyodide-core-314.0.7.tar.bz2` 6,757,104 B vs 市场表 `pyodide.asm.wasm` 22,013,349 B）。⇒ 客户端**按 `form` 分流**：`pkg`/`file` 走 catalogue（`url` basename == `entry.name`，sha 双确认）；`tree` 走站点静态路径。**`pkg`/`file` 的 16/17 命中率是实测的**（UI 与我各自独立复跑一致）。
+**内容契约：`form:"tree"` 不走 catalogue**（2026-11-03 裁定，回 UI `109`）：`tree` 的 `url` 是**解包后的入口件**、`sha256` 是**入口件指纹**、`size` 是**整目录字节**——三个键指向不同对象。实测 pyodide：`url` = `pyodide.asm.wasm`（**9,598,218 B**，sha `cc36e3ca…`），`size` = **22,013,349 B**（`du -sb` 整目录 15 文件，逐字吻合）；而 release 发的是**未解包压缩包**（`pyodide-core-314.0.7.tar.bz2` **6,757,104 B**）——**完全不同的字节集合**。⇒ 客户端**按 `form` 分流**：`pkg`/`file` 走 catalogue（`url` basename == `entry.name`，sha 双确认）；`tree` 走站点静态路径。**`pkg`/`file` 的 16/17 命中率是实测的**（UI 与我各自独立复跑一致）。
+
+**课程站（`GONGCHENGSHUXUE20260917`）该按契约拉，不必 vendor 60MB**（2026-11-03，信投其槽 `068`）：它把引擎 38M + pyodide 22M vendored 进 git（sha 与宿主给的一致，字节可信，问题是来源方式）。pyodide 换契约拉可直接省 **8.4MB**（release 三件合计 13.6MB vs 解包后 22MB，且解包在构建期不进 git）。引擎不劝立刻换——它手上是宿主给的单线程 no-COI 特殊交付件，够用就好。
 
 **判「两份东西是否相同」先问差异在语义还是排布**（2026-11-03 宿主指出我错了）：我拿「按 `(product,name,sha256)` **序列**算指纹」比两个 release，得出"不同"——实际是 entry 数组顺序不同、9/9 条身份全同。**顺序是契约不要求的东西**（校验器零顺序判据）。⇒ 新工具 `tools/compare-release-payloads.py`（自证 8/8，已挂 pre-commit）**排序后比集合**，并单独报告 codec 形状差异。
 
