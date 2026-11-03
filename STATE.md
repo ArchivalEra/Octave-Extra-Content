@@ -59,10 +59,17 @@ UI 把两套契约对了一遍，独立复跑 16/17 命中（我复核一致，�
    ⇒ 客户端**按 `form` 分流**：`pkg`/`file` 走 catalogue；`tree` 走站点静态路径。已写进 `port/README.md`。
    ★ **诚实**：这条语义 2026-10-20 就写在 `port/README.md` 了，只是**没写进 UI 读的地方**——
    **是文档分布问题，不是 UI 没读**。
-2. **MSL 同名同 sha 两条 release = 我的冗余**：`supply-msl-4.1.0`（我发）与
-   `msl-4.1.0-maint.om`（OM 发）逐字相同（`a97d8d94ca7f…`）。**MSL 产地是 OM 不是我**
-   （红线：不许以产地为由改别人的产物归属），我准备撤自己那条，但**等 UI 切过去再删**
-   （不想在它还没切时把它的测试挂掉）。
+2. **MSL 同名同 sha 两条 release = 我的冗余 —— 已撤（2026-11-03 用户点令「直接撤掉」）**：
+   `supply-msl-4.1.0`（我发）与 `msl-4.1.0-maint.om`（OM 发）逐字相同（`a97d8d94ca7f…`）。
+   **MSL 产地是 OM 不是我**（红线：不许以产地为由改别人的产物归属）。
+   · **删前先核对方完好**：下载 OM 那条全量 + 跑校验器 ⇒ **47 PASS / 0 FAIL，5 asset**。
+     **不先核就删，是拿别人的可用性赌自己的整洁。**
+   · 执行 `gh release delete supply-msl-4.1.0 --yes` ⇒ 现在 404；本仓 release **15 → 14**
+     （台账 `releases_published` 走 `--accept-changes` 放行 —— 那是**实测变化**不是量错）。
+   · **为什么不违反「release 不可变」**：那条原则防的是**改写已发布字节**；
+     这里撤的是**我自己发的重复件**，权威件（OM 的）仍在，**字节从未消失**。
+   · 文档同步：`docs/RELEASES.md` 删掉 `supply-msl-*` **命名约定**（否则又是第二个产地）、
+     发布面 15→14、历史验证记录标删除线留痕不删。
 3. **`octave.*` 按 product 重名**：UI 按 `(product, name)` 定位是**对的，不用改**。
    `manifest.products` 实际是**对象**（`{"wasm32":{...},...}`），而 Static-Contract 的
    `releaseContract` 写的是 `readonly string[]` + `Array.isArray` 判 ⇒ **恒 undefined**。
@@ -2024,20 +2031,20 @@ UI 把两套契约对了一遍，独立复跑 16/17 命中（我复核一致，�
 
 | 键 | 值 | 测于 | 复跑命令 |
 |---|---|---|---|
-| `docs_count` | **6** | 2026-11-01T09:47:12+0800 | `ls docs/*.md | wc -l` |
-| `llvm_bundle_bytes` | **34693729** | 2026-11-01T09:47:12+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz` |
-| `llvm_bundle_sha` | `cd6450fe7944875c…` | 2026-11-01T09:47:12+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz | cut -d' ' -f1` |
-| `port_docs_count` | **1** | 2026-11-01T09:47:12+0800 | `ls port/*.md | wc -l` |
-| `pyodide_core_bytes` | **6757104** | 2026-11-01T09:47:12+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
-| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-11-01T09:47:12+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
-| `recipes_count` | **3** | 2026-11-01T09:47:12+0800 | `ls recipes/*.md | wc -l` |
-| `releases_published` | **15** | 2026-11-01T09:47:12+0800 | `gh api 'repos/ArchivalEra/Octave-Extra-Content/releases?per_page=100' --jq '[.[]|select(.draft==false)]|length' 2>/dev/null` |
-| `shelf_needs_capability` | **1** | 2026-11-01T09:47:11+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
-| `shelf_oct_packs` | **0** | 2026-11-01T09:47:11+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
-| `shelf_packs` | **13** | 2026-11-01T09:47:11+0800 | `ls packages/*.json | wc -l` |
-| `shelf_verified` | **13** | 2026-11-01T09:47:11+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
-| `shelf_versions` | **52** | 2026-11-01T09:47:11+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
-| `tool_selftest_pass` | **47** | 2026-11-01T09:47:11+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
+| `docs_count` | **6** | 2026-11-03T16:51:30+0800 | `ls docs/*.md | wc -l` |
+| `llvm_bundle_bytes` | **34693729** | 2026-11-03T16:51:30+0800 | `stat -c%s /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz` |
+| `llvm_bundle_sha` | `cd6450fe7944875c…` | 2026-11-03T16:51:30+0800 | `sha256sum /mnt/hdd/zcode-projects/LLVM-wasm/release/llvm-wasm-bundle-v0.1.3.tar.gz | cut -d' ' -f1` |
+| `port_docs_count` | **1** | 2026-11-03T16:51:30+0800 | `ls port/*.md | wc -l` |
+| `pyodide_core_bytes` | **6757104** | 2026-11-03T16:51:30+0800 | `stat -c%s /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2` |
+| `pyodide_core_sha` | `2abdcc2e35208af4…` | 2026-11-03T16:51:30+0800 | `sha256sum /mnt/hdd/octave-wasm-build/symprobe/cache/pyodide-core-314.0.7.tar.bz2 | cut -d' ' -f1` |
+| `recipes_count` | **3** | 2026-11-03T16:51:30+0800 | `ls recipes/*.md | wc -l` |
+| `releases_published` | **14** | 2026-11-03T16:51:30+0800 | `gh api 'repos/ArchivalEra/Octave-Extra-Content/releases?per_page=100' --jq '[.[]|select(.draft==false)]|length' 2>/dev/null` |
+| `shelf_needs_capability` | **1** | 2026-11-03T16:51:29+0800 | `grep -l '能力层需求' packages/*.json | wc -l` |
+| `shelf_oct_packs` | **0** | 2026-11-03T16:51:29+0800 | `python3 -c "import json,glob;print(sum(1 for f in glob.glob('packages/*.json') if any('oct' in (v.get('kinds') or []) for v in json.load(open(f))['versions'])))"` |
+| `shelf_packs` | **13** | 2026-11-03T16:51:29+0800 | `ls packages/*.json | wc -l` |
+| `shelf_verified` | **13** | 2026-11-03T16:51:29+0800 | `grep -l '"verified": {' packages/*.json | wc -l` |
+| `shelf_versions` | **52** | 2026-11-03T16:51:29+0800 | `python3 -c "import json,glob;print(sum(len(json.load(open(f))['versions']) for f in glob.glob('packages/*.json')))"` |
+| `tool_selftest_pass` | **47** | 2026-11-03T16:51:29+0800 | `python3 tools/forge-shelf.py --selftest 2>/dev/null | grep -c '^PASS'` |
 
 14 条事实。
 <!-- /AUTO:FACTS -->

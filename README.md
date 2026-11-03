@@ -108,7 +108,7 @@ STATE.md      活状态文档（机器维护的事实块在文末）
 
 **货架实测状态**（`--probe` 逐版探的产物）：13 个包 / 52 个版本**全部有实测 `size`**，本地字节与台账 sha **52/52 逐字一致**。⚠️ `versions[].size == 0` 是**历史遗留的假值**（旧版 probe 不写 size），不是「很小」——2026-10-31 抓到 `cgi` 的 0（实际 9,960 B），已修正并把 12 个旧文契的包全部 re-probe。自查残留：`verified.how` 里没有「逐版探」三个字的就是还没过新版 probe。
 
-**已发布的 release 就是货架的可取形态**（`docs/RELEASES.md`）：15 个 tag（13 Forge 包 + Pyodide + MSL），每个 release 内一份 `manifest.json` + 扁平分片。**接入分发目录时不要手抄条目——从 GitHub releases 派生**：catalogue 一旦手改就成了第二个产地（真实状态在 release 里，副本必然漂移）；订阅清单只该记「哪些仓」，不记 tag/sha。
+**已发布的 release 就是货架的可取形态**（`docs/RELEASES.md`）：**14 个 tag**（13 Forge 包 + Pyodide），每个 release 内一份 `manifest.json` + 扁平分片。**MSL 不归本仓发**（2026-11-03 已撤我那条重复 release：与 OM 的 `msl-4.1.0-maint.om` 逐字相同，MSL 产地是 OM）。**接入分发目录时不要手抄条目，应从 GitHub releases 派生**：catalogue 一旦手改就成了第二个产地（真实状态在 release 里，副本必然漂移）；订阅清单只该记「哪些仓」，不记 tag/sha。
 
 **已上架**（2026-11-01）：Static-Contract 的严格派生目录已收录 **16 条**（本仓 15 + LLVM v0.1.5；LLVM v0.1.0–v0.1.4 因 `schema=1` 被 G5 挡在目录外）。本仓独立复核：从 catalogue 的 `base` 真取字节拼回验 sha ⇒ **16 PASS / 0 FAIL**。⚠️ 复核判据是「**每条通道 == 本次构建指纹**」，不是「三通道互相一致」——都停在旧版时也一致（这个区别由 Static-Contract 的验收闸门指出，2026-11-01）。
 

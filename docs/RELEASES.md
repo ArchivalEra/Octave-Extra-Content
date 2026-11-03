@@ -24,8 +24,10 @@ release 解决这件事：**同一个 tag 永远是同一份字节**。
 ```
 forge-<包名>-<版本>            例：forge-cgi-0.1.2
 supply-pyodide-<pyodide版本>   例：supply-pyodide-314.0.7
-supply-msl-<MSL版本>           例：supply-msl-4.1.0
 ```
+
+**MSL 没有 `supply-msl-*` 约定**（2026-11-03 撤除）：MSL 归 OM 发（其 tag 是
+`msl-4.1.0-maint.om`，不带 `supply-` 前缀）。**本仓不产 MSL release。**
 
 **一个包一个 release**（用户 2026-11-01 裁定）。理由：增量最小——某个包更新只重发那一个，
 不牵动其它 12 个。
@@ -67,14 +69,20 @@ supply-msl-<MSL版本>           例：supply-msl-4.1.0
 `miscellaneous` 1.3.3 · `nan` 3.7.2 · `optim` 1.6.3 · `quaternion` 2.4.2 ·
 `splines` 1.3.5 · `statistics` 1.7.7 · `struct` 1.0.18 · `symbolic` 3.2.2 · `tsa` 4.6.3
 
-**2 个能力层 release**：
+**1 个能力层 release**：
 
 | tag | 内容 | entry / asset |
 |---|---|---|
 | `supply-pyodide-314.0.7` | Pyodide core + SymPy + mpmath（`symbolic` 的运行期依赖） | 3 / 10 |
-| `supply-msl-4.1.0` | Modelica Standard Library（安装形状 zip） | 1 / 5 |
 
-**合计 15 个 release**（台账键 `releases_published`）。
+**合计 14 个 release**（台账键 `releases_published`）。
+
+**★ MSL 不在本仓发布（2026-11-03 已撤）**：我曾发过 `supply-msl-4.1.0`，与 OM 的
+`msl-4.1.0-maint.om` **逐字相同**（`a97d8d94ca7f…`）。那是**冗余发布**，而且
+**MSL 的产地是 OM 不是我**（红线：不许以产地为由改别人的产物归属）。
+已删除本仓那条；OM 那条经我核验完好（47 PASS / 0 FAIL，5 asset）。
+**为什么删不违反「release 不可变」**：那条原则防的是**改写已发布字节**；
+这里撤的是**我自己发的重复件**，权威件（OM 的）仍在，字节从未消失。
 
 ---
 
@@ -171,7 +179,8 @@ PY
 
 - 13 个 Forge release：**13/13 下载回验通过**（每份 `check-release-v4.py --base` 全 PASS）
 - `supply-pyodide-314.0.7`：92 PASS / 0 FAIL
-- `supply-msl-4.1.0`：39 PASS / 0 FAIL
+- ~~`supply-msl-4.1.0`：39 PASS / 0 FAIL~~（**该 release 已于 2026-11-03 撤除**——与 OM 的
+  `msl-4.1.0-maint.om` 逐字重复，MSL 产地归 OM。以上验证记录保留作历史。）
 - 13 份的验证条数各自 30 条左右（1 entry / 2 asset 的规模）
 
 **踩坑记录**（写给下次）：`gh release create` 在本机慢网络下会超时并留 draft；
