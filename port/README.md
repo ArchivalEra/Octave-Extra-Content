@@ -66,16 +66,33 @@ catalog 的 `kinds` 是内容构成）：
 | 形态 | `url` 指向 | 能否按「产物名 + sha」命中 release |
 |---|---|---|
 | `form:"pkg"` / `"file"` | **一个完整发布单件**（如 `optim-1.6.3.tar.gz`） | ✅ 能（`url` basename == `entry.name`） |
-| **`form:"tree"`** | **解包后的入口件**（如 `pyodide.asm.wasm`） | ❌ **绝不能**，且**不该强求** |
+| **`form:"tree"`** | **解包后的入口件**（如 `pyodide.asm.wasm`、`OpenModelicaCompiler_bg.wasm`） | **看情况**——取决于该入口件是否也作为**独立 entry** 发布 |
 
-**判据（实测）**：pyodide 的 release 发**未解包原始字节**（`pyodide-core-314.0.7.tar.bz2`
-6,757,104 B），而市场表 `url` 指向**解包后的入口文件**（`pyodide.asm.wasm` 22,013,349 B）
-——**两者是不同的字节集合，不是命名问题**。LLVM 同形：`clang.wasm` 在 tar 内，
-release 发的是 `llvm-wasm-bundle-*.tar.gz`。
+**判据（实测，逐个 tree 包核）**：
 
-**⇒ 客户端按 `form` 分流**：
-- `pkg` / `file` → 走 catalogue（`url` basename 匹配 `entry.name`，sha 双确认）；
-- **`tree` → 走站点静态路径**（不进 catalogue、不做 release 匹配，**零猜测**）。
+| tree 包 | `url`（入口件） | 入口件是否在 release 里是**独立 entry** |
+|---|---|---|
+| `omc` | `omc/OpenModelicaCompiler_bg.wasm` | ✅ **是**（OM `v0.2.0-wasm32` 四 entry 之一，74,579,404 B，sha `8287589e…` 与市场表逐字相同） |
+| `llvm-wasm` | `assets/llvm/clang.wasm` | ✅ **是**（LLVM `v0.1.6` 十四 entry 之一） |
+| `pyodide` | `assets/pyodide/pyodide/pyodide.asm.wasm` | ❌ **否**——它在 `pyodide-core-314.0.7.tar.bz2` **内部**，release 发的是压缩包 |
+
+**⇒ 客户端算法：`tree` 也先试一次「产物名 + sha」，命不中就回落站点**：
+
+```
+按 form 分流不是"tree 一律走站点"，而是：
+  · pkg / file        → 走 catalogue
+  · tree              → 先试「entry.name 逐字 == url basename 且 sha256 逐字相等」
+                         命中 ⇒ 从该 entry 取该入口件
+                         命不中 ⇒ 回落站点静态路径（**日志明说原因**，不许静默）
+```
+
+**★ 为什么不能一刀切**（2026-11-04 UI `152` 纠正我）：用户目标原话是
+**「两个引擎（octave 三种产物）以及所有附属包都上 catalogue」**。
+一刀切 ⇒ **OMC 引擎被迫走站点**，而 OMC 恰恰是**能干净命中**的那一类
+（它的入口件就是 release 的独立 entry）。**砍掉能命中的，是拿"简单"换"倒退"。**
+
+**命中判据与 `pkg`/`file` 完全一致**——`entry.name` 逐字 == `url` basename **且** sha 逐字相等，
+**零映射表、零别名、零猜测**。**只是把"试一次"从 pkg/file 扩到 tree，不是放宽判据。**
 
 **为什么否决 UI 提的 A/B 方案**：
 - **A（给 tree 加 `release_entry` 字段）**：要新字段，而 `tree` 的语义是「一棵目录树」，

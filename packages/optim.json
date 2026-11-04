@@ -47,7 +47,7 @@
   "tarball_sha": "59fb3771a2d2a231",
   "probed_versions": 1
  },
- "note": "",
+ "note": "**许可分散在文件头，包内没有集中正文**（2026-11-04 实测）：`optim-1.6.3.tar.gz` 里的 `optim-1.6.3/COPYING` 只有 34 字节，内容是「See individual files for licenses」；真正的 GPL-3+ 声明在 86 个 `.m` 文件的文件头里（92 个 `.m` 中 86 个带），另有 BSD / public domain 的部分。⇒ 对外的 `license.url` **不能指向那个 34 字节的占位**，应指向包主页`https://octave.sourceforge.io/optim/`（实测正文写 `License GPLv3+, modified BSD, public domain`）。这不是网站缺陷，是 upstream 的许可组织方式。",
  "versions": [
   {
    "version": "1.6.3",
