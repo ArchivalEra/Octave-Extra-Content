@@ -120,6 +120,10 @@ STATE.md      活状态文档（机器维护的事实块在文末）
 
 **零参数守卫：会批量操作线上的 CLI 必须要求显式开关**（2026-11-02 实测踩到）：`upgrade-manifest-license.py` 原本不带参数就会对**全部 15 个 release** 逐个下载并改写 manifest——我本想查 `--help`，差点触发一次批量操作。现改为：不给 `--dry-run`/`--out` 就只打用法、rc=2、什么都不做。**判据：凡"默认行为=对线上动手"的脚本，默认行为必须是拒绝。**
 
+**历史工具已归档到 `tools/archive/`**（2026-11-07，Static-Contract 清理请求）：v1 站侧 HTTP 探针 `check-release-contract.py`、v2 校验器 `check-release-v2.py`、v3 试点生成器 `make-release-manifest.py` 三件判据已被现行 v1/v1.1 取代，**移出执行面并逐件标注「不适用，不要跑，不要抄」**。现行 7 件全留（含最容易被误删的 `upgrade-manifest-license.py`——名字没有 v4 但 LLVM 的 CI 还在 import 它）。史料 `specs/` v0–v3 继续保留。**顺带补了白名单 `.gitignore` 的 `!tools/*.mjs`**：`multi-source.mjs` 从创建起就被忽略、从未进过 git，这次才真正入库——**「看不见」比「报错」更难查**。
+
+**单测绿 ≠ 产物能用**（2026-11-07，采纳 UI `154`）：凡「声明了注入面」的改动，必须有一条**读真实装配点源码**的断言。UI 栽过两次同一病灶——单测都自注入假件（假件永远可达、组合根根本没注入 ⇒ 整条路径在产物里不可达）；正则按带 org 前缀的 id 写，而真实 id 不含前缀 ⇒ 静默退化为无操作。**单测 / 类型检查 / 构建都抓不到这类**，必须显式搭桥。
+
 **catalogue 的死链窗口是必然的，客户端必须容忍**（2026-11-02 实测）：派生是 6 小时定时（`cron: 17 */6 * * *`），**上游删旧 tag + 发新 tag 之后，窗口内 catalogue 必然指向已删除的 tag**。实测此刻主仓两条 base 全 404（`octave-11.3.0` / `octave-11.3.0-r2`，而新 tag `octave-full-wasm-v0.1.0` 还没进目录）。⇒ 消费者必须**取 manifest 失败就换下一条**，不许"取第一条就开工"。已报告 Static-Contract（其槽 `026`）与 UI（其槽 `098`）。
 
 **内容契约：`form:"tree"` 的 `url`/`sha256`/`size` 指向三个不同对象**（`url` = 解包后的入口件、`sha256` = 入口件指纹、`size` = 整目录字节）。实测 pyodide：`url` = `pyodide.asm.wasm`（**9,598,218 B**，sha `cc36e3ca…`），`size` = **22,013,349 B**（`du -sb` 整目录 15 文件，逐字吻合）；release 发的是**未解包压缩包**（`pyodide-core-314.0.7.tar.bz2` **6,757,104 B**）。

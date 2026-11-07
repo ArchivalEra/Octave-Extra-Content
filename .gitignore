@@ -15,6 +15,10 @@
 # ── 工具链（取包/校验/探测/出目录）──────────────────────────────────────
 !tools/
 !tools/*.py
+!tools/*.mjs
+!tools/archive/
+!tools/archive/*.py
+!tools/archive/*.md
 
 # ── 供给配方（非包内容：运行时 / 工具链）────────────────────────────────
 !recipes/
