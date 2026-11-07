@@ -22,7 +22,7 @@ import os
 import subprocess
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "zreflect"))
 from ledger import fact                                    # noqa: E402
 from gate import module_meta                               # noqa: E402
 
@@ -31,7 +31,7 @@ from gate import module_meta                               # noqa: E402
 MODULE = module_meta("本仓数据层", "量本仓的货架/工具/配方上游字节（数据 vs 机制分离）",
                      selftest=False)
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = os.path.dirname(os.path.abspath(__file__))
 
 # 配方引用的上游字节（**持久盘**上的 provision 产物；权威事实在生产者的 manifest）。
 # 可用环境变量覆盖（换机器）；读不到就**不写**那条事实（宁缺勿假）。

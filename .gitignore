@@ -51,6 +51,10 @@ __pycache__/
 # ── 事实系统（Einfacht 机制层 + 本仓数据层 + 台账）──────────────────────────
 !zreflect/
 !zreflect/*.py
+!zreflect/*.json.example
+!zreflect/lang/
+!zreflect/lang/*/
+!zreflect/lang/*/*.json
 !reflect-hooks/
 !reflect-hooks/*
 !gates-selftest.sh

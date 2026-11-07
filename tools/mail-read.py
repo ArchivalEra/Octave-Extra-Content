@@ -63,7 +63,7 @@ def module_meta(name, summary, selftest=False):
 
 
 try:                                    # 有 Einfacht ⇒ 用真实现（同名字段同语义）
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "zreflect"))
     from gate import module_meta
 except ImportError as _e:               # 没有 ⇒ 留在上面的本地实现，且**退化要可闻**
     print("note: 本仓无 zreflect/gate.py（非 Einfacht 仓）—— mail-read 以自包含模式运行：%s"

@@ -30,6 +30,9 @@ DEFAULTS = {
 env = dict(os.environ)
 for k, v in DEFAULTS.items():
     env.setdefault(k, v)
+# 2026-11-07 额叶移除：数据层在仓根（不在 zreflect/，那里是纯机制层，
+# 会被上游 check_i18n 扫）；子进程 sys.path[0] 是 zreflect/ ⇒ 显式加仓根。
+env["PYTHONPATH"] = REPO + os.pathsep + env.get("PYTHONPATH", "")
 
 sys.exit(subprocess.run([sys.executable, ENTRY] + sys.argv[1:],
                         cwd=REPO, env=env).returncode)
