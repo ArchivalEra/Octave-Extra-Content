@@ -33,6 +33,10 @@ _spec.loader.exec_module(upstream)
 
 
 def main():
+    # 与上游 gate.py run() 同款：先把 Einfacht.env 的旋钮搬进本进程，
+    # 否则子进程拿到默认 FACTS.json（本仓台账在 build/FACTS.json）。
+    upstream._load_env_plugin(HERE)
+
     # ① 机器块必须新鲜（只核 STATE.md —— 本仓唯一有 AUTO:FACTS 块的文档）
     rc, out = upstream._sh([sys.executable,
                             os.path.join(REPO, "zreflect", "facts.py"),
