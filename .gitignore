@@ -55,6 +55,8 @@ __pycache__/
 !zreflect/lang/
 !zreflect/lang/*/
 !zreflect/lang/*/*.json
+# 本仓数据层在仓根（非 zreflect/ 机制层）
+!measure_extra_content.py
 !reflect-hooks/
 !reflect-hooks/*
 !gates-selftest.sh

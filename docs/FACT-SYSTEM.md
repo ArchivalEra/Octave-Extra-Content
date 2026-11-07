@@ -22,7 +22,7 @@
 | **悬案台账** | 未结案的问题，每条挂**可跑的结算件** | `.scratch/open-questions/issues/` |
 
 **机制层从上游 vendored**（`zreflect/` 机制 + `reflect-hooks/` 钩子 + `gates-selftest.sh`），
-**数据层是本仓唯一要写的文件**（`zreflect/measure_extra_content.py`）—— 换仓库只换那个文件。
+**数据层是本仓唯一要写的文件**（仓根 `measure_extra_content.py`）—— 换仓库只换那个文件。
 
 ---
 
@@ -30,12 +30,12 @@
 
 1. **vendor 机制层**：取上游 [Einfacht](https://github.com/ArchivalEra/Einfacht) 的
    `zreflect/*.py` + `reflect-hooks/*` + `gates-selftest.sh`，**排除上游的 `measure_*.py`**。
-2. **写本仓数据层** `zreflect/measure_extra_content.py`：定义 `measure()`，
+2. **写本仓数据层** `measure_extra_content.py`（仓根，由 `REFLECT_MEASURE_MODULE` 分派）：定义 `measure()`，
    把本仓"量到的事实"收成 dict；每条 `fact(value, cmd, …)` 的 **`cmd` 必须是能跑的裸命令**（见 §3 坑 3）。
 3. **配旋钮** `reflect-hooks/Einfacht.env`（见 §3 坑 1、坑 2）。
-4. **装钩子**：`sh reflect-hooks/install.sh`（= `git config core.hooksPath reflect-hooks`）。
+4. **装钩子**：机制层升级到 b815cd1 后旧 `install.sh` 已删；上游提供 `reflect-hooks/install.py`（`--chain` / `--legacy` / `--uninstall`）。本仓**不用装** —— `git config core.hooksPath reflect-hooks` 已指向混合壳 `pre-commit` / `pre-push`。
    **不装 = 一套没人执行的闸门，而日志一切正常**（§3 坑 4）。
-5. **首台账 + 机器块**：`python3 zreflect/facts.py --render-doc STATE.md`。
+5. **首台账 + 机器块**：`python3 build/facts.py --render-doc STATE.md`（本仓壳；裸跑 `zreflect/facts.py` 不再能分派数据层）。
 6. **自证**：`sh gates-selftest.sh`（平台闸门自证，含"换仓库名字全换"的反向断言）。
 
 ---
@@ -99,7 +99,7 @@
 ## §5 复跑命令（验证接入成功）
 
 ```bash
-python3 zreflect/facts.py --render-doc STATE.md --check    # 机器块新鲜
+python3 build/facts.py --render-doc STATE.md --check    # 机器块新鲜（本仓壳）
 python3 zreflect/registry.py --run commit                  # ran/off/failed 三档
 sh gates-selftest.sh                                       # 平台闸门自证
 python3 .githooks/check-whitelist.py                       # 白名单覆盖（本仓同样适用）

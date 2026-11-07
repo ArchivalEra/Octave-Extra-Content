@@ -12,8 +12,9 @@
 #
 # 壳只做一件事：给手工直跑补上本仓默认旋钮（与 reflect-hooks/Einfacht.env 同口径），
 # 使"不带环境变量直接跑"与钩子一致。真正干活的只有 zreflect/facts.py。
-# 老习惯 `python3 zreflect/facts.py …` 照旧能用（上游机制不变），但**本仓的正确
-# 入口是本壳**；Einfacht #15 B4 若上游化 run-gates 包装，本壳与其合一。
+# ⚠️ 2026-11-07 额叶移除后：**裸跑 `python3 zreflect/facts.py`（量测路径）不再能用**
+# —— 数据层在仓根，只有本壳把它加进 PYTHONPATH；裸跑会 FATAL
+# facts.measure_module_unusable。量测/重渲染一律走本壳。
 import os
 import subprocess
 import sys

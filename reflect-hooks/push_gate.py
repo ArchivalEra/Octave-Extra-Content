@@ -33,6 +33,10 @@ _spec.loader.exec_module(upstream)
 
 
 def main():
+    # 与上游 gate.py _main() 同款：激活语言包 + 校验 REFLECT_LANG（缺包 ⇒ rc=2）。
+    rc = upstream.activate_or_fatal()
+    if rc:
+        return rc
     # 与上游 gate.py run() 同款：先把 Einfacht.env 的旋钮搬进本进程，
     # 否则子进程拿到默认 FACTS.json（本仓台账在 build/FACTS.json）。
     upstream._load_env_plugin(HERE)

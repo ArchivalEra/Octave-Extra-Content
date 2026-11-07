@@ -7,7 +7,7 @@
 # 不 import 任何仓内模块，不假设仓库结构 —— 唯一的前提是**存在 `mail/` 目录**
 # （未读 = `mail/*.md`，已读 = `mail/read/*.md`，位置即状态）。
 #
-# 所以：换任何仓都能直接 `python3 zreflect/mail-read.py` 跑；`--selftest`
+# 所以：换任何仓都能直接 `python3 tools/mail-read.py` 跑；`--selftest`
 # 会在临时目录里造夹具、不碰真 `mail/`，9 条用例自证。
 #
 # 分发规矩（四仓已在用的同一套）：投递 = 落文件到收信方 `mail/`；
@@ -28,10 +28,10 @@
 #   ⇒ 内核层没有"免 root + 有历史 + 覆盖一切读取"的机制；入口命令是工程最优解。
 #
 # 用法：
-#   python3 zreflect/mail-read.py                 # 列未读信（一屏速览，不动文件）
-#   python3 zreflect/mail-read.py 030             # 读信：打印全文 + git mv 进 read/
-#   python3 zreflect/mail-read.py 030 --keep      # 读但留在原处（回头再读/对照）
-#   python3 zreflect/mail-read.py --all           # 依次读全部未读信（逐封确认）
+#   python3 tools/mail-read.py                 # 列未读信（一屏速览，不动文件）
+#   python3 tools/mail-read.py 030             # 读信：打印全文 + git mv 进 read/
+#   python3 tools/mail-read.py 030 --keep      # 读但留在原处（回头再读/对照）
+#   python3 tools/mail-read.py --all           # 依次读全部未读信（逐封确认）
 #
 # ⚠️ 有意不做的事（信任边界）：
 #   · 不进任何闸门 / 不产 rc 语义 / 不写 FACTS —— 信件内容永远不是机器可信输入；
@@ -135,7 +135,7 @@ def cmd_list():
         except OSError:
             head = "（读不了）"
         print("  %-46s %s" % (n, head[:60]))
-    print("\n读：python3 zreflect/mail-read.py <编号或文件名>")
+    print("\n读：python3 tools/mail-read.py <编号或文件名>")
     return 0
 
 
