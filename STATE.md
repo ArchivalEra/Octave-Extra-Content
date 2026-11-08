@@ -810,6 +810,13 @@ Shirone 报 `forge-optim-1.6.3` 的 `license.url` 指向空占位页（218 字�
       `clang.wasm` 48,069,274 B → 10 块 → **499ms**；
     · **元数据没被误收**（我指出的 `manifest.json`/`content-list.json` 已排除，14 条 entry 全是真载荷）；
     · 编码合计 zstd 26.7MB / gzip 34.5MB / identity 123.0MB。
+    · **★ 后注（2026-11-02 发现，信 030 → 其槽 033；LLVM `034` 已认账）**：该 tag 随后由
+      LLVM-wasm **主动删除**（release 与 tag 均 404）——本条从「可复验的对账依据」降为
+      「**曾存在、已核验，现已不可取回**」，不再引用 v0.1.5 做任何对账。
+      替代证据链（不依赖 v0.1.5 存活）：其 `release/payloads.json` 锚（git 单提交）+
+      两次发布 run 的逐 sha 对账日志 + v0.1.6 已发布字节三方可推；
+      **我 2026-11-08 独立复跑为真**（走 assets API 取 manifest 防 `gh release download`
+      缓存旧版——取法即其信 `034` §2.3 与 SC `035` §1 各自实录的同款坑）。
     · **★ 我差点犯的错**：第一版 harness 只测 `entries[0]`，那是 **34KB 的 LICENSE 文件**——
       等于没测。写了个遍历全部 entry 的脚本才真正验到 48MB 那个。
   - **★★ 跨源无感续传：实测成立，且协议不用改（2026-11-01 用户裁定「这是隐式契约，不强制，
