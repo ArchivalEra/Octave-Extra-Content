@@ -69,6 +69,8 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 **★★ 子代理 review（Standards + Spec 两轴）后修正的诚实性问题**（2026-11-07）：`REFLECT_NAKED_MIN=99999999` 是**两条判据共用的阈值**——它不只短路新的反向判据，也把旧的「抄了台账值却没写 `[[键名]]`」黑名单一并关了；且 `source Einfacht.env` 后 `gates-selftest.sh` 的 4 条反向自证被污染、harness 后 4 个 section 被 `rc or` 跳过。此前写的「其余判据照跑」是假描述，已在 `Einfacht.env` / `questions/06` / `AGENTS.md` 改正。**判据确实被关一道，直到 STATE 裸数字迁移结案**——注入台账值裸抄实测：带阈值 0 命中、去阈值 2 命中。复跑命令改为 `env -u REFLECT_NAKED_MIN sh gates-selftest.sh`（隔离旋钮，34 个闸门都跑；仍有 3 条上游夹具失败，如实留账）。另补 `!measure_extra_content.py` 白名单、修 `build/facts.py`「裸跑照旧能用」假注释、`tools/mail-read.py` 路径、`docs/FACT-SYSTEM.md` 陈旧指令、`push_gate.py` 补 `activate_or_fatal`。**未越权改 vendored 机制层**（128 文件逐字等于上游 `b815cd1`，两轴 review 均 PASS）。
 
+**收发信清账**（2026-11-08）：`mail/` 未读区 28 封历史信全部经 `tools/mail-read.py` 归档（rc 逐封核对，README 不归档属正常）。LLVM-wasm `034`（v0.1.5 删除认账 + 替代证据链）已收执（本仓 `mail/sent/159`）：其证据链我**独立复跑为真**——v0.1.6 manifest（sha `293445faa767…`，走 assets API 取 octet-stream，避开 `gh release download` 缓存坑）14/14 条 `(sha256, bytes)` 与其 git 锚 `d6822d8:release/payloads.json` 相等。同时兑现信 `146` 的承诺：STATE 里 v0.1.5 条目补后注「曾存在、已核验，现已不可取回」——之前只发信没改文档，是「声明了改动 ≠ 落了改动」的同款病。
+
 **向上游报缺陷走它自己的渠道，不走本仓的 `mail/`**。`mail/` 是 Octave 集群内部的通信体例；Einfacht 在集群之外，向它报告一律走 **GitHub issue**（其 #1–#21 都是「反哺（使用方…）」形状）。投递渠道由收信方定，不由发信方按集群惯例类推——这条是我 2026-10-31 投错渠道后立的规矩（详见 `mail/README.md` 第 2 条与 `STATE.md`）。本仓向上游报的三条闸门判据盲区：issue #23 / #24 / #25。
 
 **两种协议完全不相干**（2026-11-02 用户裁定「一种管分发，一种管市场聚合」）：
