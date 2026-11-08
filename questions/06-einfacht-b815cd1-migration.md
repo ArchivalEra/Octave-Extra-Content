@@ -1,13 +1,15 @@
-# 悬案 06：上游 Einfacht b815cd1 升级后的三处结构性不兼容 + STATE 裸数字迁移
+# 悬案 06：Einfacht b815cd1→351dc7b 升级账 + STATE 裸数字迁移
 
 **Status:** needs-triage
 **Raised:** 2026-11-07（「额叶移除」：机制层整层换成上游 HEAD）
+**Updated:** 2026-11-08（再升级 351dc7b：B/C 结案、夹具 3→2、根因定位）
 
 ## 背景
 
 2026-11-07 把本仓 `zreflect/`（27 个 py）整层换成上游 `b815cd1`（33 个 py + `lang/` +
-9 个新模块），钩子骨架换成上游 `gate.py` 薄壳。试验场（`/tmp/lobotomy`）已验证
-**6 处可修不兼容并全部修好**（见下），但留下 **3 处上游结构性问题**，本仓不改 vendored 代码。
+9 个新模块），钩子骨架换成上游 `gate.py` 薄壳，**6 处可修不兼容全修**（见下表）。
+2026-11-08 再整层升到上游 `351dc7b`（试验场 `/tmp` 先行验证；上游工作区当时有未提交
+改动，故用 `git archive 351dc7b` 只取已提交内容）。
 
 ## 已修（主仓已落地，全部实测通过）
 
@@ -24,11 +26,12 @@
 `replay 14 条逐字一致`、`stale OK`、`i18n OK（36 文件零语言）`、5 工具自证全绿、
 解耦真实数据 OK、混合 pre-commit rc=0、真实 `git push` 通过。
 
-⚠️ **`gates-selftest.sh` 当前 rc=1（如实记）**，两套失败：
+⚠️ **`gates-selftest.sh` 当前 rc=1（如实记）**，两类失败：
 - `source Einfacht.env` 后直接跑 ⇒ `check_facts` 4 条反向自证被 `REFLECT_NAKED_MIN`
   短路，且 harness 的 `rc or` 让后 4 个 section 不执行 ⇒ 只有 1 个 heading。
   修法（AGENTS.md 已改）：`env -u REFLECT_NAKED_MIN sh gates-selftest.sh` 隔离旋钮。
-- 即便隔离旋钮，仍有 **3 条上游夹具失败**（见 §附），上游自己仓 rc=0。
+- 即便隔离旋钮，仍有 **2 条上游夹具失败**（vendored env 载体污染，根因已定位，
+  见 §附），上游自己仓 rc=0（它没有宿主 env 文件）。
   **不造假 `PRINCIPLES.md` 占位，不改 vendored 自证。** 生产判据以
   `registry --run commit` 为准。
 
@@ -64,21 +67,12 @@ REFLECT_NAKED_MIN=99999999  python3 zreflect/check_facts.py STATE.md  ⇒ 0 条�
 这类嵌套（`/tmp/lobotomy` 试验场实测，已放弃该路径）。**必须人工逐段判断**，
 或给每个数字补 `[[键名]]`。
 
-## 待办 B：上游 `check_facts` 把千分位逗号数字切成假 token（上游缺陷，已报）
+## 待办 B：上游 `check_facts` 把千分位逗号数字切成假 token —— **已结案（2026-11-08）**
 
-**复现**（上游 `zreflect/check_facts.py`）：
-
-```python
-line = "（实测 pyodide：release  6,757,104 B vs"
-# _SHAPE_PATTERNS 剥不掉 "6,757,104"
-# re.findall(r"(?<![\w.])\d+(?![\w.])", line) ⇒ ['6', '757', '104']
-# ⇒ '757' / '104' 被当成「无出处裸数字」报出来
-```
-
-`_SHAPE_PATTERNS` 不含 `\d{1,3}(,\d{3})+`，上游 18 条自证**没有覆盖带逗号的数字**
-（`--selftest` 18 PASS / 0 FAIL）。这是「判据比它声称的窄」，与本仓 #22 同族。
-
-**处置**：已报告 **Einfacht issue #27 ①**，不代修（vendored）。
+**结案**：上游 `b580052` 把 `\d{1,3}(,\d{3})+` 加进 `_SHAPE_PATTERNS`（实测
+`zreflect/check_facts.py:98`）。升级落地后复跑 Settling：含 `6,757,104` 的正文
+`facts.ok` 不再切成三段；`check_facts --selftest` **19 PASS / 0 FAIL**（18→19，
+新增的正是带逗号数字的用例）。
 
 **Settling:** `python3 zreflect/check_facts.py --selftest` —— 上游把 `\d{1,3}(,\d{3})+`
 加进 `_SHAPE_PATTERNS` **并补一条带逗号数字的自证**后：`6,757,104` 被整段剥掉
@@ -86,16 +80,19 @@ line = "（实测 pyodide：release  6,757,104 B vs"
 仍切成三段 ⇒ 未结案。**这条独立于待办 A**：A 结案（数字被行内代码豁免）后
 逗号切分就再也测不出，所以 B 必须靠上游自证单独结算，不能被 A 吞掉。
 
-## 待办 C：上游 `facts --check` 无条件要 `PRINCIPLES.md`，而 opt-out 对它无效（上游不一致，已报）
+## 待办 C：上游 `facts --check` 无条件要 `PRINCIPLES.md` —— **已结案（2026-11-08）**
 
-**事实**（已报 **Einfacht issue #27 ②**）：
-- `doc.accepts_principles()` 认 `REFLECT_NO_PRINCIPLES=1`（实测 `_has_principles_doc()` 返回 False）；
-- 但 `cmd_check()` 调 `_doc_names()`，后者**无条件**返回 `('STATE.md', 'PRINCIPLES.md')`，
-  **没走 `_has_principles_doc()`** ⇒ 不建 `PRINCIPLES.md` 就 FATAL。
+**结案**：上游 `b580052` 修了 #27②：`_doc_names()` 现在**尊重**
+`doc.accepts_principles()`（`REFLECT_NO_PRINCIPLES=1` ⇒ 只查 STATE.md；
+docstring 明说连 `gate._prepare(push)` 的 pre-push 恒红一起修）。
+升级落地后实测：`python3 zreflect/facts.py --check`（无 PRINCIPLES.md）**rc=0**；
+反向判据已失效属预期（判据本身修好了，不存在「没改却变绿」情形——机制读过源码确认）。
 
-**本仓立场**：**不造 `PRINCIPLES.md` 占位文件**——那是「为了让判据绿而造一份自己不用的东西」，
-正是本仓反复反对的。改用的是**本仓 pre-push 兼容层**（`reflect-hooks/push_gate.py`），
-复用上游全部 push 判据，只把 `--check` 换成官方支持的单文档形式 `--check STATE.md`。
+**落地动作（按本节原 Settling 执行）**：`reflect-hooks/push_gate.py` **已删**；
+`reflect-hooks/pre-push` **恢复上游薄壳** `exec gate.py push "$(git rev-parse --show-toplevel)"`
+（上游 run()：env 插件 → `facts --check` → registry → README 同批，与本仓兼容层等价）；
+`Einfacht.env` 的 `REFLECT_NO_PRINCIPLES=1` **保留**——它不再是 workaround，
+而是「本仓不接纳原则文档」的正式声明输入。
 
 **Settling:** `python3 zreflect/facts.py --check` —— 上游让 `cmd_check` 尊重
 `REFLECT_NO_PRINCIPLES` 后，删 `reflect-hooks/push_gate.py` 且 pre-push 恢复
@@ -104,30 +101,34 @@ line = "（实测 pyodide：release  6,757,104 B vs"
 当前实测 `rc=2` + `facts.doc_missing_check(path=…/PRINCIPLES.md)`；若上游没改而它
 变 rc=0，说明有人造了占位文件或改了判据 —— 那不算结案，要查。
 
-## 附：上游 `gates-selftest.sh` 的两套失败（2026-11-07 子代理 review 后重测纠正）
+## 附：上游 `gates-selftest.sh` 的夹具失败 —— **已清零（2026-11-08）**
 
-**★ 之前把两套失败混成一套了，实测区分如下：**
+**351dc7b 落地后 3 → 2，同日上游 `0040c7e` 修复后 2 → 0**：
 
-**套 1（由本仓迁移期旋钮引起，已用命令隔离）**：`source Einfacht.env` 后直接
-`sh gates-selftest.sh` ⇒ `check_facts.py --selftest` 的 4 条反向自证被
-`REFLECT_NAKED_MIN=99999999` 短路（14 PASS / 4 FAIL），且 harness 的 `rc or`
-让后 4 个 section 不执行（只有 1 个 heading）。**`env -u REFLECT_NAKED_MIN`
-后这 4 条全过**（18 PASS / 0 FAIL）。AGENTS.md 已把复跑命令改成隔离形式。
-
-**套 2（上游夹具自身，隔离旋钮后仍在）**：`env -u REFLECT_NAKED_MIN sh gates-selftest.sh`
-⇒ rc=1，3 条，**两条成因不同**：
+- `registry.env_hint_fires_with_carrier`：`b580052` 修掉（env 语境自证）。
 - `facts.fresh_repo_bootstraps_green` / `facts.real_repo_shaped_bootstraps`：
-  夹具造 `doc.md`，上游 `_block_homes` 只认 `STATE.md` + `PRINCIPLES.md`
-  ⇒ `FATAL: facts.doc_has_no_home`。**上游自己仓 rc=0**（它有 PRINCIPLES.md）。
-  ⇒ 隐含依赖「套件仓有原则文档」（已报 **Einfacht issue #27 ③**）。
-- `registry.env_hint_fires_with_carrier`：**不是** PRINCIPLES 成因 —— 夹具造临时
-  `Einfacht.env` 写 `REFLECT_FACTS=FACTS.json`，却没清掉父进程继承的
-  `REFLECT_FACTS=build/FACTS.json`，于是 `env_hint()` 认为旋钮已配、返回 None。
-  实测 `env -i PATH="$PATH" HOME="$HOME" GATE_REPO=$PWD python3 zreflect/registry.py --selftest`
-  ⇒ rc=0。**这是下游 env 载体耦合**，此前笼统归成「PRINCIPLES」是错的。
+  **我 2026-11-08 定位真根因并报 [Einfacht #34]**（vendored 形态特有）：夹具的
+  `_copy_suite_into()` 把宿主仓整个 `reflect-hooks/`（含带宿主旋钮的
+  `Einfacht.env`）拷进「全新仓」，宿主 env 遮蔽夹具自己的 env ⇒ 夹具里
+  `check_facts` / `check_readme_sync` 按宿主的 `REFLECT_DOCS` 跑，全新仓只有
+  STATE.md ⇒ 红。
+  **实证**：把 `reflect-hooks/Einfacht.env` 临时挪走再跑
+  `python3 zreflect/facts.py --selftest` ⇒ **16 PASS / 0 FAIL 全过**（挪回原状）。
+  纯上游仓（无该 env 文件）同自证 16/0。b815cd1 基线同样两红 ⇒ 非升级回归。
+  **上游同日修复**（`0040c7e`）：夹具按名册拷 `reflect-hooks/` 时
+  **排除 `Einfacht.env`**。落地后本仓
+  `env -u REFLECT_NAKED_MIN sh gates-selftest.sh` ⇒ **rc=0，35 闸门自证全绿，
+  facts.py 自证 17/0**。#34 可关。
 
-**⇒ 两套都不是本仓生产判据红。** 生产判据以 `registry --run commit`
-（9 ran / 0 failed）为准。**不为了绿而改 vendored 自证，也不造假 PRINCIPLES.md。**
+⚠️ **复跑判据必须用干净 shell**（AGENTS.md 命令原样单独跑）：把
+`source Einfacht.env` 与壳写进同一条命令链，会把宿主旋钮（`REFLECT_NO_PRINCIPLES`
+等未被夹具覆写的）泄进 harness 夹具 ⇒ `rename_failed` 假红（2026-11-08 实测踩过：
+文件、代码、与上游仓逐字无差，差的只是进程 env）。
+
+**历史记录（b815cd1 时期的三条分类，留痕）**：当时两条 facts bootstrap 失败
+被归因为「隐含依赖 PRINCIPLES.md」+ env_hint 载体耦合。2026-11-08 重测：
+前者归因不准（真根因是上面的 env 载体污染，与 PRINCIPLES 无关）；
+env_hint 那条已被 b580052 修复。
 
 ## 关联
 

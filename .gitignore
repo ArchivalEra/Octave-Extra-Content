@@ -68,6 +68,11 @@ __pycache__/
 !questions/
 !questions/*.md
 
+# ── 仓库级 kimi-hook 薄壳（不注册进用户级 config，显式调用）─────────────
+!.kimi-code/
+!.kimi-code/hooks/
+!.kimi-code/hooks/kimi-hook
+
 # ── 规格（复钓验收 spec 等待批文档）──────────────────────────────────────
 !specs/
 !specs/*.md

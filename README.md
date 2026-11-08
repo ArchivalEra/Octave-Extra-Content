@@ -71,6 +71,8 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 **收发信清账**（2026-11-08）：`mail/` 未读区 28 封历史信全部经 `tools/mail-read.py` 归档（rc 逐封核对，README 不归档属正常）。LLVM-wasm `034`（v0.1.5 删除认账 + 替代证据链）已收执（本仓 `mail/sent/159`）：其证据链我**独立复跑为真**——v0.1.6 manifest（sha `293445faa767…`，走 assets API 取 octet-stream，避开 `gh release download` 缓存坑）14/14 条 `(sha256, bytes)` 与其 git 锚 `d6822d8:release/payloads.json` 相等。同时兑现信 `146` 的承诺：STATE 里 v0.1.5 条目补后注「曾存在、已核验，现已不可取回」——之前只发信没改文档，是「声明了改动 ≠ 落了改动」的同款病。
 
+**机制层再升级 351dc7b → 0040c7b + 接线架构转向（2026-11-08）**：`zreflect/` 整层再换到上游同日 HEAD（试验场先行；上游工作区有未提交内容 ⇒ 用 `git archive` 只取已提交）。**questions/06 待办 B/C 结案**（千分位进 `_SHAPE_PATTERNS`、`_doc_names()` 尊重 `REFLECT_NO_PRINCIPLES`）——按原 Settling **删 `push_gate.py` 兼容层，pre-push 恢复上游薄壳**。**我报的 [Einfacht #34](https://github.com/ArchivalEra/Einfacht/issues/34)（夹具把宿主 `reflect-hooks/Einfacht.env` 拷进全新仓、宿主旋钮遮蔽夹具 env）上游同日修复（`0040c7e`）**，落地后 `gates-selftest.sh` **rc=0 全绿（35 闸门）**，questions/06 §附清账。⚠️ 该命令必须干净 shell 单独跑：把 `source` 与壳写进同一条链会把宿主旋钮泄进 harness 夹具 ⇒ `rename_failed` 假红（实测踩过）。**接线架构转向**：kimi-code 用户级钩子会把注入洒进机器上所有会话（上游实测污染 10 个外仓会话、假拦截 37 次提交，四代接线全撤——见其仓 `6fc055e`/`a4f016a` 与临时通知），本仓按「各跑各的」自建**仓库级薄壳 `.kimi-code/hooks/kimi-hook`**（不注册进任何用户级 config，显式调用，5 形状实测：本仓注入/坏 payload/无 cwd/别仓静默/手跑路径全过），白名单放行；用户级 `[[hooks]]` 已全摘（config.toml 空 hooks）。
+
 **向上游报缺陷走它自己的渠道，不走本仓的 `mail/`**。`mail/` 是 Octave 集群内部的通信体例；Einfacht 在集群之外，向它报告一律走 **GitHub issue**（其 #1–#21 都是「反哺（使用方…）」形状）。投递渠道由收信方定，不由发信方按集群惯例类推——这条是我 2026-10-31 投错渠道后立的规矩（详见 `mail/README.md` 第 2 条与 `STATE.md`）。本仓向上游报的三条闸门判据盲区：issue #23 / #24 / #25。
 
 **两种协议完全不相干**（2026-11-02 用户裁定「一种管分发，一种管市场聚合」）：

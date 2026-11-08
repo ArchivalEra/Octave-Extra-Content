@@ -1,10 +1,5 @@
 #!/bin/sh
-# pre-push：机器块必须新鲜 + 全部闸门 + 三语 README 同批。
-#
-# ★ 2026-11-07 额叶移除：上游 gate.py push 的 _prepare() 硬编码 `facts.py --check`
-#   （不带文档名），而 facts.py 的 cmd_check 无条件扫 STATE.md + PRINCIPLES.md；
-#   本仓没有 PRINCIPLES.md 且已 REFLECT_NO_PRINCIPLES=1（_has_principles_doc() 返回
-#   False，但 cmd_check 没调用它 —— 这是上游不一致，已报）。
-#   ⇒ 本壳复用 gate.py 的 ref 解析与 README 判据，只把 --check 换成带 STATE.md 的
-#     单文档形式（上游 facts.py --check <doc> 官方支持）。**三条判据一条不少。**
-exec python3 "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/push_gate.py"
+# 薄壳 —— 只供**旧装法**（`core.hooksPath reflect-hooks`）使用：git 找的就是
+# 这两个名字。新装法用 `install.py --chain`，或直接在你的钩子里调 gate.py。
+# 逻辑与文案全在 `reflect-hooks/gate.py`（此处零文案，不会漏中文）。
+exec python3 "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/gate.py" push "$(git rev-parse --show-toplevel)"

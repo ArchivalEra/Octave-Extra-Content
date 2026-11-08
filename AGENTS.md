@@ -99,11 +99,12 @@
 python3 build/facts.py --render-doc STATE.md --check     # 机器块新鲜（走壳：免旋钮，防裸跑写根）
 set -a; source reflect-hooks/Einfacht.env; set +a        # 闸门旋钮（registry 裸跑=全线误红，2026-10-25 实证）
 python3 zreflect/registry.py --run commit                  # ran/off/failed 三档
-# ★ 2026-11-07：必须 `env -u REFLECT_NAKED_MIN` 隔离迁移期阈值，否则 check_facts
-# 的 4 条反向自证被短路 ⇒ rc=1 且 harness 的 4 个 section 被 `rc or` 跳过。
-# ⚠️ 当前（迁移期）该命令仍是 **rc=1**：另有 3 条上游夹具失败
-# （2 条 facts bootstrap 隐含依赖 PRINCIPLES.md + 1 条 registry env 载体耦合），
-# 上游自己仓 rc=0。生产判据以 `registry --run commit` 为准，不造假占位文件。
-env -u REFLECT_NAKED_MIN sh gates-selftest.sh             # 平台闸门自证（隔离旋钮）
+# ★ 必须 `env -u REFLECT_NAKED_MIN` 隔离迁移期阈值（STATE 裸数字迁移未结案前），
+# 且**单独跑**（干净 shell）——别把 source 与它写进同一条命令链，宿主旋钮会泄进
+# harness 夹具造成 rename_failed 假红（2026-11-08 实测）。2026-11-08 起该命令
+# **rc=0**（上游 0040c7e 修掉 #34 夹具 env 污染后，35 闸门全绿）。
+env -u REFLECT_NAKED_MIN sh gates-selftest.sh             # 平台闸门自证（隔离旋钮，干净 shell）
 REFLECT_FACTS=build/FACTS.json python3 zreflect/check_facts_replay.py   # 每条 cmd 逐字复跑（台账在 build/，勿裸跑）
+# 仓库级「接着上一轮」薄壳（不注册进用户级 config；kimi-code 用户级钩子会把注入洒进所有会话——2026-11-08 实测教训）
+printf '%s' '{"cwd":"'"$PWD"'"}' | .kimi-code/hooks/kimi-hook
 ```
