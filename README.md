@@ -73,6 +73,8 @@ Octave 包市场的内容层：管包、运行时、工具链的档案事实与�
 
 **机制层再升级 351dc7b → 0040c7b + 接线架构转向（2026-11-08）**：`zreflect/` 整层再换到上游同日 HEAD（试验场先行；上游工作区有未提交内容 ⇒ 用 `git archive` 只取已提交）。**questions/06 待办 B/C 结案**（千分位进 `_SHAPE_PATTERNS`、`_doc_names()` 尊重 `REFLECT_NO_PRINCIPLES`）——按原 Settling **删 `push_gate.py` 兼容层，pre-push 恢复上游薄壳**。**我报的 [Einfacht #34](https://github.com/ArchivalEra/Einfacht/issues/34)（夹具把宿主 `reflect-hooks/Einfacht.env` 拷进全新仓、宿主旋钮遮蔽夹具 env）上游同日修复（`0040c7e`）**，落地后 `gates-selftest.sh` **rc=0 全绿（35 闸门）**，questions/06 §附清账。⚠️ 该命令必须干净 shell 单独跑：把 `source` 与壳写进同一条链会把宿主旋钮泄进 harness 夹具 ⇒ `rename_failed` 假红（实测踩过）。**接线架构转向**：kimi-code 用户级钩子会把注入洒进机器上所有会话（上游实测污染 10 个外仓会话、假拦截 37 次提交，四代接线全撤——见其仓 `6fc055e`/`a4f016a` 与临时通知），本仓按「各跑各的」自建**仓库级薄壳 `.kimi-code/hooks/kimi-hook`**（不注册进任何用户级 config，显式调用，5 形状实测：本仓注入/坏 payload/无 cwd/别仓静默/手跑路径全过），白名单放行；用户级 `[[hooks]]` 已全摘（config.toml 空 hooks）。
 
+**UI `156` 逐题答（2026-11-10）**：UI 自曝其 `LANE_PRODUCT` 手写映射让消费侧身份依赖 release `product`（与已作废的 `acquisition.releaseRef` 同族），问声明地。本仓核实后回信（UI 仓 `020`，本仓 `mail/sent/160`）：**A1** 车道身份声明地 = **引擎契约**（宿主 ↔ UI），内容契约不碰、不兼、不新增字段；**A2** `wasm64 ↔ w64` 不是两仓值域分叉——宿主 `validate-content-list.py` 对 `kind:'engine'` 按 kind 扩词表，`w64`/`omc` 是 lane 索引键（注释「索引键不是版本轴」），与分发侧投送 `arch` 同名两义，无需归一。转呈宿主 `071` 请其给声明、知会 SC `075` 协议不动。投递时复现宿主 `mail/015` B2 的坑：Write 落 antigravity 路径被解析到 zcode 侧工作树，已复制回真实活动树并逐字核对。活状态同步进 `AGENTS.md` 裁定段与 `STATE.md`。
+
 **向上游报缺陷走它自己的渠道，不走本仓的 `mail/`**。`mail/` 是 Octave 集群内部的通信体例；Einfacht 在集群之外，向它报告一律走 **GitHub issue**（其 #1–#21 都是「反哺（使用方…）」形状）。投递渠道由收信方定，不由发信方按集群惯例类推——这条是我 2026-10-31 投错渠道后立的规矩（详见 `mail/README.md` 第 2 条与 `STATE.md`）。本仓向上游报的三条闸门判据盲区：issue #23 / #24 / #25。
 
 **两种协议完全不相干**（2026-11-02 用户裁定「一种管分发，一种管市场聚合」）：

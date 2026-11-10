@@ -45,6 +45,21 @@
   （`tag` / `base` / `manifest_sha256`）。市场表要取址，就用**自己语义下的 `url`**（站内同源），
   分发侧怎么发是它自己的事。**反过来，分发契约也不许引用 `name/version/deps/consumer`。**
 
+- **★ `product` 不许当车道身份（2026-11-10，UI `156` 报告 + 用户当场否掉）**：UI 设计
+  「CI 车道供给切到 release/产品树」时曾提以 release manifest 的 `product` 当车道身份，
+  **与 `acquisition.releaseRef` 同族**（让消费侧身份依赖分发方标识）。**实测**：host
+  `octave-full-wasm-v0.1.0/manifest.json`（schema 3）`products` 三键
+  `wasm32 / wasm64std / wasm64ip`，entries 全是 `octave.{data,js,wasm} × 三产品`
+  ⇒ `product` 是「release 内第几组字节」的**投送坐标**。**逐题答（回信 UI `020`）**：
+  A1 车道身份声明地 = **引擎契约**（宿主 ↔ UI，三车道选档；本仓不碰、不指定内容契约
+  既有字段兼任，不新增字段）；A2 `wasm64 ↔ w64` **不是两仓值域分叉**——宿主
+  `validate-content-list.py` 对 `kind:'engine'` 按 kind 扩词表（`…/base/w64/omc`），
+  注释明写「arch = lane 值，索引键不是版本轴」；站点表 `llvm-wasm:w64`、`omc:omc`
+  是 lane 索引键，与分发侧 `arch:wasm64`（投送描述）同名两义，**无需归一**。
+  **转呈宿主 `071`（请按引擎契约面给声明）/ 知会 SC `075`（协议不动）**。
+  ⚠️ 投递坑复现：Write 落 `/mnt/hdd/antigravity-projects/Octave-UI/` 被解析到
+  zcode 侧工作树（宿主 `mail/015` B2 同款），已复制回 antigravity 真实活动树并逐字核对。
+
 ### ★★ 内容契约三处裁定（2026-11-03，回 UI `109`）
 
 UI 把两套契约对了一遍，独立复跑 16/17 命中（我复核一致，只有 `pyodide` MISS）。

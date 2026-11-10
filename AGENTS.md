@@ -64,6 +64,12 @@
   ⚠️ 曾经的「第 6 步：内容契约加 `acquisition.releaseRef` 引用 release」是**错误方向，已作废**——
   那会让市场表依赖分发方标识，换分发方（GitHub → CF → 对象存储）市场就得跟着改。
   实测：宿主 schema 与 17 条 content-list 里**从来没有**该字段，解耦在实现层早已成立。
+  ⚠️ **适用范围扩展（2026-11-10，UI `156` 实证）**：release manifest 的 **`product` 也是投送坐标**
+  （「这份 release 里第几组字节」的索引），不许上升为车道/产品身份产地——消费侧的
+  `EngineLane → product` 手写映射与 `acquisition.releaseRef` 同族。**车道身份的声明地 = 引擎契约**
+  （宿主 ↔ UI），本仓不碰、不指定内容契约既有字段兼任；`kind:'engine'` 条目的 `arch`（`w64`/`omc`
+  等 lane 索引键）与分发侧 `arch:wasm64` 是**同名两义**，各自语境合法，**不需归一、不新增字段**
+  （判据唯一产地 = 宿主 `validate-content-list.py` 的按 kind 扩词表，注释明写「索引键不是版本轴」）。
 - **端口产地 = 宿主**（2026-10-14 裁决）：schema + 校验器归宿主 `build/extra-content/`；
   本仓 `port/` 是**副本**，符合它、以它为准。**内容语义**归本仓（见 `mail/004`）。
 - **归属 ≠ 投送**：归属（谁定语义/负契约责）= 本仓；投送（UI 拿到什么）= 宿主（站点里的表）；
