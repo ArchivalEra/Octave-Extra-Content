@@ -170,3 +170,5 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 **宿主 163 收执（2026-11-10）**：`071` 的 Q1 已答——A1 归属判断被产地确认（声明地=引擎契约），声明落 `build/lanes.json` → v0.1.1 manifest 顶层 `lanes`（生成器三面对账：声明↔目录↔`build.mode`），未分家、未改词表、`product` 裁定一字未动。与我 STATE 落账（be4c1f6）逐点互证，无新裁定需求。已归档 `mail/read/163`。
 
 （Einfacht 同步：knobs.py + registry.py 升 issue #21 相位旋钮，全套闸门 7/0/0 绿）
+
+**宿主裁定收执（2026-11-10，wo-u 转告）**：w64 档可接 release wasm64ip（8768 全量 56 套绿已跑这份字节，与我 STATE 同源实测互证）；base 暂不切（release wasm32 从未过全量验收），前提是宿主先跑 PROBES=1 全量。裁定正本由宿主直接投 UI 信箱（引擎契约职权面，不经我转述），本仓无动作。
