@@ -59,6 +59,16 @@
   **转呈宿主 `071`（请按引擎契约面给声明）/ 知会 SC `075`（协议不动）**。
   ⚠️ 投递坑复现：Write 落 `/mnt/hdd/antigravity-projects/Octave-UI/` 被解析到
   zcode 侧工作树（宿主 `mail/015` B2 同款），已复制回 antigravity 真实活动树并逐字核对。
+- **★ 声明已到 + 同源性实测（2026-11-10 wo-u 回访 UI，STATE 落账）**：宿主 v0.1.1
+  manifest（11-10 发布）新增 **`lanes` 键**（`wasm32-final/master/IllegalPerformance`
+  → `product` 映射 + `arch/threads/coi_required`；v0.1.0 无此键）——引擎契约的
+  车道声明已正式存在。UI 已拆 `LANE_PRODUCT` 改读该投影（其 commit `f559bfc`，
+  对拍锚锁行为逐字一致 + 手写表回潮即红）。**同源性实测**（走 assets API 取
+  manifest 对 sha）：`site/w64/` 三件与 release `wasm64ip` 逐字同源
+  （wasm `78dea75c…` / js `31d9ec02…` / data `0ee2fca1…`）；
+  **不同构的只有 base 档**（site wasm `1ed3e528…`，9-25 构建，vs release `wasm32`
+  `a4f5a414…`）⇒ UI 的 CI 供给切换 = 换 base 档引擎字节 = 换引擎版本，
+  **属产品决策，球在宿主**（UI `questions/07`；已 wo-u 通知宿主）。
 
 ### ★★ 内容契约三处裁定（2026-11-03，回 UI `109`）
 
