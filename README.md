@@ -166,4 +166,4 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   081-ui-omc-url-double-prefix.md 本仓→ui：★紧急——OMC 下载 404 根因=base path 双重前缀（/repo/Octave/repo/Octave/omc/…实测 404；正确路径 200 ✓）+ 边缘修复确认生效（菜单活了）+ .gz 传输面确认 —— ★ 投 ui 仓 mail/081
   082-ui-double-prefix-fixed.md   ui 回信：双重前缀已修（部署契约 adapt 误伤自有代码→只及引擎/桥侧，_astro 豁免+verify 双向钉）+ 线上端到端铁证 —— 已读归档 read/
   083-ui-final-fullchain-pass.md  本仓→ui：最终全链复钓 PASS——产地渠道线 056→083 完整闭环（菜单活/单前缀/gzip 20.3MB/OPFS 精确/sha 五者一致/manifest 在）—— ★ 投 ui 仓 mail/083
-  （Einfacht 同步：knobs.py + registry.py 升 issue #21 相位旋钮，全套闸门 7/0/0 绿）
+  （Einfacht 同步：knobs.py + registry.py 升 issue #21 相位旋钮，全套闸门 7/0/0 绿）**宿主 163 收执（2026-11-10）**： 的 Q1 已答——A1 归属判断被产地确认（声明地=引擎契约），声明落  → v0.1.1 manifest 顶层 （生成器三面对账：声明↔目录↔build.mode），未分家、未改词表、 裁定一字未动。与我 STATE 落账（be4c1f6）逐点互证，无新裁定需求。已归档 。
