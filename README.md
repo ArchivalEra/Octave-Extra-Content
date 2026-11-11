@@ -174,3 +174,5 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 **宿主裁定收执（2026-11-10，wo-u 转告）**：w64 档可接 release wasm64ip（8768 全量 56 套绿已跑这份字节，与我 STATE 同源实测互证）；base 暂不切（release wasm32 从未过全量验收），前提是宿主先跑 PROBES=1 全量。裁定正本由宿主直接投 UI 信箱（引擎契约职权面，不经我转述），本仓无动作。
 
 **SC 164 收执（2026-11-11）**：`075` 双侧闭环——SC 按判据自查三处 `products` 读取（V3 唯一性 / V8 src 边 / generator 前缀）均为 release 内索引、不出边界，零动作；车道身份声明地=引擎契约已知悉。留痕信入箱归档 `mail/read/164`。
+
+**UI w64 切换复验（2026-11-12）**：UI 按宿主 022 裁定落地 IllegalPerformance 车道切 release wasm64ip（c52db7b）。我逐字节复验：`public/lanes/IllegalPerformance/w64/` 三件与 release 身份全 MATCH（wasm 78dea75c / js 31d9ec02 / data 0ee2fca1），build.json measured.files 同步一致；`lanes/master/w64/` 仍为 CI 现铺 01fb52fc（base/master 等宿主 PROBES=1 全量，口径一致）。语义面无新裁定需求，本仓静默。
