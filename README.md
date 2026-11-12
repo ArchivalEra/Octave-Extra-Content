@@ -182,3 +182,5 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 **071 转呈线全链闭环（2026-11-12）**：宿主 v0.1.1 全量验收过（99 套 / 1589 PASS / 0 FAIL，台账 v011_sweep_* 实读核对），base（wasm32）/ master（wasm64std）同批放行（宿主直投 UI 023），pins 三条统一钉 v0.1.1。链路：宿主 lanes 声明 → UI 拆表 f559bfc → 022 w64 裁定 → UI c52db7b 落地（我逐字节复验）→ 023 base/master 放行。宿主确认 OEC 零语义面问题，本仓无未决项。
 
 **GitRoll provenance 质询（2026-11-12，Shirone-Theme 协调）**：八仓联合评审定稿（trash-can@gitroll 0922b65）。两点：① 同形状异判（Einfacht 0 vuln vs LLVM-wasm 40，check_pins.py:83 两树逐字同在 + 双 census 互证）⇒ 规则集激活差异；② vuln 行裸 scan-id 无文件归属（OFW/LLVM），导出器按 type 分支——OEC 独立数据吻合假说（181 行全带路径 + textRange 全有 + vuln 行 0）。修复面 3 条随件投 GitRoll 官方渠道。OEC 本轮角色：第 6 取样点 + measures-issues 一致性正例。
+
+**CI 等价评估落地（2026-11-12）**：GitHub Code Quality 官方版个人账号不可用（Shirone-Theme 全网通报，用户裁定方向），改走自有闸门 CI 摘要——`.github/workflows/quality-assessment.yml`（workflow_dispatch + 每周一 cron + PR），检查项 = AGENTS 复跑命令同款零新增；干净克隆模拟先行全绿；replay 闸门在 CI 如实 SKIP（4 条 cmd 吃本机字节缓存 + 1 条要 gh 认证，官方出口 REFLECT_REPLAY=off），不冒充 PASS。参考 Anti-Laborer 32f6095 终态（Shirone-Theme 忙于 isui.ren 收尾转介）。

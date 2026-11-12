@@ -1,0 +1,132 @@
+# 本地版「代码质量评估」——GitHub Code Quality 官方版在个人账号上不可用
+# （Team/Enterprise + 独立付费），用**本仓已有的判据**做等价替代：不新增 lint 规则，
+# 只把本仓已有的检查逐条跑一遍，产出可比的 PR/周报摘要（GITHUB_STEP_SUMMARY）
+# + 可下载的日志 artifact。失败如实记 rc，不伪装、不吞错。
+#
+# 与 reflect-hooks/ 的分工：pre-commit/pre-push 是门禁（本地红 = 拦下）；
+# 本 workflow 是评估报表（同命令、同判据，只做呈现与留档）。
+#
+# 检查项与来源（全部是 AGENTS.md「复跑命令」节的既有命令，零新增）：
+#   facts-render      = build/facts.py --render-doc STATE.md --check（机器块与台账一致）
+#   registry-commit   = zreflect/registry.py --run commit（发现式闸门名录，9 ran/off 三档）
+#   i18n / questions / envfile / stale / retractions / readme-sync —— registry 面内闸门
+#   gates-selftest    = env -u REFLECT_NAKED_MIN sh gates-selftest.sh（35 闸门自证，隔离旋钮）
+#   tools-selftest    = 5 个生产者工具 --selftest（pre-commit ② 同款）
+#   replay            = **CI skip**（如实标注，不伪装 PASS）：台账 14 条 cmd 里 4 条
+#                       读本机字节缓存（LLVM bundle / pyodide-core tar，/mnt/hdd/...），
+#                       1 条要 gh 认证读 release——干净 runner 无这些字节。该闸门有
+#                       官方整仓出口 REFLECT_REPLAY=off（AGENTS 在册），本地照跑。
+
+name: Code quality assessment
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 6 * * 1'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  assess:
+    name: Assess ${{ github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Run checks
+        shell: bash
+        run: |
+          set +e
+          : > results.tsv
+          run_check() {
+            n="$1"; shift
+            printf '%s\t' "$n" >> results.tsv
+            "$@" > "/tmp/$n.log" 2>&1
+            rc=$?
+            printf '%s\n' "$rc" >> results.tsv
+            printf '  %s: rc=%s\n' "$n" "$rc"
+          }
+          # 显式 skip 的闸门（不伪装成 PASS，summary 单列原因）
+          run_skip() {
+            n="$1"
+            printf '%s\tSKIP\n' "$n" >> results.tsv
+            printf '  %s: SKIP\n' "$n"
+          }
+
+          # 旋钮来源（AGENTS 复跑命令同款；gh 只给 releases_published 复跑用）
+          set -a; . ./reflect-hooks/Einfacht.env; set +a
+
+          # ① 机器块与台账一致（走壳）
+          run_check facts-render python3 build/facts.py --render-doc STATE.md --check
+
+          # ② replay：4 条 cmd 吃本机字节缓存 + 1 条要 gh release 读（runner 无）。
+          #    官方出口 REFLECT_REPLAY=off 让该闸门进入 off 档（registry 输出里
+          #    phase_off 可见）——CI 里如实标 SKIP，不冒充 PASS。
+          run_skip replay-ci-unavailable-local-bytes
+          export REFLECT_REPLAY=off
+
+          # ③ registry commit 相位（含 i18n/questions/envfile/stale/retractions/
+          #    readme-sync/ab/…，发现式名录；off 是没查不是通过——summary 如实分列）
+          run_check registry-commit python3 zreflect/registry.py --run commit
+
+          # ④ 平台闸门自证（35 闸门；必须隔离迁移期阈值 + 干净 shell，AGENTS 在册）
+          run_check gates-selftest env -u REFLECT_NAKED_MIN sh gates-selftest.sh
+
+          # ⑤ 复跑（本地语义）本地跑不了，但闸门自身的判据自证必须单独留档
+          run_check facts-selftest python3 zreflect/facts.py --selftest
+          run_check facts-replay-selftest env -u REFLECT_NAKED_MIN python3 zreflect/check_facts_replay.py --selftest
+
+          # ⑥ 5 个生产者工具自证（pre-commit ② 同款，零新增）
+          for t in make-manifest-v4 check-release-v4 upgrade-manifest-license \
+                   check-contract-decoupling compare-release-payloads; do
+            run_check "tool-$t" python3 "tools/$t.py" --selftest
+          done
+
+      - name: Publish summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Code quality assessment — Octave-Extra-Content"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -f results.tsv ]; then
+            while IFS=$'\t' read -r n rc; do
+              if [ "$rc" = "0" ]; then badge="PASS"
+              elif [ "$rc" = "SKIP" ]; then badge="SKIP (4 ledger cmds need local byte caches + 1 needs gh auth; gate off via REFLECT_REPLAY=off)"
+              else badge="FAIL (rc=$rc)"
+              fi
+              printf '| %s | %s |\n' "$n" "$badge" >> "$GITHUB_STEP_SUMMARY"
+            done < results.tsv
+          else
+            echo "| (no results) | — |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          {
+            echo ""
+            echo "Assessment uses this repository's existing gates (no new lint rules):"
+            echo "registry commit phase + gates-selftest + facts/replay selftests + 5 producer-tool"
+            echo "selftests — same commands as AGENTS.md 复跑命令 section. The replay gate is"
+            echo "**skipped honestly** in CI: 4 of 14 ledger cmds hash local byte caches"
+            echo "(LLVM bundle / pyodide-core tar), 1 needs gh auth — gate off via"
+            echo "REFLECT_REPLAY=off; locally it always runs."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-logs
+          path: /tmp/*.log
+          if-no-files-found: ignore
