@@ -184,3 +184,5 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 **GitRoll provenance 质询（2026-11-12，Shirone-Theme 协调）**：八仓联合评审定稿（trash-can@gitroll 0922b65）。两点：① 同形状异判（Einfacht 0 vuln vs LLVM-wasm 40，check_pins.py:83 两树逐字同在 + 双 census 互证）⇒ 规则集激活差异；② vuln 行裸 scan-id 无文件归属（OFW/LLVM），导出器按 type 分支——OEC 独立数据吻合假说（181 行全带路径 + textRange 全有 + vuln 行 0）。修复面 3 条随件投 GitRoll 官方渠道。OEC 本轮角色：第 6 取样点 + measures-issues 一致性正例。
 
 **CI 等价评估落地（2026-11-12）**：GitHub Code Quality 官方版个人账号不可用（Shirone-Theme 全网通报，用户裁定方向），改走自有闸门 CI 摘要——`.github/workflows/quality-assessment.yml`（workflow_dispatch + 每周一 cron + PR），检查项 = AGENTS 复跑命令同款零新增；干净克隆模拟先行全绿；replay 闸门在 CI 如实 SKIP（4 条 cmd 吃本机字节缓存 + 1 条要 gh 认证，官方出口 REFLECT_REPLAY=off），不冒充 PASS。参考 Anti-Laborer 32f6095 终态（Shirone-Theme 忙于 isui.ren 收尾转介）。
+
+**replay 超时旋钮（2026-11-12）**：Einfacht.env 加 REFLECT_REPLAY_TIMEOUT=60——台账 releases_published 复跑走 gh api 外网，偶发 >10s 默认超时 ⇒ pre-commit/pre-push 假红（实测 3 次 rc=1 detail=''，重跑即绿，典型超时形状）。判据本身不变。CI 等价评估 workflow 同批落地（.github/workflows/quality-assessment.yml，replay 在 CI 如实 SKIP）。
