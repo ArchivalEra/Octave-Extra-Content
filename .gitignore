@@ -77,6 +77,11 @@ __pycache__/
 !specs/
 !specs/*.md
 
+# ── CI 等价评估（quality-assessment，同 AGENTS 复跑命令，零新增规则）──────
+!.github/
+!.github/workflows/
+!.github/workflows/quality-assessment.yml
+
 # 本地缓存/临时物（不进仓）
 __pycache__/
 *.pyc
