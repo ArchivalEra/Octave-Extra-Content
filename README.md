@@ -180,3 +180,5 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 **GitRoll 第三轮对账（2026-11-12，Shirone-Theme 协调）**：181 条逐类核源码——vendored 123 归上游、tools/archive 11 接受、own 真代码 47 三分类，**5 条 BUG 型全部核为误报**（never_falsifiable 反向夹具 / 语义判据 float-eq / 自证夹具恒定 rc）。跨仓证据（五仓同源误报表）反哺上游 [Einfacht #40](https://github.com/ArchivalEra/Einfacht/issues/40)，与上游自己的 #39 分账互指衔接；三仓独立同结论由 Shirone-Theme 确认为机制层契约。全量处置与清偿计划落 `questions/07`（Settling：P2 清偿批 + 下轮 unused 计数下降）。
 
 **071 转呈线全链闭环（2026-11-12）**：宿主 v0.1.1 全量验收过（99 套 / 1589 PASS / 0 FAIL，台账 v011_sweep_* 实读核对），base（wasm32）/ master（wasm64std）同批放行（宿主直投 UI 023），pins 三条统一钉 v0.1.1。链路：宿主 lanes 声明 → UI 拆表 f559bfc → 022 w64 裁定 → UI c52db7b 落地（我逐字节复验）→ 023 base/master 放行。宿主确认 OEC 零语义面问题，本仓无未决项。
+
+**GitRoll provenance 质询（2026-11-12，Shirone-Theme 协调）**：八仓联合评审定稿（trash-can@gitroll 0922b65）。两点：① 同形状异判（Einfacht 0 vuln vs LLVM-wasm 40，check_pins.py:83 两树逐字同在 + 双 census 互证）⇒ 规则集激活差异；② vuln 行裸 scan-id 无文件归属（OFW/LLVM），导出器按 type 分支——OEC 独立数据吻合假说（181 行全带路径 + textRange 全有 + vuln 行 0）。修复面 3 条随件投 GitRoll 官方渠道。OEC 本轮角色：第 6 取样点 + measures-issues 一致性正例。
