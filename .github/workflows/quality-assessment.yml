@@ -43,6 +43,9 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install zstandard (make-manifest-v4 selftest needs it)
+        run: pip install zstandard
+
       - name: Run checks
         shell: bash
         run: |
@@ -79,8 +82,13 @@ jobs:
           #    readme-sync/ab/…，发现式名录；off 是没查不是通过——summary 如实分列）
           run_check registry-commit python3 zreflect/registry.py --run commit
 
-          # ④ 平台闸门自证（35 闸门；必须隔离迁移期阈值 + 干净 shell，AGENTS 在册）
-          run_check gates-selftest env -u REFLECT_NAKED_MIN sh gates-selftest.sh
+          # ④ 平台闸门自证（35 闸门）。⚠️ 两件必须隔离（AGENTS 在册 + 2026-11-12 CI 实测）：
+          #    a) REFLECT_NAKED_MIN（迁移期阈值会关自证的反向用例）；
+          #    b) REFLECT_MEASURE_MODULE=measure_extra_content —— 本仓数据层在仓根，
+          #       CI 干净树里 harness 夹具（改名 LEDGER.json/NOTES.md）解析它必失配
+          #       ⇒ rename_failed ok=14/17（本地全量 source 后同款，已二分实锤）。
+          #    数据层只在本地 measure 时需要，自证不需要——unsets 即干净。
+          run_check gates-selftest env -u REFLECT_NAKED_MIN -u REFLECT_MEASURE_MODULE sh gates-selftest.sh
 
           # ⑤ 复跑（本地语义）本地跑不了，但闸门自身的判据自证必须单独留档
           run_check facts-selftest python3 zreflect/facts.py --selftest
