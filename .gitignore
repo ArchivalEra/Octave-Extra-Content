@@ -81,6 +81,7 @@ __pycache__/
 !.github/
 !.github/workflows/
 !.github/workflows/quality-assessment.yml
+!.github/shellcheck-allowlist.md
 
 # 本地缓存/临时物（不进仓）
 __pycache__/
