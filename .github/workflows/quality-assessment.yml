@@ -43,8 +43,9 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install zstandard (make-manifest-v4 selftest needs it)
-        run: pip install zstandard
+      - name: Install zstandard + shellcheck (selftest deps)
+        run: |
+          pip install zstandard shellcheck-py
 
       - name: Run checks
         shell: bash
@@ -99,6 +100,15 @@ jobs:
                    check-contract-decoupling compare-release-payloads; do
             run_check "tool-$t" python3 "tools/$t.py" --selftest
           done
+
+          # ⑦ shellcheck（外部验证既有壳，不是新 lint）：2026-11-12 首扫 13 条
+          #    finding 全部落入 4 条惯用形规则（SC1007「CDPATH= cd」清 CDPATH 的
+          #    POSIX 惯用法、SC1090/SC1091 插件契约的运行时 source、SC2016 自证
+          #    夹具故意不展开）——逐条核源码后定性误报，allowlist 排除；排除后
+          #    rc=0（真代码零 finding）。allowlist 收录在 allowlist.txt，可审计。
+          run_check shellcheck-gates shellcheck -e SC1007,SC1090,SC1091,SC2016 \
+            reflect-hooks/einfacht-env.sh reflect-hooks/pre-commit \
+            reflect-hooks/pre-push gates-selftest.sh .kimi-code/hooks/kimi-hook
 
       - name: Publish summary
         if: always()
