@@ -186,3 +186,5 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 **CI 等价评估落地（2026-11-12）**：GitHub Code Quality 官方版个人账号不可用（Shirone-Theme 全网通报，用户裁定方向），改走自有闸门 CI 摘要——`.github/workflows/quality-assessment.yml`（workflow_dispatch + 每周一 cron + PR），检查项 = AGENTS 复跑命令同款零新增；干净克隆模拟先行全绿；replay 闸门在 CI 如实 SKIP（4 条 cmd 吃本机字节缓存 + 1 条要 gh 认证，官方出口 REFLECT_REPLAY=off），不冒充 PASS。参考 Anti-Laborer 32f6095 终态（Shirone-Theme 忙于 isui.ren 收尾转介）。
 
 **replay 超时旋钮（2026-11-12）**：Einfacht.env 加 REFLECT_REPLAY_TIMEOUT=60——台账 releases_published 复跑走 gh api 外网，偶发 >10s 默认超时 ⇒ pre-commit/pre-push 假红（实测 3 次 rc=1 detail=''，重跑即绿，典型超时形状）。判据本身不变。CI 等价评估 workflow 同批落地（.github/workflows/quality-assessment.yml，replay 在 CI 如实 SKIP）。
+
+**CI 首轮实跑修复（2026-11-12）**：workflow_dispatch 首跑抓出两件——① `make-manifest-v4` 自证缺 `zstandard` 模块（CI 加 pip install）；② gates-selftest 在 CI `ok=14/17`：**根因二分实锤为 `REFLECT_MEASURE_MODULE`**——本仓数据层在仓根，harness 改名夹具（LEDGER.json/NOTES.md）解析 host 数据层必失配；workflow 改 `env -u REFLECT_NAKED_MIN -u REFLECT_MEASURE_MODULE`（本地全量 source 后同款复现，unsets 后 17/17）。measures→issues 不一致、排程 cron '37 6 * * 1' 不撞整点。
