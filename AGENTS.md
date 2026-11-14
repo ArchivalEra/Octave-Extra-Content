@@ -113,4 +113,7 @@ env -u REFLECT_NAKED_MIN sh gates-selftest.sh             # 平台闸门自证�
 REFLECT_FACTS=build/FACTS.json python3 zreflect/check_facts_replay.py   # 每条 cmd 逐字复跑（台账在 build/，勿裸跑）
 # 仓库级「接着上一轮」薄壳（不注册进用户级 config；kimi-code 用户级钩子会把注入洒进所有会话——2026-11-08 实测教训）
 printf '%s' '{"cwd":"'"$PWD"'"}' | .kimi-code/hooks/kimi-hook
+# ★ 2026-11-12 起推送路径变更（站长裁定）：节点凭据 PlumHelper 全仓只读（push=false），
+# main 分支保护不可见属预期。交付 = 本地改 → wo-u 报告 wo-u-maintainer（diff 摘要/证据）
+# → 站长侧代为落库。不要尝试 push / fork / PR——路径已确认关闭。
 ```
