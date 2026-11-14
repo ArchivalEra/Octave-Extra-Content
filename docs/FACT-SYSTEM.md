@@ -98,13 +98,8 @@
 
 ## §5 复跑命令（验证接入成功）
 
-```bash
-python3 build/facts.py --render-doc STATE.md --check    # 机器块新鲜（本仓壳）
-python3 zreflect/registry.py --run commit                  # ran/off/failed 三档
-sh gates-selftest.sh                                       # 平台闸门自证
-python3 .githooks/check-whitelist.py                       # 白名单覆盖（本仓同样适用）
-python3 zreflect/check_facts_replay.py                     # 每条 cmd 逐字复跑
-```
+单一产地 = 仓根 `AGENTS.md` 的「Reproduction commands」节（那里有判据注释与旋钮隔离的
+完整形状；本节曾有一份手抄拷贝，已因漂移删除——改判据只改 AGENTS.md，别再造第二份）。
 
 ---
 

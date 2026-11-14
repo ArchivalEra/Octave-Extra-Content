@@ -1,122 +1,201 @@
 # AGENTS.md
 
-给在这个仓里工作的 agent 的硬规矩。**这些不是建议，是闸门会拦的东西。**
+Hard rules for agents working in this repo. Gates enforce them.
 
-## 七条纪律
+## Discipline
 
-1. **数值/行为只认实测**，并把复跑方式写在断言旁边。写不出复跑方式的句子，只能当历史读
-   —— 不许写成「现在如此」。台账里的 `cmd` 由 `check_facts_replay.py` **逐字执行**
-   （stdout 必须是裸值；坏命令 / 超时 / 没 cmd 都报）。
-2. **数字只生产一次**。文档里引用写 `[[键名]]`，**不手抄数字**。`check_facts.py`
-   会拦正文里的裸数字和指向不存在键的引用。
-3. **能取到 ≠ 能用了**。本仓的 `verified` 来自 `--probe`（tar 内容判 m/oct），
-   **不等于「装上能跑」**（`symbolic` 就是反例：探出纯 `.m`，实则要 Python/SymPy）。
-   碰「能不能真用」必须在真实环境里测。
-   - **「测不到」≠「不存在」**（2026-10-29 实测教训，与 UI 同款纪律）：任何
-     「某东西不存在 / 没起来 / 没实现」的结论，**必须先有一个同类肯定用例证明探针
-     能测到「存在」**，否则报的是探针缺陷，不是产品缺陷。
-     实例：我复钓双引擎时用 `querySelectorAll('button')` 找 `'Boot GNU Octave Engine'`
-     ——那串文案是 `<h3 class="modal-title">` 不是按钮，`.click()` 永远空操作 ⇒
-     推出「omc 引擎从未启动」的**错误结论**并写进 STATE；换成真按钮选择器后
-     `__omc` 1.4 秒就绪。**复钓脚本的点击/选择/断言面自己也要有判据**：
-     先证「我点到了」，再证「点到的结果是 X」。
-   - **调用面要对产物导出面核**（D12 教训）：审工具/适配器调用的 API，必须查
-     产物 `.d.ts` / 运行时 `typeof`，不能只看源码写得对不对——`omc_loadModel`
-     在源码里好看，在产物里不存在。
-   - **★ 声明了注入面 ≠ 接线了**（2026-11-07 采纳 UI `154`）：凡是「声明了注入面」
-     的改动，必须有一条**读真实装配点源码**的断言。UI 栽过两次同一病灶——
-     ① 单测都自己 `new DownloadStore({ engineReleaseSource: fake })` 注入假件，
-     **假件永远可达**，而真实组合根根本没注入 ⇒ 整条路径在产物里不可达；
-     ② 正则写 `^ArchivalEra/(...)`，而 catalogue 的 id 不含 org 前缀 ⇒ 排序**静默退化为无操作**。
-     **单测 / 类型检查 / 构建全都抓不到这类**——它们眼里假件永远可达。
-     ⇒ **「单测绿」与「产物能用」之间没有桥，必须显式搭一条。**
-   - **★ 一个反例不能证明整类不行**（2026-11-07，我从自身错误里收的）：我曾拿
-     `pyodide` 一个 tree 包命不中，就裁定「`form:"tree"` 一律走站点」；UI 把三个成员
-     逐个列出后发现 2 个能干净命中。**判「某类能不能 X」必须把该类所有成员列出来逐个看**——
-     当时只有 3 个成员，逐个看成本几乎为零。这是纪律 3 的兄弟，不是同一条：
-     「测不到 ≠ 不存在」防的是**探针瞎了**，这条防的是**样本不够**。
-4. **断言要能证伪**：新契约至少配一条**反向**断言（该报错的必须报错）。每个闸门必须写
-   `--selftest`，且三类用例齐全：正常不报 / 该报的必须报 / 空输入必须报。
-5. **断言有生命周期**：实测 / 推断 / 翻案。
-   - 活状态文档里**只写实测**；
-   - **推断**写进 `questions/`（作为悬案）并注明**哪个实验能结案**；
-   - **被推翻**的进 `build/retractions.json`，`check_retractions.py` 会在它**重新出现在
-     `REFLECT_DOCS` 声明的活状态文档里**时报错 —— 扫描面**有界**（清单外的文件不在面内，
-     这是写明的缺口，不是「查过」）。
-6. **写文档先懂「活状态」**（`zreflect/living.py`）：历史章节（`REFLECT_HISTORY_SECS`
-   声明）里的数字是「当时如此」；行内带历史/退役/已翻案标记的行也是。除此之外 ——
-   **含无编号章节** —— 全是活状态，闸门会拿它跟台账对账。
-7. **写 `measure()` 先读采集器契约**（`zreflect/collect.py`）：只读持久盘、不引入会自己变的
-   输入（墙上时钟 / HEAD sha ⇒ `--check` 永不收敛）、读不到就明说（**不许编 0**）、贵的测量要缓存。
+1. **Numbers come from measurement only**; keep the reproduction command next to each
+   assertion. A sentence without a reproduction command is history, never current state.
+   Ledger `cmd` entries in `build/FACTS.json` are executed verbatim by
+   `zreflect/check_facts_replay.py` (stdout must equal the bare value).
+2. **Each number is produced once**. In documents, cite `[[key]]`; never hand-copy a
+   number. `zreflect/check_facts.py` blocks bare numbers and broken references in
+   live-state prose.
+3. **Readable ≠ usable**. `verified` here comes from `--probe` (inspecting tar
+   contents for m/oct); it does not mean "runs when installed". Anything about real
+   usability must be tested in the real environment.
+   - **"Probe found nothing" ≠ "it does not exist"**: before claiming something is
+     missing or broken, first show a positive control proving the probe can detect
+     existence when present. Otherwise you are reporting a probe defect, not a product
+     defect.
+   - **Verify call surfaces against the artifact's exports**: when auditing tools or
+     adapters, check the artifact's `.d.ts` or runtime `typeof`, not just the source
+     code.
+   - **A declared injection seam is not wiring**: every "declared injection surface"
+     change needs an assertion that reads the real composition-root source. Unit
+     tests, type checks, and builds cannot catch a missing injection — their fakes
+     are always reachable.
+   - **One counterexample does not condemn a class**: before judging "all members of
+     class X cannot do Y", list every member and check each one.
+4. **Assertions must be falsifiable**: every new contract ships at least one negative
+   assertion (the error case must error). Every gate ships a `--selftest` with three
+   case classes: normal passes / violations fail / empty input fails.
+5. **Assertions have a lifecycle** (measured / inferred / retracted):
+   - live-state documents contain measured facts only;
+   - inferences go to `questions/` as open questions with a runnable settling command;
+   - retracted claims go to `build/retractions.json` (`zreflect/check_retractions.py`
+     fails when they reappear in declared live-state docs; the scan surface is bounded
+     to declared docs — a known gap, stated here).
+6. **Know what "live state" means** before editing documents (`zreflect/living.py`):
+   numbers inside history sections declared via `REFLECT_HISTORY_SECS` describe the
+   past; lines carrying history/retired/retracted markers describe the past;
+   everything else is live state and is reconciled against the ledger by gates.
+7. **Read the collector contract** (`zreflect/collect.py`) before writing `measure()`:
+   read persistent disk only, never introduce self-changing inputs (wall clock, HEAD
+   sha ⇒ `--check` never converges), report unavailable instead of fabricating 0,
+   cache expensive measurements.
 
-## 本仓专属红线
+## Repo-specific red lines
 
-- **角色 = 生产适配器**（接缝 §8.1）：出档案 + 配方 + 端口副本 + 事实系统运维，并接
-  **「内容契约」↔ UI 的那条边**（**内容语义**：四态含义 / `content` 诚实 / 版本策略 / 许可台账）。
-  **不碰引擎契约**（那是引擎的）、**不替分发契约定语义**（那是 Static-Contract 的）、
-  **不做运行期端点**（唯一同源端点 = 宿主站点）。
-- **两种协议完全不相干**（2026-11-02 用户裁定「一种管分发，一种管市场聚合」）：
-  **分发协议**（release 契约：`manifest.json` / 分片 / `catalogue.json` 的 `base`）**只管字节怎么发、怎么取**；
-  **市场协议**（内容契约 `content-list`：`name`/`version`/`deps`/`content`/`consumer`/`role`/`form`）
-  **只管市场里有什么、能不能用、给谁用**。
-  **判据**：**市场表的任何字段都不许取自分发侧的唯一标识**（`tag`/`base`/`manifest_sha256`）；
-  **分发契约也不许引用 `name`/`version`/`deps`/`consumer`**。
-  ⚠️ 曾经的「第 6 步：内容契约加 `acquisition.releaseRef` 引用 release」是**错误方向，已作废**——
-  那会让市场表依赖分发方标识，换分发方（GitHub → CF → 对象存储）市场就得跟着改。
-  实测：宿主 schema 与 17 条 content-list 里**从来没有**该字段，解耦在实现层早已成立。
-  ⚠️ **适用范围扩展（2026-11-10，UI `156` 实证）**：release manifest 的 **`product` 也是投送坐标**
-  （「这份 release 里第几组字节」的索引），不许上升为车道/产品身份产地——消费侧的
-  `EngineLane → product` 手写映射与 `acquisition.releaseRef` 同族。**车道身份的声明地 = 引擎契约**
-  （宿主 ↔ UI），本仓不碰、不指定内容契约既有字段兼任；`kind:'engine'` 条目的 `arch`（`w64`/`omc`
-  等 lane 索引键）与分发侧 `arch:wasm64` 是**同名两义**，各自语境合法，**不需归一、不新增字段**
-  （判据唯一产地 = 宿主 `validate-content-list.py` 的按 kind 扩词表，注释明写「索引键不是版本轴」）。
-- **端口产地 = 宿主**（2026-10-14 裁决）：schema + 校验器归宿主 `build/extra-content/`；
-  本仓 `port/` 是**副本**，符合它、以它为准。**内容语义**归本仓（见 `mail/004`）。
-- **归属 ≠ 投送**：归属（谁定语义/负契约责）= 本仓；投送（UI 拿到什么）= 宿主（站点里的表）；
-  对话（深语义）= 经 `mail/`。**别把"本仓 private、UI public"读成"契约降级为机器面"。**
-- **不含字节**：本仓只存元数据与配方（URL + sha256）。取包 / 装配是宿主的事。
-  - **精确边界（2026-11-01 用户裁定「你为产地吧，你维护的就是市场标准与所有可以直接拿来用的
-    forge 包」后重述）**：**「不含字节」= 本仓 git 的历史里不存内容字节**，它防的是
-    「本仓变成字节的存储池 / 装配站」。**它不禁止 GitHub Release 的 asset**——
-    release 是**发布面**，不是仓库内容，且不可变 tag 正是「同一份字节永远取得到」的载体。
-  - **本仓可以是 release 的产地**：13 个 Forge 包 + 能力层资产（Pyodide / MSL）由本仓发 release。
-    **理由（原设计的缺口）**：此前链条是「上游 SourceForge → 宿主装配 → 站点」，
-    **中间没有稳定产地**——上游挂过、改过 URL（`optim` 至今是 `download.php?package=` 重定向）。
-    上游一变，手里那份 sha 就成了**无法验证的历史断言**。release 把字节钉到我们控制的不可变地址上。
-  - **红线仍然成立的三种情形**：(a) 不许 `git add` 任何 tar/zip/wasm/whl 进本仓；
-    (b) 不许本仓提供运行期端点（装配与同源仍是宿主的事）；(c) 不许以「产地」为由改别人的产物归属。
-- **不改宿主仓**（路径铁律）；宿主的消费面由宿主维护。
-- **白名单 .gitignore**：新增文件/目录必须同步加一行 `!路径`，否则它不进 git 且**看不见**
-  （见 `docs/FORK-PIPELINE.md` §4 坑 3）。
-- **上游字节不在本机 ⇒ 那条事实不写**（不许用 0 冒充「已量」）。
-- **本仓 tip 不进台账**（每提交都变 ⇒ 破坏 `--check` 收敛）；见 `R-001`。
+- **Role = production adapter**: package dossiers (`packages/`), supply recipes
+  (`recipes/`), port copy (`port/`), facts-system operation, and the content-contract
+  edge toward the UI (state semantics: four-state meanings, `content` honesty, version
+  policy, license ledger). Do not touch the engine contract (host's), do not define
+  distribution-contract semantics (Static-Contract's), do not run runtime endpoints
+  (the only same-origin endpoint is the host site).
+- **The two protocols are fully disjoint**:
+  - **Distribution protocol** (release contract: `manifest.json`, chunks,
+    `catalogue.json` `base`): how bytes are published and fetched.
+  - **Market protocol** (content contract `content-list`: `name`/`version`/`deps`/
+    `content`/`consumer`/`role`/`form`): what the market offers, what works, for whom.
+  - Rule: no field of the market table may come from a distribution-side unique id
+    (`tag`/`base`/`manifest_sha256`); the distribution contract must not reference
+    `name`/`version`/`deps`/`consumer`.
+  - **`product` in a release manifest is a delivery coordinate** ("which byte group
+    within this release"), never a lane/product identity source. Consumer-side
+    hand-written maps from lane names to `product` are the same disease. Lane
+    identity is declared by the **engine contract** (host ↔ UI); this repo does not
+    touch it and does not assign an existing content-contract field to that job.
+    The `arch` of `kind:"engine"` entries (`w64`/`omc` lane index keys) and the
+    distribution-side `arch` (`wasm64`) are homonyms with different meanings — no
+    unification, no new fields (the authority is the host's
+    `validate-content-list.py`, which widens the enum per kind: "index key, not a
+    version axis").
+- **Port origin = host**: schema + validator live in the host repo
+  `build/extra-content/`; `port/` here is a copy, kept in sync, host wins.
+- **Ownership ≠ delivery**: ownership (who defines semantics) = this repo; delivery
+  (what the UI actually receives) = host (assembled site tables); deep-semantics
+  conversation goes through `mail/`.
+- **No bytes in git**: this repo stores metadata and recipes (URL + sha256) only.
+  "No bytes" = no content bytes in git history; GitHub Release assets are fine (they
+  are the publication surface, and immutable tags keep bytes reachable). Red lines
+  that still hold: never `git add` tar/zip/wasm/whl into this repo; never provide a
+  runtime endpoint; never reassign another repo's artifact ownership in the name of
+  being an origin.
+- **Never modify the host repo** (path iron rule); the host maintains its own
+  consumption surface.
+- **Whitelist .gitignore**: every new file/directory needs a matching `!path` line,
+  otherwise it stays invisible to git. `!pattern` does not support trailing comments.
+- **If upstream bytes are not on this machine, the fact is not written** (never
+  fabricate 0 as "measured").
+- **The repo tip never enters the ledger** (it changes every commit ⇒ `--check`
+  never converges).
 
-## 跨 agent 通信（`mail/`）
+## Cross-agent mail (`mail/`)
 
-- **`mail/` 是收件箱**（别人问本仓的），**只追加不删**；规矩见 `mail/README.md`。
-- **逐题回**（`A1/A2…` 对齐 `Q1/Q2…`）；**改了本仓什么就写路径**（回信是边界动没动的凭据）。
-- **分歧不静默**：不同意就写「不同意 + 判据」。
-- **由信催生的结论若改变本仓角色/契约，必须落进 `README.md` / `AGENTS.md` / `STATE.md`
-  的活状态** —— 只有活状态才被闸门对账；信件本身不进任何断言面。
+- `mail/` is the inbox (letters addressed to this repo), append-only; rules in
+  `mail/README.md`.
+- Answer point by point (`A1`/`A2` aligned to `Q1`/`Q2`); state changed paths
+  explicitly in replies.
+- Disagreement is never silent: state "disagree" plus the criterion.
+- Conclusions from letters that change this repo's role or contracts go into the
+  live-state docs (`README.md` / `AGENTS.md` / `STATE.md`) — only live state is
+  gate-reconciled.
 
-## 复跑命令（验证本仓事实系统健康）
+## Defect reports to Einfacht go through GitHub issues
+
+Upstream Einfacht is outside the Octave cluster mail system; report via its GitHub
+issues using its downstream-feedback issue shape (title prefixed with the reporting
+repo and what was measured). The delivery channel is chosen by the receiver, never
+inferred by the sender.
+
+## Reproduction commands (facts-system health)
 
 ```bash
-python3 build/facts.py --render-doc STATE.md --check     # 机器块新鲜（走壳：免旋钮，防裸跑写根）
-set -a; source reflect-hooks/Einfacht.env; set +a        # 闸门旋钮（registry 裸跑=全线误红，2026-10-25 实证）
-python3 zreflect/registry.py --run commit                  # ran/off/failed 三档
-# ★ 必须 `env -u REFLECT_NAKED_MIN` 隔离迁移期阈值（STATE 裸数字迁移未结案前），
-# 且**单独跑**（干净 shell）——别把 source 与它写进同一条命令链，宿主旋钮会泄进
-# harness 夹具造成 rename_failed 假红（2026-11-08 实测）。2026-11-08 起该命令
-# **rc=0**（上游 0040c7e 修掉 #34 夹具 env 污染后，35 闸门全绿）。
-env -u REFLECT_NAKED_MIN sh gates-selftest.sh             # 平台闸门自证（隔离旋钮，干净 shell）
-REFLECT_FACTS=build/FACTS.json python3 zreflect/check_facts_replay.py   # 每条 cmd 逐字复跑（台账在 build/，勿裸跑）
-# 仓库级「接着上一轮」薄壳（不注册进用户级 config；kimi-code 用户级钩子会把注入洒进所有会话——2026-11-08 实测教训）
+python3 build/facts.py --render-doc STATE.md --check     # machine blocks fresh (run via the wrapper)
+set -a; source reflect-hooks/Einfacht.env; set +a        # gate knobs (bare registry runs = false reds)
+python3 zreflect/registry.py --run commit                  # ran/off/failed counts
+# Run gates-selftest with both knobs unset (see CI notes) and in a clean shell:
+# sourcing the env file in the same command chain leaks host knobs into harness
+# fixtures (false rename_failed reds).
+env -u REFLECT_NAKED_MIN -u REFLECT_MEASURE_MODULE sh gates-selftest.sh  # platform selftest
+REFLECT_FACTS=build/FACTS.json python3 zreflect/check_facts_replay.py
+# Repo-level "next round" shell (never registered in user-level hook config):
 printf '%s' '{"cwd":"'"$PWD"'"}' | .kimi-code/hooks/kimi-hook
-# ★★ 2026-11-12 推送路径**永久关闭**（站长最终裁定，非临时收紧）：节点 gh 凭据
-# = PlumHelper（全仓只读，push=false），这是**终态**——ArchivalEra token 不会再
-# 下发，不存在「等凭据恢复」的状态。交付路径 = 本地修改 → commit → wo-u 报告
-# wo-u-maintainer（diff 摘要/证据/commit sha）→ 站长侧落库。**永远不要**尝试
-# push / fork / 提 PR / 等待写权限——那些路径已确认关闭，重试只产生失败噪音。
-# 本仓先例：0d86a7f（AGENTS 本段）即按此路径交付的首笔。
 ```
+
+## Tool and contract behaviors
+
+- **Test git hooks the way git runs them** (`./reflect-hooks/pre-commit`, not
+  `sh reflect-hooks/pre-commit`): under `sh` the `$0` derivation fails and
+  `Einfacht.env` is silently skipped, so the replay gate reports a missing ledger.
+- **CLIs that mutate live state require explicit flags**: a script whose default
+  action rewrites published releases must refuse with usage and a non-zero exit
+  when its guard flags are absent.
+- **`tools/` here is shared**: other repos' CI clones this repo's main to run the
+  validators, so changing a tool is changing someone else's build — verify against
+  real artifacts before landing, keep the two-step split (generator never touches
+  licenses; the upgrade tool is a separate verified step), and after any change run
+  the tool against another repo's real published data, not just local fixtures.
+- **The catalogue has a dead-link window by design**: it is derived on a timer, so
+  after an upstream deletes an old tag the catalogue points at the missing tag until
+  the next run. Consumers must fall back to the next entry when a manifest fetch
+  fails; never start from the first entry unconditionally.
+- **`license.url` must point at a page with substantive terms**: an HTTPS URL that
+  returns an empty page passes a shape check, so the criterion is license keywords in
+  the page body. When an upstream package has no central license text, state that
+  fact instead of pointing at a placeholder.
+- **Strings used for matching come only from the side being matched**: never trim,
+  beautify, or prefix keys (e.g. `entry.name` stays exactly as the manifest
+  declares), and never fabricate normalization examples — a wrong example gets
+  copied.
+- **For `form:"tree"`, `url` / `sha256` / `size` point at three different objects**
+  (the unpacked entry file / its hash / the whole directory's bytes), and a tree
+  hits a release only when its entry file is also a standalone entry; otherwise fall
+  back to the site path and log why. Check every member of a class before generalizing.
+- **Comparing two payloads: sort, then compare sets** — entry order is not content.
+  Report codec-shape differences separately.
+- **Selftests must catch hollowed assertions**: meta-tests, mutation checks, and
+  fail counters all miss a `t(label, True)` rewrite; the effective defense is a
+  static audit of source (an assertion's condition may not be a literal bool), and
+  that audit is itself covered by the selftest.
+- **Syncing shared upstream tools is a release**: run the selftest, regress against
+  real published data, and prove the new criterion rejects what it should — a stale
+  tool pinned on main blocks downstream repos that gate on the selftest count.
+
+
+
+## Push and read path
+
+- The remote is **split**: `fetch` = `https://github.com/ArchivalEra/Octave-Extra-Content.git`
+  (read-only PAT via the gh keyring — silent, no approval); `push` =
+  `ssh://git@github-ArchivalEra/ArchivalEra/Octave-Extra-Content.git` (SK key via the
+  akr FIDO2 agent + phone MFA approval).
+- **Never point a fetch URL at an ssh:// URL** — every ssh fetch fires a phone
+  approval and is forbidden. Reconciliation prefers `gh api`; plain `git fetch` over
+  HTTPS is the fallback; `gh repo sync` is never used (it needs write scope and
+  returns 403 under a read-only PAT). The SSH aliases (`github-ArchivalEra` /
+  `github-PlumHelper`) exist for push only.
+- The push gate is the push itself: the SK key is signed via the akr FIDO2 agent and
+  the owner approves on the phone. Approval does not flow through the cross-repo
+  coordination channel (`wo-u` carries task assignments and rulings only) — instead,
+  run the code-review skill on your own changes, write the change description plus
+  the review conclusion into your session's final output (the commit message carries
+  them too), then stop; the owner patrols session outputs and replies with approval.
+- Configure remotes and proxy per this repo's own Einfacht env; do not copy another
+  repo's config.
+
+## CI notes
+
+- `.github/workflows/quality-assessment.yml` runs the same existing checks
+  (no new lint rules); the replay gate is **skipped honestly** there — several
+  ledger cmds hash local byte caches and one needs gh auth. Locally it always runs.
+- `gates-selftest` must always run with
+  `-u REFLECT_NAKED_MIN -u REFLECT_MEASURE_MODULE` (locally and in CI): the data
+  layer lives at repo root, so harness fixtures with renamed files fail to resolve
+  the host measure module when that knob is set.
+- `REFLECT_REPLAY_TIMEOUT` is raised above its default because one ledger cmd
+  (`releases_published`) calls the GitHub API; the short default produces flaky
+  false reds.
+- shellcheck runs with the allowlist in `.github/shellcheck-allowlist.md` (every
+  excluded rule has a written criterion; do not add `-e` codes without updating it).
